@@ -1,4 +1,5 @@
 ﻿@inherits LayoutComponentBase
+@inject IAuthService AuthService
 
 <div class="page">
     <div class="sidebar">
@@ -15,3 +16,14 @@
         </article>
     </main>
 </div>
+
+@code {
+    // Runs once when the app's single long-lived Blazor Hybrid session
+    // starts (this layout is not recreated on client-side navigation) -
+    // the "on application startup" hook: try to restore a session from
+    // secure storage without blocking the UI if the backend is unreachable.
+    protected override async Task OnInitializedAsync()
+    {
+        await AuthService.TryRestoreSessionAsync();
+    }
+}

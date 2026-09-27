@@ -1,2 +1,31 @@
-﻿@page "/"
+@page "/"
+@inject IAuthService AuthService
+@implements IDisposable
+
 <p>This is my mobile app</p>
+
+@if (AuthService.IsAuthenticated)
+{
+    <p>Signed in as <strong>@AuthService.CurrentUser?.Email</strong>. <a href="/account">View account</a></p>
+}
+else
+{
+    <p><a href="/login">Login</a> or <a href="/register">Register</a> to connect to StockAI Pro.</p>
+}
+
+@code {
+    // Session restoration (MainLayout.OnInitializedAsync) completes AFTER
+    // this page's first render, so without this subscription the page
+    // keeps showing "not signed in" even once IsAuthenticated flips to
+    // true - caught during Phase 7A's own emulator test (restart the app
+    // with a stored session: the backend call succeeded but this page
+    // stayed on the logged-out view).
+    protected override void OnInitialized()
+    {
+        AuthService.AuthStateChanged += OnAuthStateChanged;
+    }
+
+    private void OnAuthStateChanged() => InvokeAsync(StateHasChanged);
+
+    public void Dispose() => AuthService.AuthStateChanged -= OnAuthStateChanged;
+}

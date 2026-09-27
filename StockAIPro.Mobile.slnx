@@ -1,3 +1,5 @@
 <Solution>
   <Project Path="StockAIPro.Mobile/StockAIPro.Mobile.csproj" />
+  <Project Path="StockAIPro.Mobile.Core/StockAIPro.Mobile.Core.csproj" />
+  <Project Path="StockAIPro.Mobile.Tests/StockAIPro.Mobile.Tests.csproj" />
 </Solution>

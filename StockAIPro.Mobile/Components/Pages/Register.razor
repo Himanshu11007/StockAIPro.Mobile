@@ -1,0 +1,111 @@
+@page "/register"
+@using StockAIPro.Mobile.Services.Api
+@inject IAuthService AuthService
+@inject NavigationManager Navigation
+@implements IDisposable
+
+<h1>Create account</h1>
+
+@if (AuthService.IsAuthenticated)
+{
+    <p>You're already signed in as <strong>@AuthService.CurrentUser?.Email</strong>.</p>
+    <p><a href="/account">Go to Account</a></p>
+}
+else
+{
+    <EditForm Model="_form" OnValidSubmit="SubmitAsync">
+        <DataAnnotationsValidator />
+
+        <div class="mb-3">
+            <label for="email">Email</label>
+            <InputText id="email" class="form-control" @bind-Value="_form.Email" />
+        </div>
+
+        <div class="mb-3">
+            <label for="password">Password</label>
+            <InputText id="password" type="password" class="form-control" @bind-Value="_form.Password" />
+            <small>At least 8 characters.</small>
+        </div>
+
+        <div class="mb-3">
+            <label for="confirmPassword">Confirm password</label>
+            <InputText id="confirmPassword" type="password" class="form-control" @bind-Value="_form.ConfirmPassword" />
+        </div>
+
+        @if (!string.IsNullOrEmpty(_errorMessage))
+        {
+            <p class="text-danger" role="alert">@_errorMessage</p>
+        }
+
+        <button type="submit" class="btn btn-primary" disabled="@_isSubmitting">
+            @(_isSubmitting ? "Creating account..." : "Register")
+        </button>
+    </EditForm>
+
+    <p class="mt-3">
+        Already have an account? <a href="/login">Login</a>
+    </p>
+}
+
+@code {
+    private readonly RegisterForm _form = new();
+    private bool _isSubmitting;
+    private string? _errorMessage;
+
+    protected override void OnInitialized()
+    {
+        AuthService.AuthStateChanged += OnAuthStateChanged;
+    }
+
+    private void OnAuthStateChanged() => InvokeAsync(StateHasChanged);
+
+    public void Dispose() => AuthService.AuthStateChanged -= OnAuthStateChanged;
+
+    private async Task SubmitAsync()
+    {
+        _errorMessage = null;
+
+        if (_form.Password != _form.ConfirmPassword)
+        {
+            _errorMessage = "Passwords do not match.";
+            return;
+        }
+
+        _isSubmitting = true;
+        try
+        {
+            await AuthService.RegisterAsync(_form.Email, _form.Password);
+            Navigation.NavigateTo("/account");
+        }
+        catch (ApiException ex) when (ex.Kind == ApiErrorKind.NetworkUnavailable)
+        {
+            _errorMessage = "Could not reach the StockAI Pro server. Check your connection and try again.";
+        }
+        catch (ApiException ex) when (ex.Kind == ApiErrorKind.Conflict)
+        {
+            _errorMessage = "An account with this email already exists.";
+        }
+        catch (ApiException ex)
+        {
+            _errorMessage = ex.Message;
+        }
+        finally
+        {
+            _isSubmitting = false;
+        }
+    }
+
+    private sealed class RegisterForm
+    {
+        [System.ComponentModel.DataAnnotations.Required]
+        [System.ComponentModel.DataAnnotations.EmailAddress]
+        public string Email { get; set; } = string.Empty;
+
+        [System.ComponentModel.DataAnnotations.Required]
+        [System.ComponentModel.DataAnnotations.MinLength(8)]
+        public string Password { get; set; } = string.Empty;
+
+        [System.ComponentModel.DataAnnotations.Required]
+        public string ConfirmPassword { get; set; } = string.Empty;
+    }
+}

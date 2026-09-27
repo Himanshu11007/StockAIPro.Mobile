@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Plain (non-MAUI) class library holding every platform-independent piece
+    of the mobile app's API/authentication layer: models, HTTP clients,
+    token-refresh handler, and auth state service. Deliberately separate
+    from the StockAIPro.Mobile MAUI project so it can be unit tested with
+    a normal desktop test host - a net10.0-android test assembly cannot run
+    on desktop at all (it needs an actual Android runtime), which is the
+    reason this split exists rather than putting everything in the MAUI
+    project as originally suggested.
+
+    The one platform-specific piece an interface here needs (ITokenStore,
+    backed by MAUI SecureStorage) is implemented in the MAUI project as
+    Services/Authentication/SecureTokenStore.cs.
+  -->
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.12" />
+  </ItemGroup>
+
+</Project>

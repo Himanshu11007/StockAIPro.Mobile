@@ -1,0 +1,108 @@
+@page "/account"
+@using StockAIPro.Mobile.Services.Api
+@inject IAuthService AuthService
+@inject NavigationManager Navigation
+@implements IDisposable
+
+<h1>Account</h1>
+
+@if (_isLoading)
+{
+    <p>Checking authentication...</p>
+}
+else if (!AuthService.IsAuthenticated || AuthService.CurrentUser is null)
+{
+    <p>You're not signed in.</p>
+    <p><a href="/login">Login</a> &nbsp;|&nbsp; <a href="/register">Register</a></p>
+}
+else
+{
+    var user = AuthService.CurrentUser;
+
+    <p><strong>Authentication:</strong> Connected</p>
+    <p><strong>Signed in as:</strong> @user.Email</p>
+    <p><strong>Role@(user.Roles.Count == 1 ? "" : "s"):</strong> @string.Join(", ", user.Roles)</p>
+    <p><strong>Account created:</strong> @user.CreatedAt.ToLocalTime().ToString("g")</p>
+
+    @if (!string.IsNullOrEmpty(_statusMessage))
+    {
+        <p>@_statusMessage</p>
+    }
+    @if (!string.IsNullOrEmpty(_errorMessage))
+    {
+        <p class="text-danger" role="alert">@_errorMessage</p>
+    }
+
+    <button class="btn btn-secondary" @onclick="RefreshProfileAsync" disabled="@_isBusy">
+        @(_isBusy ? "Working..." : "Refresh profile (authenticated request)")
+    </button>
+
+    <button class="btn btn-outline-danger" @onclick="LogoutAsync" disabled="@_isBusy">
+        Logout
+    </button>
+}
+
+@code {
+    private bool _isLoading = true;
+    private bool _isBusy;
+    private string? _statusMessage;
+    private string? _errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        AuthService.AuthStateChanged += OnAuthStateChanged;
+
+        if (!AuthService.IsAuthenticated)
+        {
+            // Handles both "never logged in this session" and "app just
+            // started" - TryRestoreSessionAsync is safe to call even if a
+            // session is already established (it's a no-op cost either way
+            // here since we only reach this branch when not authenticated).
+            await AuthService.TryRestoreSessionAsync();
+        }
+
+        _isLoading = false;
+    }
+
+    private async Task RefreshProfileAsync()
+    {
+        _statusMessage = null;
+        _errorMessage = null;
+        _isBusy = true;
+        try
+        {
+            await AuthService.RefreshCurrentUserAsync();
+            _statusMessage = "Profile refreshed from the backend.";
+        }
+        catch (ApiException ex) when (ex.Kind == ApiErrorKind.NetworkUnavailable)
+        {
+            _errorMessage = "Could not reach the StockAI Pro server. Check your connection and try again.";
+        }
+        catch (ApiException ex)
+        {
+            _errorMessage = ex.Message;
+        }
+        finally
+        {
+            _isBusy = false;
+        }
+    }
+
+    private async Task LogoutAsync()
+    {
+        _isBusy = true;
+        try
+        {
+            await AuthService.LogoutAsync();
+        }
+        finally
+        {
+            _isBusy = false;
+        }
+        Navigation.NavigateTo("/login");
+    }
+
+    private void OnAuthStateChanged() => InvokeAsync(StateHasChanged);
+
+    public void Dispose() => AuthService.AuthStateChanged -= OnAuthStateChanged;
+}
