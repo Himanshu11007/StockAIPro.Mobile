@@ -1,0 +1,136 @@
+@page "/performance"
+@inject IPerformanceApiClient PerformanceApiClient
+@inject NavigationManager Navigation
+
+<div class="sai-card">
+    <div class="sai-card-title">Performance</div>
+    <div class="sai-action-desc">
+        Historical, observed outcomes over validated recommendations - not a
+        prediction of future results.
+    </div>
+</div>
+
+@if (_isLoading)
+{
+    <LoadingState Message="Loading performance analytics..." />
+}
+else if (_error is not null)
+{
+    @if (_errorKind == ApiErrorKind.Unauthorized)
+    {
+        <ErrorState Title="Session expired" Message="@_error" RetryLabel="Sign in again" OnRetry="@(() => Navigation.NavigateTo("/login"))" />
+    }
+    else
+    {
+        <ErrorState Title="Couldn't load performance data" Message="@_error" OnRetry="LoadAsync" />
+    }
+}
+else if (_summary is { } summary)
+{
+    @if (summary.Total == 0)
+    {
+        <EmptyState Title="No validated recommendations yet" Message="Performance analytics appear once recommendations have been validated." />
+    }
+    else
+    {
+        <div class="sai-metric-grid">
+            <MetricCard Label="Total" Value="@summary.Total.ToString()" />
+            <MetricCard Label="Success Rate" Value="@($"{summary.SuccessRate:0.0}%")" />
+            <MetricCard Label="Successful" Value="@summary.Successful.ToString()" />
+            <MetricCard Label="Failed" Value="@summary.Failed.ToString()" />
+            <MetricCard Label="Avg Return" Value="@($"{summary.AvgReturn:+0.00;-0.00}%")" />
+            <MetricCard Label="Best Return" Value="@($"{summary.BestReturn:+0.00;-0.00}%")" />
+            <MetricCard Label="Worst Return" Value="@($"{summary.WorstReturn:+0.00;-0.00}%")" />
+        </div>
+
+        <div class="sai-section-title">By signal</div>
+        @foreach (var row in _bySignal ?? [])
+        {
+            <div class="sai-card d-flex justify-content-between align-items-center">
+                <div>
+                    <SignalBadge Signal="@row.Signal" />
+                    <span class="sai-action-desc ms-2">@row.Count sample@(row.Count == 1 ? "" : "s")</span>
+                </div>
+                <div class="text-end">
+                    <div class="sai-metric-value" style="font-size:1rem">@row.SuccessRatePercent.ToString("0.0")%</div>
+                    <div class="sai-action-desc">avg @row.AvgReturnPercent.ToString("+0.00;-0.00")%</div>
+                </div>
+            </div>
+        }
+
+        <div class="sai-section-title">By ML confidence</div>
+        @foreach (var row in _byConfidence ?? [])
+        {
+            <div class="sai-card d-flex justify-content-between align-items-center">
+                <div>
+                    <span class="sai-action-title">@row.ConfidenceBand%</span>
+                    <span class="sai-action-desc ms-2">@row.Count sample@(row.Count == 1 ? "" : "s")</span>
+                </div>
+                <div class="text-end">
+                    <div class="sai-metric-value" style="font-size:1rem">@row.SuccessRatePercent.ToString("0.0")%</div>
+                    <div class="sai-action-desc">avg @row.AvgReturnPercent.ToString("+0.00;-0.00")%</div>
+                </div>
+            </div>
+        }
+
+        <div class="sai-section-title">By confluence score</div>
+        @foreach (var row in _byConfluence ?? [])
+        {
+            <div class="sai-card d-flex justify-content-between align-items-center">
+                <div>
+                    <span class="sai-action-title">@row.ConfluenceBand</span>
+                    <span class="sai-action-desc ms-2">@row.Count sample@(row.Count == 1 ? "" : "s")</span>
+                </div>
+                <div class="text-end">
+                    <div class="sai-metric-value" style="font-size:1rem">@row.SuccessRatePercent.ToString("0.0")%</div>
+                    <div class="sai-action-desc">avg @row.AvgReturnPercent.ToString("+0.00;-0.00")%</div>
+                </div>
+            </div>
+        }
+    }
+}
+
+@code {
+    private bool _isLoading = true;
+    private string? _error;
+    private ApiErrorKind? _errorKind;
+    private PerformanceSummary? _summary;
+    private List<SignalPerformance>? _bySignal;
+    private List<ConfidencePerformance>? _byConfidence;
+    private List<ConfluencePerformance>? _byConfluence;
+
+    protected override Task OnInitializedAsync() => LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        _isLoading = true;
+        _error = null;
+        _errorKind = null;
+        StateHasChanged();
+        try
+        {
+            // Independent read-only calls - fetched together rather than
+            // sequentially since none depends on another's result.
+            var summaryTask = PerformanceApiClient.GetSummaryAsync();
+            var signalTask = PerformanceApiClient.GetBySignalAsync();
+            var confidenceTask = PerformanceApiClient.GetByConfidenceAsync();
+            var confluenceTask = PerformanceApiClient.GetByConfluenceAsync();
+
+            await Task.WhenAll(summaryTask, signalTask, confidenceTask, confluenceTask);
+
+            _summary = summaryTask.Result;
+            _bySignal = signalTask.Result;
+            _byConfidence = confidenceTask.Result;
+            _byConfluence = confluenceTask.Result;
+        }
+        catch (ApiException ex)
+        {
+            _error = ex.Message;
+            _errorKind = ex.Kind;
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+}

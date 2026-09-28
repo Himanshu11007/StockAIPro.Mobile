@@ -1,0 +1,194 @@
+@page "/intelligence"
+@inject IIntelligenceApiClient IntelligenceApiClient
+@inject NavigationManager Navigation
+
+<div class="sai-card">
+    <div class="sai-card-title">AI Intelligence</div>
+    <div class="sai-action-desc">
+        Analytical observations over historical validated recommendations -
+        never a guarantee of future results.
+    </div>
+</div>
+
+@if (_isLoading)
+{
+    <LoadingState Message="Generating intelligence report..." />
+}
+else if (_error is not null)
+{
+    @if (_errorKind == ApiErrorKind.Unauthorized)
+    {
+        <ErrorState Title="Session expired" Message="@_error" RetryLabel="Sign in again" OnRetry="@(() => Navigation.NavigateTo("/login"))" />
+    }
+    else
+    {
+        <ErrorState Title="Couldn't load the intelligence report" Message="@_error" OnRetry="LoadAsync" />
+    }
+}
+else if (_report is { } report)
+{
+    @if (report.Meta.Error is not null)
+    {
+        <ErrorState Title="Intelligence engine failed" Message="@report.Meta.Error" OnRetry="LoadAsync" />
+    }
+    else if (report.Summary.Total == 0)
+    {
+        <EmptyState Title="No validated recommendations yet" Message="The intelligence report populates once recommendations have been validated." />
+    }
+    else
+    {
+        <div class="sai-metric-grid">
+            <MetricCard Label="Total" Value="@report.Summary.Total.ToString()" />
+            <MetricCard Label="Success Rate" Value="@($"{report.Summary.SuccessRate:0.0}%")" />
+            <MetricCard Label="Avg Return" Value="@($"{report.Summary.AvgReturn:+0.00;-0.00}%")" />
+            <MetricCard Label="Median Return" Value="@($"{report.Summary.MedianReturn:+0.00;-0.00}%")" />
+        </div>
+        @if (!string.IsNullOrEmpty(report.Summary.DataQuality))
+        {
+            <p class="sai-action-desc mt-2">@report.Summary.DataQuality</p>
+        }
+
+        @if (report.Recommendations.Count > 0)
+        {
+            <div class="sai-section-title">Developer observations</div>
+            @foreach (var rec in report.Recommendations)
+            {
+                <div class="sai-card">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div class="sai-action-title">@rec.Title</div>
+                        <span class="sai-badge @PriorityCssClass(rec.Priority)">@rec.Priority</span>
+                    </div>
+                    <p class="mt-2 mb-1">@rec.Recommendation</p>
+                    <p class="sai-action-desc mb-0">@rec.Evidence</p>
+                </div>
+            }
+        }
+
+        @if (report.PillarAnalysis.Count > 0)
+        {
+            <div class="sai-section-title">Pillar analysis</div>
+            @foreach (var pillar in report.PillarAnalysis)
+            {
+                <div class="sai-card">
+                    <div class="sai-action-title">@pillar.Pillar</div>
+                    @if (pillar.CorrWithSuccess is { } corr)
+                    {
+                        <div class="sai-action-desc">Correlation with success: @corr.ToString("0.00")</div>
+                    }
+                    <p class="mt-1 mb-0">@pillar.Interpretation</p>
+                </div>
+            }
+        }
+
+        @if (report.SignalAnalysis.Count > 0)
+        {
+            <div class="sai-section-title">Signal performance</div>
+            @foreach (var s in report.SignalAnalysis)
+            {
+                <div class="sai-card d-flex justify-content-between align-items-center">
+                    <SignalBadge Signal="@s.Signal" />
+                    <div class="text-end">
+                        <div class="sai-metric-value" style="font-size:1rem">@s.SuccessRate.ToString("0.0")%</div>
+                        <div class="sai-action-desc">@s.Trades trade@(s.Trades == 1 ? "" : "s")</div>
+                    </div>
+                </div>
+            }
+        }
+
+        @if (report.SectorAnalysis.Count > 0)
+        {
+            <div class="sai-section-title">Sector performance</div>
+            @foreach (var sector in report.SectorAnalysis)
+            {
+                <div class="sai-card d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="sai-action-title">@sector.Sector</div>
+                        @if (!string.IsNullOrEmpty(sector.Note))
+                        {
+                            <div class="sai-action-desc">@sector.Note</div>
+                        }
+                    </div>
+                    <div class="text-end">
+                        <div class="sai-metric-value" style="font-size:1rem">@sector.SuccessRate.ToString("0.0")%</div>
+                        <div class="sai-action-desc">@sector.Trades trade@(sector.Trades == 1 ? "" : "s")</div>
+                    </div>
+                </div>
+            }
+        }
+
+        @if (report.RegimeAnalysis.Count > 0)
+        {
+            <div class="sai-section-title">Market regime performance</div>
+            @foreach (var regime in report.RegimeAnalysis)
+            {
+                <div class="sai-card d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="sai-action-title">@regime.Regime</div>
+                        @if (!string.IsNullOrEmpty(regime.Note))
+                        {
+                            <div class="sai-action-desc">@regime.Note</div>
+                        }
+                    </div>
+                    <div class="text-end">
+                        <div class="sai-metric-value" style="font-size:1rem">@regime.SuccessRate.ToString("0.0")%</div>
+                        <div class="sai-action-desc">@regime.Trades trade@(regime.Trades == 1 ? "" : "s")</div>
+                    </div>
+                </div>
+            }
+        }
+
+        @if (report.ThresholdAnalysis.Count > 0)
+        {
+            <div class="sai-section-title">Confluence threshold analysis</div>
+            @foreach (var t in report.ThresholdAnalysis)
+            {
+                <div class="sai-card d-flex justify-content-between align-items-center">
+                    <div class="sai-action-title">&ge; @t.Threshold.ToString("0.00")</div>
+                    <div class="text-end">
+                        <div class="sai-metric-value" style="font-size:1rem">@t.SuccessRate.ToString("0.0")%</div>
+                        <div class="sai-action-desc">@t.Trades trade@(t.Trades == 1 ? "" : "s")</div>
+                    </div>
+                </div>
+            }
+        }
+    }
+}
+
+@code {
+    private bool _isLoading = true;
+    private string? _error;
+    private ApiErrorKind? _errorKind;
+    private IntelligenceReport? _report;
+
+    protected override Task OnInitializedAsync() => LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        _isLoading = true;
+        _error = null;
+        _errorKind = null;
+        StateHasChanged();
+        try
+        {
+            _report = await IntelligenceApiClient.GetReportAsync();
+        }
+        catch (ApiException ex)
+        {
+            _error = ex.Message;
+            _errorKind = ex.Kind;
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    // "Priority" here is the engine's own developer-facing observation
+    // priority (Low/Medium/High) - unrelated to the signal color scheme.
+    private static string PriorityCssClass(string priority) => priority switch
+    {
+        "High" => "sai-badge-negative",
+        "Medium" => "sai-badge-warning",
+        _ => "sai-badge-neutral",
+    };
+}
