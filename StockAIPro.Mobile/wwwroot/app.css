@@ -20,9 +20,17 @@
 
 html, body {
     height: 100%;
+    margin: 0;
     background-color: var(--sai-bg);
     color: var(--sai-text);
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+/* The Blazor root element index.html mounts into - must also span the
+   full height for the flex shell below to have a stable 100% to anchor
+   to, otherwise it collapses to its content height. */
+#app {
+    height: 100%;
 }
 
 a, .btn-link {
@@ -40,11 +48,21 @@ h1:focus {
 
 /* ── Layout shell ─────────────────────────────────────────────────────── */
 
+/* Uses a flex column (topbar / scrollable content / bottom nav) rather
+   than `position: fixed` + `100vh` for the topbar/nav - that combination
+   is unreliable across embedded WebView versions (the visual vs. layout
+   viewport can disagree, especially with on-screen keyboards or system
+   bar insets under edge-to-edge). Confirmed on-device: with position:fixed
+   the bottom nav drifted to different screen positions depending on how
+   tall the current page's content was, instead of staying pinned - this
+   flex layout guarantees the topbar and nav are always fully visible,
+   fixed-size flex items, with only .app-content scrolling. */
 .app-shell {
     display: flex;
     flex-direction: column;
-    min-height: 100vh;
+    height: 100%;
     background-color: var(--sai-bg);
+    overflow: hidden;
 }
 
 .app-topbar {
@@ -52,12 +70,10 @@ h1:focus {
     align-items: center;
     justify-content: center;
     flex-direction: column;
+    flex-shrink: 0;
     padding: 0.85rem 1rem 0.65rem;
     background-color: var(--sai-surface);
     border-bottom: 1px solid var(--sai-border);
-    position: sticky;
-    top: 0;
-    z-index: 10;
 }
 
 .app-topbar-brand {
@@ -76,8 +92,10 @@ h1:focus {
 }
 
 .app-content {
-    flex: 1;
-    padding: 1rem 1rem 5.5rem;
+    flex: 1 1 auto;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 1rem;
     max-width: 640px;
     width: 100%;
     margin: 0 auto;
@@ -215,6 +233,14 @@ label {
 }
 
 .sai-metric {
+    /* min-width: 0 overrides a grid item's default min-width: auto, which
+       is otherwise the item's minimum CONTENT size - a long unbreakable
+       string (e.g. an email address) would force this column wider than
+       its 1fr share and collapse the 2-column layout to what looks like a
+       single column. Confirmed on-device: this broke the Account page's
+       email tile while the same .sai-metric-grid rendered fine elsewhere
+       with shorter values. */
+    min-width: 0;
     background-color: var(--sai-surface);
     border: 1px solid var(--sai-border);
     border-radius: var(--sai-radius);
@@ -233,6 +259,8 @@ label {
     font-weight: 700;
     color: var(--sai-text);
     margin-top: 0.15rem;
+    overflow-wrap: break-word;
+    word-break: break-word;
 }
 
 /* ── Quick action list (Home) ─────────────────────────────────────────── */
@@ -309,15 +337,11 @@ label {
 /* ── Bottom navigation ────────────────────────────────────────────────── */
 
 .sai-bottom-nav {
-    position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    flex-shrink: 0;
     display: flex;
     background-color: var(--sai-surface);
     border-top: 1px solid var(--sai-border);
     padding-bottom: env(safe-area-inset-bottom);
-    z-index: 20;
 }
 
 .sai-nav-item {
