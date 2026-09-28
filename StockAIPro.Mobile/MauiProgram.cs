@@ -34,6 +34,12 @@ namespace StockAIPro.Mobile
             services.AddSingleton<ITokenStore, SecureTokenStore>();
             services.AddSingleton<IAuthApiClient, AuthApiClient>();
             services.AddSingleton<IAuthService, AuthService>();
+            services.AddSingleton<IStockApiClient, StockApiClient>();
+            services.AddSingleton<IWatchlistApiClient, WatchlistApiClient>();
+            services.AddSingleton<IAnalysisApiClient, AnalysisApiClient>();
+            services.AddSingleton<ITopPicksApiClient, TopPicksApiClient>();
+            services.AddSingleton<IPerformanceApiClient, PerformanceApiClient>();
+            services.AddSingleton<IIntelligenceApiClient, IntelligenceApiClient>();
 
             // Transient: IHttpClientFactory constructs a fresh handler
             // instance per HttpClient it builds, per its own lifecycle
