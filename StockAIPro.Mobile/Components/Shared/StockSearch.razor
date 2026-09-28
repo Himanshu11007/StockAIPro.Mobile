@@ -1,0 +1,120 @@
+@* Reusable stock search box backed by IStockApiClient - the authoritative
+   stock master. Never maintains its own list of symbols; every keystroke
+   (debounced) re-queries the backend. Used by both the Analyse and
+   Watchlist "add stock" flows so the two never diverge in behavior. *@
+@inject IStockApiClient StockApiClient
+@implements IDisposable
+
+<div class="mb-2">
+    <label for="stock-search-input">Search stock</label>
+    <input id="stock-search-input" class="form-control" placeholder="Symbol or company name"
+           value="@_query" @oninput="OnInput" autocomplete="off" />
+</div>
+
+@if (_isSearching)
+{
+    <LoadingState Message="Searching..." />
+}
+else if (_error is not null)
+{
+    <ErrorState Title="Search failed" Message="@_error" OnRetry="() => SearchAsync(_query)" />
+}
+else if (_hasSearched && _results is { Count: 0 })
+{
+    <EmptyState Title="No matches" Message="Try a different symbol or company name." />
+}
+else if (_results is { Count: > 0 })
+{
+    <div class="sai-action-list">
+        @foreach (var stock in _results)
+        {
+            <div class="sai-action-item" role="button" tabindex="0" @onclick="() => SelectAsync(stock)">
+                <div>
+                    <div class="sai-action-title">@stock.Symbol</div>
+                    <div class="sai-action-desc">@stock.Name</div>
+                </div>
+                <span class="sai-action-arrow">&#8250;</span>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    [Parameter, EditorRequired] public EventCallback<StockSearchResult> OnSelect { get; set; }
+
+    private string _query = "";
+    private bool _isSearching;
+    private bool _hasSearched;
+    private string? _error;
+    private List<StockSearchResult>? _results;
+    private CancellationTokenSource? _debounceCts;
+
+    private void OnInput(ChangeEventArgs e)
+    {
+        _query = e.Value?.ToString() ?? "";
+
+        _debounceCts?.Cancel();
+        _debounceCts?.Dispose();
+        _debounceCts = new CancellationTokenSource();
+        _ = DebouncedSearchAsync(_query, _debounceCts.Token);
+    }
+
+    private async Task DebouncedSearchAsync(string query, CancellationToken ct)
+    {
+        try
+        {
+            await Task.Delay(350, ct);
+        }
+        catch (TaskCanceledException)
+        {
+            return; // superseded by a newer keystroke
+        }
+
+        if (!ct.IsCancellationRequested)
+            await SearchAsync(query);
+    }
+
+    private async Task SearchAsync(string query)
+    {
+        if (string.IsNullOrWhiteSpace(query))
+        {
+            _results = null;
+            _hasSearched = false;
+            _error = null;
+            StateHasChanged();
+            return;
+        }
+
+        _isSearching = true;
+        _error = null;
+        StateHasChanged();
+        try
+        {
+            _results = await StockApiClient.SearchAsync(query);
+            _hasSearched = true;
+        }
+        catch (ApiException ex)
+        {
+            _error = ex.Message;
+        }
+        finally
+        {
+            _isSearching = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task SelectAsync(StockSearchResult stock)
+    {
+        _query = stock.Symbol;
+        _results = null;
+        _hasSearched = false;
+        await OnSelect.InvokeAsync(stock);
+    }
+
+    public void Dispose()
+    {
+        _debounceCts?.Cancel();
+        _debounceCts?.Dispose();
+    }
+}

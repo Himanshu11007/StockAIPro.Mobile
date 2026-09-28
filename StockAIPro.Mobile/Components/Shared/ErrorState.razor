@@ -7,7 +7,7 @@
     <div>@Message</div>
     @if (OnRetry.HasDelegate)
     {
-        <button class="btn btn-secondary mt-3" @onclick="OnRetry">Retry</button>
+        <button class="btn btn-secondary mt-3" @onclick="OnRetry">@RetryLabel</button>
     }
 </div>
 
@@ -15,4 +15,9 @@
     [Parameter] public string Title { get; set; } = "Something went wrong";
     [Parameter] public string Message { get; set; } = "Please try again.";
     [Parameter] public EventCallback OnRetry { get; set; }
+
+    /// <summary>Override to e.g. "Sign in again" when the underlying error
+    /// is ApiErrorKind.Unauthorized and OnRetry navigates to /login instead
+    /// of re-running the failed call.</summary>
+    [Parameter] public string RetryLabel { get; set; } = "Retry";
 }

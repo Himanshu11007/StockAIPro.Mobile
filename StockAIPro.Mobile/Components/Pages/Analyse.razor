@@ -1,0 +1,149 @@
+@page "/analyse"
+@inject IAnalysisApiClient AnalysisApiClient
+@inject NavigationManager Navigation
+
+<div class="sai-card">
+    <div class="sai-card-title">Analyse a stock</div>
+    <StockSearch OnSelect="OnStockSelectedAsync" />
+</div>
+
+@if (_isAnalyzing)
+{
+    <LoadingState Message="Running analysis..." />
+}
+else if (_error is not null)
+{
+    @if (_errorKind == ApiErrorKind.Unauthorized)
+    {
+        <ErrorState Title="Session expired" Message="@_error" RetryLabel="Sign in again" OnRetry="@(() => Navigation.NavigateTo("/login"))" />
+    }
+    else
+    {
+        <ErrorState Title="Analysis failed" Message="@_error" OnRetry="@(() => AnalyzeAsync(_lastSymbol))" />
+    }
+}
+else if (_result is { } r)
+{
+    <div class="sai-card">
+        <div class="sai-card-title">@r.Stock <span class="text-muted">(@r.Symbol)</span></div>
+        <SignalBadge Signal="@r.Signal" />
+    </div>
+
+    <div class="sai-metric-grid">
+        <MetricCard Label="Confluence Score" Value="@r.Score.ToString("0.00")" />
+        <MetricCard Label="ML Confidence" Value="@($"{r.Confidence:0.0}%")" />
+        <MetricCard Label="Model Accuracy" Value="@($"{r.Accuracy * 100:0.0}%")" />
+        <MetricCard Label="News Score" Value="@r.NewsScore.ToString("0.00")" />
+        <MetricCard Label="Market Regime" Value="@r.Regime" />
+        <MetricCard Label="Weekly Trend" Value="@r.WeeklyTrend" />
+        <MetricCard Label="Daily Trend" Value="@r.DailyTrend" />
+        @if (r.Target is { } target)
+        {
+            <MetricCard Label="Target" Value="@target.ToString("0.00")" />
+        }
+        @if (r.StopLoss is { } stopLoss)
+        {
+            <MetricCard Label="Stop Loss" Value="@stopLoss.ToString("0.00")" />
+        }
+    </div>
+
+    @if (r.Factors.Count > 0)
+    {
+        <div class="sai-section-title">Factors</div>
+        <div class="sai-card">
+            <ul class="mb-0">
+                @foreach (var factor in r.Factors)
+                {
+                    <li>@factor</li>
+                }
+            </ul>
+        </div>
+    }
+
+    @if (r.Explanation is { } exp)
+    {
+        <div class="sai-section-title">Explanation</div>
+        <div class="sai-card">
+            <p>@exp.Summary</p>
+            <p>@exp.SignalExplanation</p>
+
+            @if (exp.Strengths.Count > 0)
+            {
+                <strong>Strengths</strong>
+                <ul>
+                    @foreach (var s in exp.Strengths)
+                    {
+                        <li>@s</li>
+                    }
+                </ul>
+            }
+            @if (exp.Weaknesses.Count > 0)
+            {
+                <strong>Weaknesses</strong>
+                <ul>
+                    @foreach (var w in exp.Weaknesses)
+                    {
+                        <li>@w</li>
+                    }
+                </ul>
+            }
+            @if (exp.WatchPoints.Count > 0)
+            {
+                <strong>Watch points</strong>
+                <ul>
+                    @foreach (var w in exp.WatchPoints)
+                    {
+                        <li>@w</li>
+                    }
+                </ul>
+            }
+
+            <p class="mt-2">@exp.RiskSummary</p>
+            @if (!string.IsNullOrEmpty(exp.ConfidenceNote))
+            {
+                <p class="text-muted">@exp.ConfidenceNote</p>
+            }
+            <p><strong>@exp.FinalInterpretation</strong></p>
+        </div>
+    }
+}
+else
+{
+    <EmptyState Title="Search for a stock to analyse" Message="Results come from the live StockAI Pro engine." />
+}
+
+@code {
+    private bool _isAnalyzing;
+    private string? _error;
+    private ApiErrorKind? _errorKind;
+    private AnalyzeStockResult? _result;
+    private string _lastSymbol = "";
+
+    private Task OnStockSelectedAsync(StockSearchResult stock) => AnalyzeAsync(stock.Symbol);
+
+    private async Task AnalyzeAsync(string symbol)
+    {
+        if (string.IsNullOrWhiteSpace(symbol))
+            return;
+
+        _lastSymbol = symbol;
+        _isAnalyzing = true;
+        _error = null;
+        _errorKind = null;
+        _result = null;
+        StateHasChanged();
+        try
+        {
+            _result = await AnalysisApiClient.AnalyzeAsync(symbol);
+        }
+        catch (ApiException ex)
+        {
+            _error = ex.Message;
+            _errorKind = ex.Kind;
+        }
+        finally
+        {
+            _isAnalyzing = false;
+        }
+    }
+}
