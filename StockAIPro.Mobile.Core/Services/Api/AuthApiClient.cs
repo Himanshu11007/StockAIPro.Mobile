@@ -78,11 +78,15 @@ public sealed class AuthApiClient : IAuthApiClient
         {
             return await send();
         }
-        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException && !ct.IsCancellationRequested)
+        catch (Exception ex) when ((ex is HttpRequestException or TaskCanceledException) && !ct.IsCancellationRequested)
         {
             // TaskCanceledException without the caller's own token being
             // cancelled means it was OUR timeout, not a user-initiated
             // cancellation - both cases mean "couldn't reach the server".
+            // If ct.IsCancellationRequested is true, this filter does NOT
+            // match, so the original OperationCanceledException/
+            // TaskCanceledException propagates unchanged - caller-initiated
+            // cancellation must never be reported as a network error.
             throw ApiException.NetworkUnavailable(ex);
         }
     }

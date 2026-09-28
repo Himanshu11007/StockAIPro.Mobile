@@ -78,6 +78,98 @@ public class AuthenticatedHttpMessageHandlerTests
     }
 
     [Fact]
+    public async Task Refresh_5xx_preserves_credentials_and_surfaces_server_error()
+    {
+        var tokenStore = new InMemoryTokenStore("old-access", "refresh-token");
+        var api = new FakeAuthApiClient
+        {
+            RefreshResult = () => throw new Services.Api.ApiException(
+                Services.Api.ApiErrorKind.ServerError, "Internal server error", 500),
+        };
+        var inner = new RecordingHandler(_ => new HttpResponseMessage(HttpStatusCode.Unauthorized));
+        using var client = BuildClient(tokenStore, api, inner);
+
+        var ex = await Assert.ThrowsAsync<Services.Api.ApiException>(() => client.GetAsync("/whoami"));
+
+        Assert.Equal(Services.Api.ApiErrorKind.ServerError, ex.Kind);
+        Assert.Equal(1, api.RefreshCallCount);
+        Assert.Equal("old-access", await tokenStore.GetAccessTokenAsync());
+        Assert.Equal("refresh-token", await tokenStore.GetRefreshTokenAsync());
+    }
+
+    [Fact]
+    public async Task Refresh_network_failure_preserves_credentials()
+    {
+        var tokenStore = new InMemoryTokenStore("old-access", "refresh-token");
+        var api = new FakeAuthApiClient
+        {
+            RefreshResult = () => throw Services.Api.ApiException.NetworkUnavailable(new HttpRequestException("boom")),
+        };
+        var inner = new RecordingHandler(_ => new HttpResponseMessage(HttpStatusCode.Unauthorized));
+        using var client = BuildClient(tokenStore, api, inner);
+
+        var ex = await Assert.ThrowsAsync<Services.Api.ApiException>(() => client.GetAsync("/whoami"));
+
+        Assert.Equal(Services.Api.ApiErrorKind.NetworkUnavailable, ex.Kind);
+        Assert.Equal(1, api.RefreshCallCount);
+        Assert.Equal("old-access", await tokenStore.GetAccessTokenAsync());
+        Assert.Equal("refresh-token", await tokenStore.GetRefreshTokenAsync());
+    }
+
+    [Fact]
+    public async Task Logout_between_401_and_acquiring_the_refresh_lock_does_not_use_the_stale_refresh_token()
+    {
+        var tokenStore = new InMemoryTokenStore("old-access", "refresh-token");
+        tokenStore.OnGetRefreshToken = callIndex =>
+        {
+            // callIndex 1 = the read that happens right after the 401,
+            // before the lock is acquired. callIndex 2 = the re-read taken
+            // after acquiring RefreshLock. Simulate a logout landing in
+            // between, exactly the ordering the race depends on.
+            if (callIndex == 2)
+                tokenStore.ClearAsync().GetAwaiter().GetResult();
+        };
+        var api = new FakeAuthApiClient { RefreshResult = () => Canned.Tokens("new-access", "new-refresh") };
+        var inner = new RecordingHandler(_ => new HttpResponseMessage(HttpStatusCode.Unauthorized));
+        using var client = BuildClient(tokenStore, api, inner);
+
+        var response = await client.GetAsync("/whoami");
+
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+        Assert.Equal(0, api.RefreshCallCount); // never called refresh with the stale token
+        Assert.Null(await tokenStore.GetAccessTokenAsync());
+        Assert.Null(await tokenStore.GetRefreshTokenAsync());
+    }
+
+    [Fact]
+    public async Task Logout_while_refresh_is_in_flight_does_not_resurrect_the_session()
+    {
+        var tokenStore = new InMemoryTokenStore("old-access", "refresh-token");
+        var api = new FakeAuthApiClient
+        {
+            RefreshResult = () =>
+            {
+                // Simulate the user logging out while this refresh call
+                // (already sent to the server with the old, still-valid
+                // refresh token) is still in flight.
+                tokenStore.ClearAsync().GetAwaiter().GetResult();
+                return Canned.Tokens("new-access", "new-refresh");
+            },
+        };
+        var inner = new RecordingHandler(_ => new HttpResponseMessage(HttpStatusCode.Unauthorized));
+        using var client = BuildClient(tokenStore, api, inner);
+
+        var response = await client.GetAsync("/whoami");
+
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+        // The refresh technically succeeded server-side, but the user
+        // logged out locally before it completed - the new tokens must
+        // never be persisted, or logout would effectively be undone.
+        Assert.Null(await tokenStore.GetAccessTokenAsync());
+        Assert.Null(await tokenStore.GetRefreshTokenAsync());
+    }
+
+    [Fact]
     public async Task No_refresh_token_stored_surfaces_401_without_attempting_refresh()
     {
         var tokenStore = new InMemoryTokenStore("old-access", refreshToken: null!);

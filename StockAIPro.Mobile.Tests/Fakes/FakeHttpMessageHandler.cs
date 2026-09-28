@@ -32,9 +32,22 @@ public sealed class FakeHttpMessageHandler : HttpMessageHandler
         _responses.Enqueue(_ => throw new HttpRequestException("simulated network failure"));
     }
 
+    /// <summary>Throws the TaskCanceledException HttpClient itself raises on
+    /// a genuine request timeout (HttpClient.Timeout elapsing) - distinct
+    /// from a caller cancelling their own CancellationToken.</summary>
+    public void EnqueueTimeout()
+    {
+        _responses.Enqueue(_ => throw new TaskCanceledException("simulated timeout", new TimeoutException()));
+    }
+
     protected override async Task<HttpResponseMessage> SendAsync(
         HttpRequestMessage request, CancellationToken cancellationToken)
     {
+        // A real transport (SocketsHttpHandler etc.) observes the caller's
+        // token before/while doing I/O - mirror that here so tests can
+        // exercise caller-cancellation behavior without a real network stack.
+        cancellationToken.ThrowIfCancellationRequested();
+
         Requests.Add(request);
         RequestBodies.Add(request.Content is null ? null : await request.Content.ReadAsStringAsync(cancellationToken));
 

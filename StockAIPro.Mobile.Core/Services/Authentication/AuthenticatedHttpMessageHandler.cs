@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http.Headers;
+using StockAIPro.Mobile.Models.Auth;
 using StockAIPro.Mobile.Services.Api;
 
 namespace StockAIPro.Mobile.Services.Authentication;
@@ -59,8 +60,8 @@ public sealed class AuthenticatedHttpMessageHandler : DelegatingHandler
             return response;
         }
 
-        var refreshToken = await _tokenStore.GetRefreshTokenAsync();
-        if (string.IsNullOrEmpty(refreshToken))
+        var refreshTokenAtFailure = await _tokenStore.GetRefreshTokenAsync();
+        if (string.IsNullOrEmpty(refreshTokenAtFailure))
             return response; // nothing to refresh with - surface the 401 as-is
 
         response.Dispose();
@@ -76,26 +77,49 @@ public sealed class AuthenticatedHttpMessageHandler : DelegatingHandler
 
             if (newAccessToken is null)
             {
+                // Re-read the refresh token now that we actually hold the
+                // lock. It may have been rotated by a request that
+                // refreshed while we waited, or cleared entirely by a
+                // concurrent logout. Refreshing with the token captured
+                // before the failed request would risk reusing a token the
+                // rest of the app no longer considers valid (e.g. resuming
+                // a session the user just logged out of).
+                var refreshTokenNow = await _tokenStore.GetRefreshTokenAsync();
+                if (string.IsNullOrEmpty(refreshTokenNow) || refreshTokenNow != refreshTokenAtFailure)
+                    return UnauthorizedResponse(request, "Session ended before refresh could run");
+
+                TokenResponse tokens;
                 try
                 {
-                    var tokens = await _authApiClient.RefreshAsync(refreshToken, cancellationToken);
-                    await _tokenStore.SaveTokensAsync(tokens.AccessToken, tokens.RefreshToken);
-                    newAccessToken = tokens.AccessToken;
+                    tokens = await _authApiClient.RefreshAsync(refreshTokenNow, cancellationToken);
                 }
-                catch (ApiException)
+                catch (ApiException ex) when (ex.Kind == ApiErrorKind.Unauthorized)
                 {
-                    // Refresh token is invalid/expired/revoked - the user
-                    // must sign in again. Clear credentials so the app
-                    // stops presenting itself as authenticated. No point
-                    // retrying the original request (it would just 401
-                    // again) - return a synthetic 401 directly.
+                    // Refresh token is genuinely invalid/expired/revoked -
+                    // the user must sign in again. Clear credentials so the
+                    // app stops presenting itself as authenticated. No
+                    // point retrying the original request (it would just
+                    // 401 again) - return a synthetic 401 directly.
                     await _tokenStore.ClearAsync();
-                    return new HttpResponseMessage(HttpStatusCode.Unauthorized)
-                    {
-                        RequestMessage = request,
-                        ReasonPhrase = "Session expired - refresh failed",
-                    };
+                    return UnauthorizedResponse(request, "Session expired - refresh failed");
                 }
+                // Any other ApiException kind (NetworkUnavailable,
+                // ServerError, Unknown, ...) is a transient transport/server
+                // problem, not proof the session itself is invalid - let it
+                // propagate to the caller and leave stored tokens untouched
+                // so a subsequent request can retry once connectivity/the
+                // server recovers.
+
+                // The refresh call may have taken a while; if a logout
+                // cleared the refresh token while it was in flight, discard
+                // the result rather than resurrecting a session the user
+                // already ended.
+                var refreshTokenAfterCall = await _tokenStore.GetRefreshTokenAsync();
+                if (refreshTokenAfterCall != refreshTokenNow)
+                    return UnauthorizedResponse(request, "Session ended during refresh");
+
+                await _tokenStore.SaveTokensAsync(tokens.AccessToken, tokens.RefreshToken);
+                newAccessToken = tokens.AccessToken;
             }
 
             var retryRequest = await CloneRequestAsync(request, newAccessToken, retried: true);
@@ -117,6 +141,9 @@ public sealed class AuthenticatedHttpMessageHandler : DelegatingHandler
             RefreshLock.Release();
         }
     }
+
+    private static HttpResponseMessage UnauthorizedResponse(HttpRequestMessage request, string reason) =>
+        new(HttpStatusCode.Unauthorized) { RequestMessage = request, ReasonPhrase = reason };
 
     private async Task<string?> AttachAccessTokenAsync(HttpRequestMessage request)
     {

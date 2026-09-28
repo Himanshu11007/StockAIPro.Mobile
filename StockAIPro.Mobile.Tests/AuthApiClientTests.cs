@@ -179,4 +179,30 @@ public class AuthApiClientTests
         Assert.Equal(ApiErrorKind.NetworkUnavailable, ex.Kind);
         Assert.DoesNotContain("HttpRequestException", ex.Message); // user-facing message, not a raw exception dump
     }
+
+    [Fact]
+    public async Task Genuine_timeout_throws_NetworkUnavailable()
+    {
+        var handler = new FakeHttpMessageHandler();
+        handler.EnqueueTimeout();
+        var client = new AuthApiClient(new FakeHttpClientFactory(handler));
+
+        var ex = await Assert.ThrowsAsync<ApiException>(() => client.LoginAsync("a@b.com", "password1"));
+
+        Assert.Equal(ApiErrorKind.NetworkUnavailable, ex.Kind);
+    }
+
+    [Fact]
+    public async Task Caller_cancellation_is_not_converted_to_NetworkUnavailable()
+    {
+        var handler = new FakeHttpMessageHandler();
+        var client = new AuthApiClient(new FakeHttpClientFactory(handler));
+        using var cts = new CancellationTokenSource();
+        cts.Cancel();
+
+        // The caller cancelled its own token - this must surface as a
+        // cancellation, not be reinterpreted as "server unreachable".
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(
+            () => client.LoginAsync("a@b.com", "password1", cts.Token));
+    }
 }
