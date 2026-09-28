@@ -1,0 +1,215 @@
+@page "/top-picks"
+@inject ITopPicksApiClient TopPicksApiClient
+@inject NavigationManager Navigation
+@implements IDisposable
+
+<div class="sai-card">
+    <div class="sai-card-title">Top AI Picks</div>
+
+    @if (_scanState == ScanState.Idle)
+    {
+        <label for="category">Category</label>
+        <select id="category" class="form-select mb-2" @bind="_selectedCategory">
+            @foreach (var category in StockCategory.All)
+            {
+                <option value="@category">@category</option>
+            }
+        </select>
+
+        @if (!string.IsNullOrEmpty(_error) && _errorKind is null)
+        {
+            <p class="text-danger" role="alert">@_error</p>
+        }
+
+        <button class="btn btn-primary w-100" @onclick="StartScanAsync" disabled="@_isStarting">
+            @(_isStarting ? "Starting..." : "Start scan")
+        </button>
+    }
+    else if (_scanState == ScanState.Polling)
+    {
+        <LoadingState Message="@_statusMessage" />
+        <button class="btn btn-secondary w-100 mt-2" @onclick="CancelPolling">Cancel</button>
+    }
+    else if (_scanState == ScanState.Failed)
+    {
+        @if (_errorKind == ApiErrorKind.Unauthorized)
+        {
+            <ErrorState Title="Session expired" Message="@_error" RetryLabel="Sign in again" OnRetry="@(() => Navigation.NavigateTo("/login"))" />
+        }
+        else
+        {
+            <ErrorState Title="Scan failed" Message="@_error" RetryLabel="Try again" OnRetry="ResetAsync" />
+        }
+    }
+</div>
+
+@if (_scanState == ScanState.Completed)
+{
+    @if (_results is { Count: 0 })
+    {
+        <EmptyState Title="No picks found" Message="No stocks passed the quality filters for this scan." ActionLabel="Scan again" OnAction="ResetAsync" />
+    }
+    else if (_results is { } results)
+    {
+        <button class="btn btn-secondary w-100 mb-2" @onclick="ResetAsync">Scan again</button>
+
+        @foreach (var item in results)
+        {
+            <div class="sai-card">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div class="sai-action-title">@item.Stock <span class="text-muted">(@item.Symbol)</span></div>
+                    <SignalBadge Signal="@item.Signal" />
+                </div>
+                <div class="sai-metric-grid mt-2">
+                    <MetricCard Label="Confluence Score" Value="@item.Score.ToString("0.00")" />
+                    <MetricCard Label="ML Confidence" Value="@($"{item.Confidence:0.0}%")" />
+                    <MetricCard Label="Accuracy" Value="@($"{item.Accuracy:0.0}%")" />
+                    <MetricCard Label="Close" Value="@item.Close.ToString("0.00")" />
+                    @if (item.Target is { } target)
+                    {
+                        <MetricCard Label="Target" Value="@target.ToString("0.00")" />
+                    }
+                    @if (item.StopLoss is { } stopLoss)
+                    {
+                        <MetricCard Label="Stop Loss" Value="@stopLoss.ToString("0.00")" />
+                    }
+                </div>
+                @if (!string.IsNullOrEmpty(item.Reason))
+                {
+                    <p class="sai-action-desc mt-2">@item.Reason</p>
+                }
+            </div>
+        }
+    }
+}
+
+@code {
+    private enum ScanState { Idle, Polling, Completed, Failed }
+
+    private ScanState _scanState = ScanState.Idle;
+    private string _selectedCategory = StockCategory.LargeCap;
+    private bool _isStarting;
+    private string _statusMessage = "";
+    private string? _error;
+    private ApiErrorKind? _errorKind;
+    private List<TopPickItem>? _results;
+    private CancellationTokenSource? _pollCts;
+
+    private async Task StartScanAsync()
+    {
+        _isStarting = true;
+        _error = null;
+        _errorKind = null;
+        StateHasChanged();
+        try
+        {
+            var start = await TopPicksApiClient.StartScanAsync(_selectedCategory);
+            _pollCts?.Cancel();
+            _pollCts = new CancellationTokenSource();
+            _statusMessage = "Starting scan...";
+            _scanState = ScanState.Polling;
+            _ = PollLoopAsync(start.ScanId, _pollCts.Token);
+        }
+        catch (ApiException ex)
+        {
+            _error = ex.Message;
+            _errorKind = ex.Kind;
+        }
+        finally
+        {
+            _isStarting = false;
+        }
+    }
+
+    // Polls GET /top-picks/status/{scan_id} on a fixed interval until the
+    // backend reports completed/failed/not_found. The backend does not
+    // publish an expected scan duration (scanning all 3 categories can
+    // legitimately take minutes), so this loop has no hard timeout - the
+    // user can cancel manually instead, and each individual poll call is
+    // still subject to the shared HttpClient timeout/network handling.
+    private async Task PollLoopAsync(string scanId, CancellationToken ct)
+    {
+        try
+        {
+            while (!ct.IsCancellationRequested)
+            {
+                ScanStatus status;
+                try
+                {
+                    status = await TopPicksApiClient.GetStatusAsync(scanId, ct);
+                }
+                catch (ApiException ex)
+                {
+                    _error = ex.Message;
+                    _errorKind = ex.Kind;
+                    _scanState = ScanState.Failed;
+                    await InvokeAsync(StateHasChanged);
+                    return;
+                }
+
+                if (ct.IsCancellationRequested)
+                    return;
+
+                switch (status.Status)
+                {
+                    case "completed":
+                        await LoadResultAsync(scanId, ct);
+                        return;
+                    case "failed":
+                    case "not_found":
+                        _error = status.Message;
+                        _errorKind = null;
+                        _scanState = ScanState.Failed;
+                        await InvokeAsync(StateHasChanged);
+                        return;
+                    default:
+                        _statusMessage = status.Message;
+                        await InvokeAsync(StateHasChanged);
+                        break;
+                }
+
+                await Task.Delay(TimeSpan.FromSeconds(3), ct);
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            // Cancelled by the user (CancelPolling) or page navigation
+            // (Dispose) - not an error, nothing left to show.
+        }
+    }
+
+    private async Task LoadResultAsync(string scanId, CancellationToken ct)
+    {
+        try
+        {
+            var result = await TopPicksApiClient.GetResultAsync(scanId, ct);
+            _results = result.Results;
+            _scanState = ScanState.Completed;
+        }
+        catch (ApiException ex)
+        {
+            _error = ex.Message;
+            _errorKind = ex.Kind;
+            _scanState = ScanState.Failed;
+        }
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private void CancelPolling()
+    {
+        _pollCts?.Cancel();
+        _scanState = ScanState.Idle;
+    }
+
+    private Task ResetAsync()
+    {
+        _pollCts?.Cancel();
+        _scanState = ScanState.Idle;
+        _results = null;
+        _error = null;
+        _errorKind = null;
+        return Task.CompletedTask;
+    }
+
+    public void Dispose() => _pollCts?.Cancel();
+}
