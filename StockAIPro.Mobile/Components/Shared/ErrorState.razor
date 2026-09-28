@@ -1,0 +1,18 @@
+@* Never pass a raw exception message from anywhere other than
+   ApiException.Message here - that message is already vetted as
+   safe-to-display (see ApiException's own doc comment); never surface a
+   stack trace or ex.ToString() to the user. *@
+<div class="sai-state">
+    <div class="sai-state-title">@Title</div>
+    <div>@Message</div>
+    @if (OnRetry.HasDelegate)
+    {
+        <button class="btn btn-secondary mt-3" @onclick="OnRetry">Retry</button>
+    }
+</div>
+
+@code {
+    [Parameter] public string Title { get; set; } = "Something went wrong";
+    [Parameter] public string Message { get; set; } = "Please try again.";
+    [Parameter] public EventCallback OnRetry { get; set; }
+}

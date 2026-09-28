@@ -2,15 +2,62 @@
 @inject IAuthService AuthService
 @implements IDisposable
 
-<p>This is my mobile app</p>
-
 @if (AuthService.IsAuthenticated)
 {
-    <p>Signed in as <strong>@AuthService.CurrentUser?.Email</strong>. <a href="/account">View account</a></p>
+    <div class="sai-card">
+        <div class="sai-card-title">Welcome back@(string.IsNullOrEmpty(AuthService.CurrentUser?.Email) ? "" : $", {AuthService.CurrentUser!.Email}")</div>
+        <div class="sai-action-desc">Connected to StockAI Pro.</div>
+    </div>
+
+    <div class="sai-section-title">Quick actions</div>
+    <div class="sai-action-list">
+        <NavLink class="sai-action-item" href="analyse">
+            <div>
+                <div class="sai-action-title">Analyse a stock</div>
+                <div class="sai-action-desc">Run a full analysis on any stock</div>
+            </div>
+            <span class="sai-action-arrow">›</span>
+        </NavLink>
+        <NavLink class="sai-action-item" href="top-picks">
+            <div>
+                <div class="sai-action-title">Top AI Picks</div>
+                <div class="sai-action-desc">View the latest recommendations</div>
+            </div>
+            <span class="sai-action-arrow">›</span>
+        </NavLink>
+        <NavLink class="sai-action-item" href="watchlist">
+            <div>
+                <div class="sai-action-title">Watchlist</div>
+                <div class="sai-action-desc">Track the stocks you care about</div>
+            </div>
+            <span class="sai-action-arrow">›</span>
+        </NavLink>
+        <NavLink class="sai-action-item" href="performance">
+            <div>
+                <div class="sai-action-title">Performance</div>
+                <div class="sai-action-desc">Historical engine analytics</div>
+            </div>
+            <span class="sai-action-arrow">›</span>
+        </NavLink>
+        <NavLink class="sai-action-item" href="intelligence">
+            <div>
+                <div class="sai-action-title">AI Intelligence</div>
+                <div class="sai-action-desc">Engine-wide insights and observations</div>
+            </div>
+            <span class="sai-action-arrow">›</span>
+        </NavLink>
+    </div>
 }
 else
 {
-    <p><a href="/login">Login</a> or <a href="/register">Register</a> to connect to StockAI Pro.</p>
+    <div class="sai-card">
+        <div class="sai-card-title">StockAI Pro</div>
+        <div class="sai-action-desc">AI-Powered Stock Intelligence.</div>
+        <p class="mt-3">
+            <a href="/login" class="btn btn-primary">Login</a>
+            <a href="/register" class="btn btn-secondary ms-2">Register</a>
+        </p>
+    </div>
 }
 
 @code {

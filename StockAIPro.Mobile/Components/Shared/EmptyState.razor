@@ -1,0 +1,18 @@
+<div class="sai-state">
+    <div class="sai-state-title">@Title</div>
+    @if (!string.IsNullOrEmpty(Message))
+    {
+        <div>@Message</div>
+    }
+    @if (!string.IsNullOrEmpty(ActionLabel) && OnAction.HasDelegate)
+    {
+        <button class="btn btn-primary mt-3" @onclick="OnAction">@ActionLabel</button>
+    }
+</div>
+
+@code {
+    [Parameter] public string Title { get; set; } = "Nothing here yet";
+    [Parameter] public string Message { get; set; } = "";
+    [Parameter] public string? ActionLabel { get; set; }
+    [Parameter] public EventCallback OnAction { get; set; }
+}

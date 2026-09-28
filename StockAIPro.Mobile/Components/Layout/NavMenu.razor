@@ -1,59 +1,11 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">StockAIPro.Mobile</a>
-    </div>
-</div>
-
-<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
-
-<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
-    <nav class="nav flex-column">
-        <div class="nav-item px-3"  >
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="counter">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Counter
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="weather">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Weather
-            </NavLink>
-        </div>
-        @if (AuthService.IsAuthenticated)
-        {
-            <div class="nav-item px-3">
-                <NavLink class="nav-link" href="account">
-                    <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Account
-                </NavLink>
-            </div>
-        }
-        else
-        {
-            <div class="nav-item px-3">
-                <NavLink class="nav-link" href="login">
-                    <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Login
-                </NavLink>
-            </div>
-            <div class="nav-item px-3">
-                <NavLink class="nav-link" href="register">
-                    <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Register
-                </NavLink>
-            </div>
-        }
-    </nav>
-</div>
-
-@code {
-    [Inject] private IAuthService AuthService { get; set; } = default!;
-
-    protected override void OnInitialized()
-    {
-        AuthService.AuthStateChanged += OnAuthStateChanged;
-    }
-
-    private void OnAuthStateChanged() => InvokeAsync(StateHasChanged);
-}
+@* Bottom navigation bar shown only for authenticated screens (MainLayout
+   only renders this component when AuthService.IsAuthenticated). *@
+<nav class="sai-bottom-nav">
+    <NavLink class="sai-nav-item" href="" Match="NavLinkMatch.All">Home</NavLink>
+    <NavLink class="sai-nav-item" href="analyse">Analyse</NavLink>
+    <NavLink class="sai-nav-item" href="top-picks">Top Picks</NavLink>
+    <NavLink class="sai-nav-item" href="watchlist">Watchlist</NavLink>
+    <NavLink class="sai-nav-item" href="performance">Performance</NavLink>
+    <NavLink class="sai-nav-item" href="intelligence">AI Intel</NavLink>
+    <NavLink class="sai-nav-item" href="account">Account</NavLink>
+</nav>

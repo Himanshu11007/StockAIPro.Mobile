@@ -1,39 +1,356 @@
+/* StockAI Pro - dark, mobile-first financial app theme.
+   Replaces the default MAUI Blazor Hybrid template styling. */
+
+:root {
+    --sai-bg: #0d1117;
+    --sai-surface: #161b22;
+    --sai-surface-alt: #1c2229;
+    --sai-border: #30363d;
+    --sai-primary: #58a6ff;
+    --sai-text: #e6edf3;
+    --sai-text-muted: #8b949e;
+    --sai-positive: #3fb950;
+    --sai-positive-bg: rgba(63, 185, 80, 0.15);
+    --sai-negative: #f85149;
+    --sai-negative-bg: rgba(248, 81, 73, 0.15);
+    --sai-warning: #d29922;
+    --sai-warning-bg: rgba(210, 153, 34, 0.15);
+    --sai-radius: 10px;
+}
+
 html, body {
+    height: 100%;
+    background-color: var(--sai-bg);
+    color: var(--sai-text);
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
 a, .btn-link {
-    color: #006bb7;
+    color: var(--sai-primary);
+    text-decoration: none;
 }
 
-.btn-primary {
-    color: #fff;
-    background-color: #1b6ec2;
-    border-color: #1861ac;
-}
-
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-
-.content {
-    padding-top: 1.1rem;
+h1, h2, h3, h4, h5, h6 {
+    color: var(--sai-text);
 }
 
 h1:focus {
     outline: none;
 }
 
+/* ── Layout shell ─────────────────────────────────────────────────────── */
+
+.app-shell {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background-color: var(--sai-bg);
+}
+
+.app-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    padding: 0.85rem 1rem 0.65rem;
+    background-color: var(--sai-surface);
+    border-bottom: 1px solid var(--sai-border);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.app-topbar-brand {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--sai-text);
+    letter-spacing: 0.01em;
+}
+
+.app-topbar-subtitle {
+    font-size: 0.68rem;
+    color: var(--sai-text-muted);
+    margin-top: 0.1rem;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+}
+
+.app-content {
+    flex: 1;
+    padding: 1rem 1rem 5.5rem;
+    max-width: 640px;
+    width: 100%;
+    margin: 0 auto;
+    box-sizing: border-box;
+}
+
+/* ── Cards / surfaces ─────────────────────────────────────────────────── */
+
+.sai-card {
+    background-color: var(--sai-surface);
+    border: 1px solid var(--sai-border);
+    border-radius: var(--sai-radius);
+    padding: 1rem;
+    margin-bottom: 0.85rem;
+}
+
+.sai-card-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--sai-text);
+    margin-bottom: 0.6rem;
+}
+
+.sai-section-title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--sai-text-muted);
+    margin: 1.1rem 0 0.5rem;
+}
+
+/* ── Forms ────────────────────────────────────────────────────────────── */
+
+.form-control, .form-select {
+    background-color: var(--sai-surface-alt);
+    border: 1px solid var(--sai-border);
+    color: var(--sai-text);
+    border-radius: 8px;
+}
+
+    .form-control:focus, .form-select:focus {
+        background-color: var(--sai-surface-alt);
+        color: var(--sai-text);
+        border-color: var(--sai-primary);
+        box-shadow: 0 0 0 0.2rem rgba(88, 166, 255, 0.25);
+    }
+
+    .form-control::placeholder {
+        color: var(--sai-text-muted);
+    }
+
+label {
+    color: var(--sai-text-muted);
+    font-size: 0.85rem;
+    margin-bottom: 0.25rem;
+    display: inline-block;
+}
+
+/* ── Buttons ──────────────────────────────────────────────────────────── */
+
+.btn-primary {
+    color: #ffffff;
+    background-color: var(--sai-primary);
+    border-color: var(--sai-primary);
+}
+
+    .btn-primary:hover, .btn-primary:focus, .btn-primary:active {
+        background-color: #4c93e6 !important;
+        border-color: #4c93e6 !important;
+    }
+
+.btn-outline-danger {
+    color: var(--sai-negative);
+    border-color: var(--sai-negative);
+}
+
+    .btn-outline-danger:hover {
+        background-color: var(--sai-negative);
+        border-color: var(--sai-negative);
+    }
+
+.btn-secondary {
+    background-color: var(--sai-surface-alt);
+    border-color: var(--sai-border);
+    color: var(--sai-text);
+}
+
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+    box-shadow: 0 0 0 0.2rem rgba(88, 166, 255, 0.25);
+}
+
+.btn:disabled {
+    opacity: 0.6;
+}
+
+/* ── Badges (signal / status) ─────────────────────────────────────────── */
+
+.sai-badge {
+    display: inline-block;
+    padding: 0.2rem 0.55rem;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+}
+
+.sai-badge-positive {
+    background-color: var(--sai-positive-bg);
+    color: var(--sai-positive);
+}
+
+.sai-badge-negative {
+    background-color: var(--sai-negative-bg);
+    color: var(--sai-negative);
+}
+
+.sai-badge-neutral {
+    background-color: rgba(139, 148, 158, 0.18);
+    color: var(--sai-text-muted);
+}
+
+.sai-badge-warning {
+    background-color: var(--sai-warning-bg);
+    color: var(--sai-warning);
+}
+
+/* ── Metric tiles ─────────────────────────────────────────────────────── */
+
+.sai-metric-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.6rem;
+}
+
+.sai-metric {
+    background-color: var(--sai-surface);
+    border: 1px solid var(--sai-border);
+    border-radius: var(--sai-radius);
+    padding: 0.75rem;
+}
+
+.sai-metric-label {
+    font-size: 0.68rem;
+    color: var(--sai-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.sai-metric-value {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--sai-text);
+    margin-top: 0.15rem;
+}
+
+/* ── Quick action list (Home) ─────────────────────────────────────────── */
+
+.sai-action-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.sai-action-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: var(--sai-surface);
+    border: 1px solid var(--sai-border);
+    border-radius: var(--sai-radius);
+    padding: 0.9rem 1rem;
+    color: var(--sai-text);
+}
+
+    .sai-action-item:hover {
+        border-color: var(--sai-primary);
+    }
+
+.sai-action-title {
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.sai-action-desc {
+    font-size: 0.75rem;
+    color: var(--sai-text-muted);
+    margin-top: 0.1rem;
+}
+
+.sai-action-arrow {
+    color: var(--sai-text-muted);
+    font-size: 1.1rem;
+}
+
+/* ── State placeholders (loading / error / empty) ────────────────────── */
+
+.sai-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 2.5rem 1rem;
+    color: var(--sai-text-muted);
+}
+
+.sai-state-title {
+    color: var(--sai-text);
+    font-weight: 600;
+    margin-bottom: 0.35rem;
+}
+
+.sai-spinner {
+    width: 2rem;
+    height: 2rem;
+    border: 3px solid var(--sai-border);
+    border-top-color: var(--sai-primary);
+    border-radius: 50%;
+    animation: sai-spin 0.8s linear infinite;
+    margin-bottom: 0.75rem;
+}
+
+@keyframes sai-spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ── Bottom navigation ────────────────────────────────────────────────── */
+
+.sai-bottom-nav {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    background-color: var(--sai-surface);
+    border-top: 1px solid var(--sai-border);
+    padding-bottom: env(safe-area-inset-bottom);
+    z-index: 20;
+}
+
+.sai-nav-item {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 0.55rem 0.1rem;
+    font-size: 0.62rem;
+    font-weight: 500;
+    color: var(--sai-text-muted);
+    line-height: 1.15;
+}
+
+.sai-nav-item.active {
+    color: var(--sai-primary);
+    font-weight: 700;
+}
+
+/* ── Misc / validation ────────────────────────────────────────────────── */
+
 .valid.modified:not([type=checkbox]) {
-    outline: 1px solid #26b050;
+    outline: 1px solid var(--sai-positive);
 }
 
 .invalid {
-    outline: 1px solid #e50000;
+    outline: 1px solid var(--sai-negative);
 }
 
 .validation-message {
-    color: #e50000;
+    color: var(--sai-negative);
+    font-size: 0.8rem;
 }
 
 #blazor-error-ui {
@@ -67,19 +384,6 @@ h1:focus {
         content: "An error has occurred."
     }
 
-.darker-border-checkbox.form-check-input {
-    border-color: #929292;
-}
-
-.form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
-    color: var(--bs-secondary-color);
-    text-align: end;
-}
-
-.form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
-    text-align: start;
-}
-
 .status-bar-safe-area {
     display: none;
 }
@@ -90,12 +394,8 @@ h1:focus {
         position: sticky;
         top: 0;
         height: env(safe-area-inset-top);
-        background-color: #f7f7f7;
+        background-color: var(--sai-surface);
         width: 100%;
         z-index: 1;
-    }
-
-    .flex-column, .navbar-brand {
-        padding-left: env(safe-area-inset-left);
     }
 }

@@ -4,48 +4,50 @@
 @inject NavigationManager Navigation
 @implements IDisposable
 
-<h1>Create account</h1>
+<div class="sai-card">
+    <div class="sai-card-title">Create account</div>
 
-@if (AuthService.IsAuthenticated)
-{
-    <p>You're already signed in as <strong>@AuthService.CurrentUser?.Email</strong>.</p>
-    <p><a href="/account">Go to Account</a></p>
-}
-else
-{
-    <EditForm Model="_form" OnValidSubmit="SubmitAsync">
-        <DataAnnotationsValidator />
+    @if (AuthService.IsAuthenticated)
+    {
+        <p>You're already signed in as <strong>@AuthService.CurrentUser?.Email</strong>.</p>
+        <p><a href="/account">Go to Account</a></p>
+    }
+    else
+    {
+        <EditForm Model="_form" OnValidSubmit="SubmitAsync">
+            <DataAnnotationsValidator />
 
-        <div class="mb-3">
-            <label for="email">Email</label>
-            <InputText id="email" class="form-control" @bind-Value="_form.Email" />
-        </div>
+            <div class="mb-3">
+                <label for="email">Email</label>
+                <InputText id="email" class="form-control" @bind-Value="_form.Email" />
+            </div>
 
-        <div class="mb-3">
-            <label for="password">Password</label>
-            <InputText id="password" type="password" class="form-control" @bind-Value="_form.Password" />
-            <small>At least 8 characters.</small>
-        </div>
+            <div class="mb-3">
+                <label for="password">Password</label>
+                <InputText id="password" type="password" class="form-control" @bind-Value="_form.Password" />
+                <small class="text-muted">At least 8 characters.</small>
+            </div>
 
-        <div class="mb-3">
-            <label for="confirmPassword">Confirm password</label>
-            <InputText id="confirmPassword" type="password" class="form-control" @bind-Value="_form.ConfirmPassword" />
-        </div>
+            <div class="mb-3">
+                <label for="confirmPassword">Confirm password</label>
+                <InputText id="confirmPassword" type="password" class="form-control" @bind-Value="_form.ConfirmPassword" />
+            </div>
 
-        @if (!string.IsNullOrEmpty(_errorMessage))
-        {
-            <p class="text-danger" role="alert">@_errorMessage</p>
-        }
+            @if (!string.IsNullOrEmpty(_errorMessage))
+            {
+                <p class="text-danger" role="alert">@_errorMessage</p>
+            }
 
-        <button type="submit" class="btn btn-primary" disabled="@_isSubmitting">
-            @(_isSubmitting ? "Creating account..." : "Register")
-        </button>
-    </EditForm>
+            <button type="submit" class="btn btn-primary w-100" disabled="@_isSubmitting">
+                @(_isSubmitting ? "Creating account..." : "Register")
+            </button>
+        </EditForm>
 
-    <p class="mt-3">
-        Already have an account? <a href="/login">Login</a>
-    </p>
-}
+        <p class="mt-3">
+            Already have an account? <a href="/login">Login</a>
+        </p>
+    }
+</div>
 
 @code {
     private readonly RegisterForm _form = new();

@@ -1,20 +1,21 @@
-﻿@inherits LayoutComponentBase
+@inherits LayoutComponentBase
 @inject IAuthService AuthService
+@implements IDisposable
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
+<div class="app-shell">
+    <header class="app-topbar">
+        <span class="app-topbar-brand">StockAI Pro</span>
+        <span class="app-topbar-subtitle">AI-Powered Stock Intelligence</span>
+    </header>
 
-    <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
-        </div>
-
-        <article class="content px-4">
-            @Body
-        </article>
+    <main class="app-content">
+        @Body
     </main>
+
+    @if (AuthService.IsAuthenticated)
+    {
+        <NavMenu />
+    }
 </div>
 
 @code {
@@ -24,6 +25,17 @@
     // secure storage without blocking the UI if the backend is unreachable.
     protected override async Task OnInitializedAsync()
     {
+        AuthService.AuthStateChanged += OnAuthStateChanged;
         await AuthService.TryRestoreSessionAsync();
     }
+
+    // The bottom nav's visibility depends on IsAuthenticated, which can
+    // flip asynchronously after this component's first render (session
+    // restore above, or a login/logout elsewhere) - without this
+    // subscription the nav would not appear/disappear until some unrelated
+    // re-render happened. See NavMenu/Home/Login/Register/Account for the
+    // same pattern; every component that reads AuthService state needs it.
+    private void OnAuthStateChanged() => InvokeAsync(StateHasChanged);
+
+    public void Dispose() => AuthService.AuthStateChanged -= OnAuthStateChanged;
 }

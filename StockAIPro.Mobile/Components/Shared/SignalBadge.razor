@@ -1,0 +1,16 @@
+@* Renders the backend's own signal string unchanged (STRONG BUY / BUY /
+   HOLD / SELL / STRONG SELL) - only the color is derived here, never a
+   relabeling of the signal itself. *@
+<span class="sai-badge @CssClass">@Signal</span>
+
+@code {
+    [Parameter, EditorRequired] public string Signal { get; set; } = "";
+
+    private string CssClass => Signal.ToUpperInvariant() switch
+    {
+        "STRONG BUY" or "BUY" => "sai-badge-positive",
+        "STRONG SELL" or "SELL" => "sai-badge-negative",
+        "HOLD" => "sai-badge-warning",
+        _ => "sai-badge-neutral",
+    };
+}

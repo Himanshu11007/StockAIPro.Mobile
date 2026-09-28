@@ -4,43 +4,47 @@
 @inject NavigationManager Navigation
 @implements IDisposable
 
-<h1>Account</h1>
+<div class="sai-card">
+    <div class="sai-card-title">Account</div>
 
-@if (_isLoading)
-{
-    <p>Checking authentication...</p>
-}
-else if (!AuthService.IsAuthenticated || AuthService.CurrentUser is null)
-{
-    <p>You're not signed in.</p>
-    <p><a href="/login">Login</a> &nbsp;|&nbsp; <a href="/register">Register</a></p>
-}
-else
-{
-    var user = AuthService.CurrentUser;
-
-    <p><strong>Authentication:</strong> Connected</p>
-    <p><strong>Signed in as:</strong> @user.Email</p>
-    <p><strong>Role@(user.Roles.Count == 1 ? "" : "s"):</strong> @string.Join(", ", user.Roles)</p>
-    <p><strong>Account created:</strong> @user.CreatedAt.ToLocalTime().ToString("g")</p>
-
-    @if (!string.IsNullOrEmpty(_statusMessage))
+    @if (_isLoading)
     {
-        <p>@_statusMessage</p>
+        <LoadingState Message="Checking authentication..." />
     }
-    @if (!string.IsNullOrEmpty(_errorMessage))
+    else if (!AuthService.IsAuthenticated || AuthService.CurrentUser is null)
     {
-        <p class="text-danger" role="alert">@_errorMessage</p>
+        <p>You're not signed in.</p>
+        <p><a href="/login">Login</a> &nbsp;|&nbsp; <a href="/register">Register</a></p>
     }
+    else
+    {
+        var user = AuthService.CurrentUser;
 
-    <button class="btn btn-secondary" @onclick="RefreshProfileAsync" disabled="@_isBusy">
-        @(_isBusy ? "Working..." : "Refresh profile (authenticated request)")
-    </button>
+        <div class="sai-metric-grid mb-3">
+            <MetricCard Label="Email" Value="@user.Email" />
+            <MetricCard Label="Status" Value="@(user.IsActive ? "Active" : "Inactive")" />
+            <MetricCard Label="@(user.Roles.Count == 1 ? "Role" : "Roles")" Value="@string.Join(", ", user.Roles)" />
+            <MetricCard Label="Created" Value="@user.CreatedAt.ToLocalTime().ToString("d MMM yyyy")" />
+        </div>
 
-    <button class="btn btn-outline-danger" @onclick="LogoutAsync" disabled="@_isBusy">
-        Logout
-    </button>
-}
+        @if (!string.IsNullOrEmpty(_statusMessage))
+        {
+            <p>@_statusMessage</p>
+        }
+        @if (!string.IsNullOrEmpty(_errorMessage))
+        {
+            <p class="text-danger" role="alert">@_errorMessage</p>
+        }
+
+        <button class="btn btn-secondary w-100 mb-2" @onclick="RefreshProfileAsync" disabled="@_isBusy">
+            @(_isBusy ? "Working..." : "Refresh profile")
+        </button>
+
+        <button class="btn btn-outline-danger w-100" @onclick="LogoutAsync" disabled="@_isBusy">
+            Logout
+        </button>
+    }
+</div>
 
 @code {
     private bool _isLoading = true;

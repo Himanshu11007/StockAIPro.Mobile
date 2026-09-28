@@ -1,0 +1,9 @@
+<div class="sai-metric">
+    <div class="sai-metric-label">@Label</div>
+    <div class="sai-metric-value">@Value</div>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public string Label { get; set; } = "";
+    [Parameter, EditorRequired] public string Value { get; set; } = "";
+}

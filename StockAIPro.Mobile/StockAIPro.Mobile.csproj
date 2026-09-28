@@ -29,7 +29,7 @@
         <MauiXamlInflator>SourceGen</MauiXamlInflator>
 
         <!-- Display name -->
-        <ApplicationTitle>StockAIPro.Mobile</ApplicationTitle>
+        <ApplicationTitle>StockAI Pro</ApplicationTitle>
 
         <!-- App Identifier -->
         <ApplicationId>com.companyname.stockaipro.mobile</ApplicationId>

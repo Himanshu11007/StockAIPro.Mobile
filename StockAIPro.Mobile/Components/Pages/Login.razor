@@ -4,42 +4,44 @@
 @inject NavigationManager Navigation
 @implements IDisposable
 
-<h1>Sign in</h1>
+<div class="sai-card">
+    <div class="sai-card-title">Sign in</div>
 
-@if (AuthService.IsAuthenticated)
-{
-    <p>You're already signed in as <strong>@AuthService.CurrentUser?.Email</strong>.</p>
-    <p><a href="/account">Go to Account</a></p>
-}
-else
-{
-    <EditForm Model="_form" OnValidSubmit="SubmitAsync">
-        <DataAnnotationsValidator />
+    @if (AuthService.IsAuthenticated)
+    {
+        <p>You're already signed in as <strong>@AuthService.CurrentUser?.Email</strong>.</p>
+        <p><a href="/account">Go to Account</a></p>
+    }
+    else
+    {
+        <EditForm Model="_form" OnValidSubmit="SubmitAsync">
+            <DataAnnotationsValidator />
 
-        <div class="mb-3">
-            <label for="email">Email</label>
-            <InputText id="email" class="form-control" @bind-Value="_form.Email" />
-        </div>
+            <div class="mb-3">
+                <label for="email">Email</label>
+                <InputText id="email" class="form-control" @bind-Value="_form.Email" />
+            </div>
 
-        <div class="mb-3">
-            <label for="password">Password</label>
-            <InputText id="password" type="password" class="form-control" @bind-Value="_form.Password" />
-        </div>
+            <div class="mb-3">
+                <label for="password">Password</label>
+                <InputText id="password" type="password" class="form-control" @bind-Value="_form.Password" />
+            </div>
 
-        @if (!string.IsNullOrEmpty(_errorMessage))
-        {
-            <p class="text-danger" role="alert">@_errorMessage</p>
-        }
+            @if (!string.IsNullOrEmpty(_errorMessage))
+            {
+                <p class="text-danger" role="alert">@_errorMessage</p>
+            }
 
-        <button type="submit" class="btn btn-primary" disabled="@_isSubmitting">
-            @(_isSubmitting ? "Signing in..." : "Login")
-        </button>
-    </EditForm>
+            <button type="submit" class="btn btn-primary w-100" disabled="@_isSubmitting">
+                @(_isSubmitting ? "Signing in..." : "Login")
+            </button>
+        </EditForm>
 
-    <p class="mt-3">
-        Don't have an account? <a href="/register">Register</a>
-    </p>
-}
+        <p class="mt-3">
+            Don't have an account? <a href="/register">Register</a>
+        </p>
+    }
+</div>
 
 @code {
     private readonly LoginForm _form = new();
