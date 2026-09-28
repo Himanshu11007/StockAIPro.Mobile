@@ -38,6 +38,13 @@ a, .btn-link {
     text-decoration: none;
 }
 
+/* Bootstrap's default .text-muted (#6c757d, itself !important) has poor
+   contrast against our dark background - confirmed hard to read on-device
+   (the "(SYMBOL)" subtitle next to a stock name on Analyse/Top Picks). */
+.text-muted {
+    color: var(--sai-text-muted) !important;
+}
+
 h1, h2, h3, h4, h5, h6 {
     color: var(--sai-text);
 }
