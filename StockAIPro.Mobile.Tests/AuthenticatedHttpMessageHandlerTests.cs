@@ -170,6 +170,78 @@ public class AuthenticatedHttpMessageHandlerTests
     }
 
     [Fact]
+    public async Task Account_switch_between_401_and_acquiring_the_refresh_lock_never_replays_the_old_request()
+    {
+        // Reproduces the exact race described in the corrective-hardening
+        // task: User A's request 401s and captures User A's session
+        // identity; before this request can acquire the refresh lock, User
+        // A logs out AND User B logs in (a full account switch, not just a
+        // logout) - the old request must never be retried using User B's
+        // credentials, and User B's session must be left completely
+        // untouched.
+        var tokenStore = new InMemoryTokenStore("A-access", "A-refresh");
+        tokenStore.OnGetSessionId = callIndex =>
+        {
+            // callIndex 1 = the read taken when the request is first sent
+            // (before the 401). callIndex 2 = the re-read taken after
+            // acquiring RefreshLock. Simulate the account switch landing
+            // exactly in between, which is what the race depends on.
+            if (callIndex == 2)
+            {
+                tokenStore.ClearAsync().GetAwaiter().GetResult();
+                tokenStore.SaveTokensAsync("B-access", "B-refresh", isNewSession: true).GetAwaiter().GetResult();
+            }
+        };
+        var api = new FakeAuthApiClient { RefreshResult = () => Canned.Tokens("A-access-2", "A-refresh-2") };
+        var inner = new RecordingHandler(_ => new HttpResponseMessage(HttpStatusCode.Unauthorized));
+        using var client = BuildClient(tokenStore, api, inner);
+
+        var response = await client.GetAsync("/whoami");
+
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+        Assert.Equal(0, api.RefreshCallCount); // never attempted to refresh User A's stale session
+        Assert.Single(inner.Requests); // never retried against User B's session
+        // User B's freshly-established session must be completely untouched
+        // by User A's stale request - neither refreshed nor cleared.
+        Assert.Equal("B-access", await tokenStore.GetAccessTokenAsync());
+        Assert.Equal("B-refresh", await tokenStore.GetRefreshTokenAsync());
+    }
+
+    [Fact]
+    public async Task Account_switch_while_refresh_is_in_flight_does_not_overwrite_the_new_session()
+    {
+        // Same race, but the account switch happens WHILE the old request's
+        // own refresh call is in flight (rather than before it starts) -
+        // covers the second session-identity re-check, taken after the
+        // network round-trip completes.
+        var tokenStore = new InMemoryTokenStore("A-access", "A-refresh");
+        var api = new FakeAuthApiClient
+        {
+            RefreshResult = () =>
+            {
+                // The refresh technically succeeds server-side for User A,
+                // but User B has since logged in locally while the call was
+                // in flight.
+                tokenStore.ClearAsync().GetAwaiter().GetResult();
+                tokenStore.SaveTokensAsync("B-access", "B-refresh", isNewSession: true).GetAwaiter().GetResult();
+                return Canned.Tokens("A-access-2", "A-refresh-2");
+            },
+        };
+        var inner = new RecordingHandler(_ => new HttpResponseMessage(HttpStatusCode.Unauthorized));
+        using var client = BuildClient(tokenStore, api, inner);
+
+        var response = await client.GetAsync("/whoami");
+
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+        Assert.Equal(1, api.RefreshCallCount);
+        Assert.Single(inner.Requests); // never retried against User B's session
+        // User A's refreshed tokens must never be saved over User B's
+        // now-active session.
+        Assert.Equal("B-access", await tokenStore.GetAccessTokenAsync());
+        Assert.Equal("B-refresh", await tokenStore.GetRefreshTokenAsync());
+    }
+
+    [Fact]
     public async Task No_refresh_token_stored_surfaces_401_without_attempting_refresh()
     {
         var tokenStore = new InMemoryTokenStore("old-access", refreshToken: null!);
