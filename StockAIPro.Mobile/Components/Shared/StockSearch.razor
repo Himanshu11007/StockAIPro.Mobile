@@ -1,7 +1,15 @@
 @* Reusable stock search box backed by IStockApiClient - the authoritative
    stock master. Never maintains its own list of symbols; every keystroke
    (debounced) re-queries the backend. Used by both the Analyse and
-   Watchlist "add stock" flows so the two never diverge in behavior. *@
+   Watchlist "add stock" flows so the two never diverge in behavior.
+
+   Stale-response protection: searches are coordinated through
+   DebouncedSearchCoordinator (StockAIPro.Mobile.Core), which cancels an
+   older pending/in-flight search when a newer one starts and only ever
+   delivers the outcome of the most recently started search - so a slow
+   response to an earlier query (e.g. "TATA") can never overwrite the
+   results of a later one (e.g. "TATAMOTORS") that happened to return
+   first. See that class's own tests for the coordination logic itself. *@
 @inject IStockApiClient StockApiClient
 @implements IDisposable
 
@@ -17,7 +25,7 @@
 }
 else if (_error is not null)
 {
-    <ErrorState Title="Search failed" Message="@_error" OnRetry="() => SearchAsync(_query)" />
+    <ErrorState Title="Search failed" Message="@_error" OnRetry="RetryAsync" />
 }
 else if (_hasSearched && _results is { Count: 0 })
 {
@@ -42,79 +50,80 @@ else if (_results is { Count: > 0 })
 @code {
     [Parameter, EditorRequired] public EventCallback<StockSearchResult> OnSelect { get; set; }
 
+    private static readonly TimeSpan DebounceDelay = TimeSpan.FromMilliseconds(350);
+
     private string _query = "";
     private bool _isSearching;
     private bool _hasSearched;
     private string? _error;
     private List<StockSearchResult>? _results;
-    private CancellationTokenSource? _debounceCts;
+
+    private readonly DebouncedSearchCoordinator<List<StockSearchResult>> _coordinator;
+
+    public StockSearch()
+    {
+        _coordinator = new DebouncedSearchCoordinator<List<StockSearchResult>>(
+            (query, ct) => StockApiClient.SearchAsync(query, ct: ct), DebounceDelay);
+    }
 
     private void OnInput(ChangeEventArgs e)
     {
         _query = e.Value?.ToString() ?? "";
 
-        _debounceCts?.Cancel();
-        _debounceCts?.Dispose();
-        _debounceCts = new CancellationTokenSource();
-        _ = DebouncedSearchAsync(_query, _debounceCts.Token);
-    }
-
-    private async Task DebouncedSearchAsync(string query, CancellationToken ct)
-    {
-        try
+        if (string.IsNullOrWhiteSpace(_query))
         {
-            await Task.Delay(350, ct);
-        }
-        catch (TaskCanceledException)
-        {
-            return; // superseded by a newer keystroke
-        }
-
-        if (!ct.IsCancellationRequested)
-            await SearchAsync(query);
-    }
-
-    private async Task SearchAsync(string query)
-    {
-        if (string.IsNullOrWhiteSpace(query))
-        {
+            // Nothing to search for - cancel any pending search rather than
+            // debouncing an empty query, and clear the results immediately.
+            _coordinator.CancelPending();
+            _isSearching = false;
             _results = null;
             _hasSearched = false;
             _error = null;
-            StateHasChanged();
             return;
         }
 
         _isSearching = true;
         _error = null;
+        _coordinator.Start(_query, HandleSuccess, HandleFailure);
+    }
+
+    private Task RetryAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_query))
+            return Task.CompletedTask;
+
+        _isSearching = true;
+        _error = null;
         StateHasChanged();
-        try
-        {
-            _results = await StockApiClient.SearchAsync(query);
-            _hasSearched = true;
-        }
-        catch (ApiException ex)
-        {
-            _error = ex.Message;
-        }
-        finally
-        {
-            _isSearching = false;
-            StateHasChanged();
-        }
+        _coordinator.Start(_query, HandleSuccess, HandleFailure);
+        return Task.CompletedTask;
+    }
+
+    private void HandleSuccess(List<StockSearchResult> results)
+    {
+        _results = results;
+        _hasSearched = true;
+        _isSearching = false;
+        _error = null;
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void HandleFailure(Exception ex)
+    {
+        _error = ex is ApiException apiEx ? apiEx.Message : "Search failed. Please try again.";
+        _isSearching = false;
+        InvokeAsync(StateHasChanged);
     }
 
     private async Task SelectAsync(StockSearchResult stock)
     {
+        _coordinator.CancelPending();
         _query = stock.Symbol;
         _results = null;
         _hasSearched = false;
+        _isSearching = false;
         await OnSelect.InvokeAsync(stock);
     }
 
-    public void Dispose()
-    {
-        _debounceCts?.Cancel();
-        _debounceCts?.Dispose();
-    }
+    public void Dispose() => _coordinator.CancelPending();
 }
