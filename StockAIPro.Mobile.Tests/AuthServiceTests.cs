@@ -131,6 +131,106 @@ public class AuthServiceTests
         Assert.Equal("refresh-1", await tokenStore.GetRefreshTokenAsync());
     }
 
+    [Fact]
+    public async Task TryRestoreSessionAsync_on_server_error_does_not_clear_credentials()
+    {
+        // A 5xx from /auth/me proves nothing about whether the stored
+        // refresh token is valid - only an explicit 401 does.
+        var tokenStore = new InMemoryTokenStore("access-1", "refresh-1");
+        var api = new FakeAuthApiClient
+        {
+            CurrentUserResult = () => throw new ApiException(ApiErrorKind.ServerError, "Internal server error", 500),
+        };
+        var service = new AuthService(api, tokenStore);
+
+        var restored = await service.TryRestoreSessionAsync();
+
+        Assert.False(restored);
+        Assert.False(service.IsAuthenticated);
+        Assert.Equal("access-1", await tokenStore.GetAccessTokenAsync());
+        Assert.Equal("refresh-1", await tokenStore.GetRefreshTokenAsync());
+    }
+
+    [Fact]
+    public async Task TryRestoreSessionAsync_on_forbidden_does_not_clear_credentials()
+    {
+        // 403 means the account/refresh token is valid but lacks some
+        // permission - not that the session itself is invalid.
+        var tokenStore = new InMemoryTokenStore("access-1", "refresh-1");
+        var api = new FakeAuthApiClient
+        {
+            CurrentUserResult = () => throw new ApiException(ApiErrorKind.Forbidden, "Forbidden", 403),
+        };
+        var service = new AuthService(api, tokenStore);
+
+        var restored = await service.TryRestoreSessionAsync();
+
+        Assert.False(restored);
+        Assert.False(service.IsAuthenticated);
+        Assert.Equal("access-1", await tokenStore.GetAccessTokenAsync());
+        Assert.Equal("refresh-1", await tokenStore.GetRefreshTokenAsync());
+    }
+
+    [Fact]
+    public async Task TryRestoreSessionAsync_on_too_many_requests_does_not_clear_credentials()
+    {
+        // Rate-limited, not unauthenticated - retrying later should still
+        // work with the same stored credentials.
+        var tokenStore = new InMemoryTokenStore("access-1", "refresh-1");
+        var api = new FakeAuthApiClient
+        {
+            CurrentUserResult = () => throw new ApiException(ApiErrorKind.TooManyRequests, "Too many requests", 429),
+        };
+        var service = new AuthService(api, tokenStore);
+
+        var restored = await service.TryRestoreSessionAsync();
+
+        Assert.False(restored);
+        Assert.False(service.IsAuthenticated);
+        Assert.Equal("access-1", await tokenStore.GetAccessTokenAsync());
+        Assert.Equal("refresh-1", await tokenStore.GetRefreshTokenAsync());
+    }
+
+    [Fact]
+    public async Task TryRestoreSessionAsync_on_unknown_api_error_does_not_clear_credentials()
+    {
+        // An unrecognized failure kind is exactly the case where guessing
+        // wrong is most costly - default to preserving credentials.
+        var tokenStore = new InMemoryTokenStore("access-1", "refresh-1");
+        var api = new FakeAuthApiClient
+        {
+            CurrentUserResult = () => throw new ApiException(ApiErrorKind.Unknown, "Unexpected error", 599),
+        };
+        var service = new AuthService(api, tokenStore);
+
+        var restored = await service.TryRestoreSessionAsync();
+
+        Assert.False(restored);
+        Assert.False(service.IsAuthenticated);
+        Assert.Equal("access-1", await tokenStore.GetAccessTokenAsync());
+        Assert.Equal("refresh-1", await tokenStore.GetRefreshTokenAsync());
+    }
+
+    [Fact]
+    public async Task TryRestoreSessionAsync_propagates_caller_cancellation_without_clearing_credentials()
+    {
+        // A caller-initiated cancellation (e.g. the app is shutting down or
+        // navigating away) is not a statement about the session's validity
+        // at all - it must propagate to the caller unchanged, and must not
+        // be swallowed or mistaken for a 401.
+        var tokenStore = new InMemoryTokenStore("access-1", "refresh-1");
+        var api = new FakeAuthApiClient();
+        var service = new AuthService(api, tokenStore);
+        using var cts = new CancellationTokenSource();
+        cts.Cancel();
+
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(
+            () => service.TryRestoreSessionAsync(cts.Token));
+
+        Assert.Equal("access-1", await tokenStore.GetAccessTokenAsync());
+        Assert.Equal("refresh-1", await tokenStore.GetRefreshTokenAsync());
+    }
+
     /// <summary>Wraps a FakeAuthApiClient so LogoutAsync always throws,
     /// while delegating everything else - simulates a server-side logout
     /// failure without needing a whole new fake implementation.</summary>

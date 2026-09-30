@@ -41,10 +41,14 @@ public sealed class AuthenticatedHttpMessageHandler : DelegatingHandler
     protected override async Task<HttpResponseMessage> SendAsync(
         HttpRequestMessage request, CancellationToken cancellationToken)
     {
-        var accessTokenUsed = await AttachAccessTokenAsync(request);
-        // Captured at the same time as the access token, before the request
-        // is even sent - see the session-identity check below for why.
-        var sessionIdUsed = await _tokenStore.GetSessionIdAsync();
+        // Captured as a single atomic snapshot, not as separate
+        // GetAccessTokenAsync()/GetSessionIdAsync() calls - two independent
+        // reads leave a gap between them in which a concurrent logout
+        // and/or login could complete, producing a torn pair (e.g. User A's
+        // access token alongside User B's session id) that belongs to no
+        // session that ever actually existed. See ITokenStore.GetSnapshotAsync.
+        var snapshotUsed = await _tokenStore.GetSnapshotAsync();
+        AttachAccessToken(request, snapshotUsed.AccessToken);
 
         var response = await base.SendAsync(request, cancellationToken);
 
@@ -63,8 +67,7 @@ public sealed class AuthenticatedHttpMessageHandler : DelegatingHandler
             return response;
         }
 
-        var refreshTokenAtFailure = await _tokenStore.GetRefreshTokenAsync();
-        if (string.IsNullOrEmpty(refreshTokenAtFailure))
+        if (string.IsNullOrEmpty(snapshotUsed.RefreshToken))
             return response; // nothing to refresh with - surface the 401 as-is
 
         response.Dispose();
@@ -72,46 +75,48 @@ public sealed class AuthenticatedHttpMessageHandler : DelegatingHandler
         await RefreshLock.WaitAsync(cancellationToken);
         try
         {
-            // Session-identity guard: re-read which session is active NOW
-            // that we hold the lock. If it differs from the session this
-            // request was originally sent under, the account/session has
-            // changed since this request failed - a logout, a logout
-            // followed by a login (same or different account), all bump
-            // the session id (see ITokenStore.GetSessionIdAsync). This
-            // request must never be retried against whatever credentials
-            // happen to be active now: without this check, the access-token
-            // comparison just below would see a "changed" access token and
-            // wrongly conclude "another request already refreshed MY
-            // session," when what actually happened is a completely
-            // different session is now logged in.
-            var currentSessionId = await _tokenStore.GetSessionIdAsync();
-            if (currentSessionId != sessionIdUsed)
+            // Re-snapshot now that we hold the lock, in one atomic read.
+            var currentSnapshot = await _tokenStore.GetSnapshotAsync();
+
+            // Session-identity guard: if the active session differs from
+            // the one this request was originally sent under, the
+            // account/session has changed since this request failed - a
+            // logout, or a logout followed by a login (same or different
+            // account), all bump the session id (see
+            // ITokenStore.GetSessionIdAsync). This request must never be
+            // retried against whatever credentials happen to be active
+            // now: without this check, the access-token comparison just
+            // below could see a "changed" access token and wrongly
+            // conclude "another request already refreshed MY session,"
+            // when what actually happened is a completely different
+            // session is now logged in.
+            if (currentSnapshot.SessionId != snapshotUsed.SessionId)
                 return UnauthorizedResponse(request, "Session changed - not retrying under a different session");
 
             // Another request may have already refreshed while we waited
             // for the lock - if the stored access token changed since we
             // sent our request (and, per the check above, it's still the
             // same session), use it directly instead of refreshing again.
-            var currentAccessToken = await _tokenStore.GetAccessTokenAsync();
-            string? newAccessToken = currentAccessToken != accessTokenUsed ? currentAccessToken : null;
+            string? newAccessToken = currentSnapshot.AccessToken != snapshotUsed.AccessToken
+                ? currentSnapshot.AccessToken
+                : null;
 
             if (newAccessToken is null)
             {
-                // Re-read the refresh token now that we actually hold the
-                // lock. It may have been rotated by a request that
-                // refreshed while we waited, or cleared entirely by a
+                // currentSnapshot's refresh token was already re-read under
+                // the lock above. It may have been rotated by a request
+                // that refreshed while we waited, or cleared entirely by a
                 // concurrent logout. Refreshing with the token captured
                 // before the failed request would risk reusing a token the
                 // rest of the app no longer considers valid (e.g. resuming
                 // a session the user just logged out of).
-                var refreshTokenNow = await _tokenStore.GetRefreshTokenAsync();
-                if (string.IsNullOrEmpty(refreshTokenNow) || refreshTokenNow != refreshTokenAtFailure)
+                if (string.IsNullOrEmpty(currentSnapshot.RefreshToken) || currentSnapshot.RefreshToken != snapshotUsed.RefreshToken)
                     return UnauthorizedResponse(request, "Session ended before refresh could run");
 
                 TokenResponse tokens;
                 try
                 {
-                    tokens = await _authApiClient.RefreshAsync(refreshTokenNow, cancellationToken);
+                    tokens = await _authApiClient.RefreshAsync(currentSnapshot.RefreshToken, cancellationToken);
                 }
                 catch (ApiException ex) when (ex.Kind == ApiErrorKind.Unauthorized)
                 {
@@ -136,9 +141,8 @@ public sealed class AuthenticatedHttpMessageHandler : DelegatingHandler
                 // resurrecting a session the user already ended, or - worse
                 // - saving User A's refreshed tokens on top of User B's
                 // now-active session.
-                var refreshTokenAfterCall = await _tokenStore.GetRefreshTokenAsync();
-                var sessionIdAfterCall = await _tokenStore.GetSessionIdAsync();
-                if (refreshTokenAfterCall != refreshTokenNow || sessionIdAfterCall != sessionIdUsed)
+                var snapshotAfterCall = await _tokenStore.GetSnapshotAsync();
+                if (snapshotAfterCall.RefreshToken != currentSnapshot.RefreshToken || snapshotAfterCall.SessionId != snapshotUsed.SessionId)
                     return UnauthorizedResponse(request, "Session ended during refresh");
 
                 await _tokenStore.SaveTokensAsync(tokens.AccessToken, tokens.RefreshToken);
@@ -168,12 +172,10 @@ public sealed class AuthenticatedHttpMessageHandler : DelegatingHandler
     private static HttpResponseMessage UnauthorizedResponse(HttpRequestMessage request, string reason) =>
         new(HttpStatusCode.Unauthorized) { RequestMessage = request, ReasonPhrase = reason };
 
-    private async Task<string?> AttachAccessTokenAsync(HttpRequestMessage request)
+    private static void AttachAccessToken(HttpRequestMessage request, string? accessToken)
     {
-        var accessToken = await _tokenStore.GetAccessTokenAsync();
         if (!string.IsNullOrEmpty(accessToken))
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-        return accessToken;
     }
 
     /// <summary>

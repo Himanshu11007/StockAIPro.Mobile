@@ -54,6 +54,7 @@ public sealed class FakeAuthApiClient : IAuthApiClient
     public Task<UserProfileResponse> GetCurrentUserAsync(CancellationToken ct = default)
     {
         GetCurrentUserCallCount++;
+        ct.ThrowIfCancellationRequested();
         return Task.FromResult(CurrentUserResult());
     }
 }

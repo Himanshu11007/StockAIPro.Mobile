@@ -120,12 +120,13 @@ public class AuthenticatedHttpMessageHandlerTests
     public async Task Logout_between_401_and_acquiring_the_refresh_lock_does_not_use_the_stale_refresh_token()
     {
         var tokenStore = new InMemoryTokenStore("old-access", "refresh-token");
-        tokenStore.OnGetRefreshToken = callIndex =>
+        tokenStore.OnGetSnapshot = callIndex =>
         {
-            // callIndex 1 = the read that happens right after the 401,
-            // before the lock is acquired. callIndex 2 = the re-read taken
-            // after acquiring RefreshLock. Simulate a logout landing in
-            // between, exactly the ordering the race depends on.
+            // callIndex 1 = the atomic snapshot taken right before the
+            // request is sent. callIndex 2 = the re-snapshot taken after
+            // acquiring RefreshLock, once the 401 comes back. Simulate a
+            // logout landing in between, exactly the ordering the race
+            // depends on.
             if (callIndex == 2)
                 tokenStore.ClearAsync().GetAwaiter().GetResult();
         };
@@ -172,24 +173,29 @@ public class AuthenticatedHttpMessageHandlerTests
     [Fact]
     public async Task Account_switch_between_401_and_acquiring_the_refresh_lock_never_replays_the_old_request()
     {
-        // Reproduces the exact race described in the corrective-hardening
-        // task: User A's request 401s and captures User A's session
-        // identity; before this request can acquire the refresh lock, User
-        // A logs out AND User B logs in (a full account switch, not just a
-        // logout) - the old request must never be retried using User B's
-        // credentials, and User B's session must be left completely
-        // untouched.
+        // Reproduces the exact race this handler's atomic-snapshot design
+        // exists to close: User A's request captures an atomic snapshot of
+        // User A's session and 401s; before this request can acquire the
+        // refresh lock, User A logs out AND User B logs in (a full account
+        // switch, not just a logout) - the old request must never retry
+        // using User B's credentials, must never call refresh on User A's
+        // behalf, must never reach the backend a second time, and User B's
+        // session (access token, refresh token, and session id, all three)
+        // must be left byte-for-byte untouched.
         var tokenStore = new InMemoryTokenStore("A-access", "A-refresh");
-        tokenStore.OnGetSessionId = callIndex =>
+        string? bSessionIdAfterSwitch = null;
+        tokenStore.OnGetSnapshot = callIndex =>
         {
-            // callIndex 1 = the read taken when the request is first sent
-            // (before the 401). callIndex 2 = the re-read taken after
-            // acquiring RefreshLock. Simulate the account switch landing
-            // exactly in between, which is what the race depends on.
+            // callIndex 1 = the atomic snapshot taken when the request is
+            // first sent (before the 401). callIndex 2 = the re-snapshot
+            // taken after acquiring RefreshLock. Simulate the account
+            // switch landing exactly in between, which is what the race
+            // depends on.
             if (callIndex == 2)
             {
                 tokenStore.ClearAsync().GetAwaiter().GetResult();
                 tokenStore.SaveTokensAsync("B-access", "B-refresh", isNewSession: true).GetAwaiter().GetResult();
+                bSessionIdAfterSwitch = tokenStore.GetSessionIdAsync().GetAwaiter().GetResult();
             }
         };
         var api = new FakeAuthApiClient { RefreshResult = () => Canned.Tokens("A-access-2", "A-refresh-2") };
@@ -200,11 +206,14 @@ public class AuthenticatedHttpMessageHandlerTests
 
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
         Assert.Equal(0, api.RefreshCallCount); // never attempted to refresh User A's stale session
-        Assert.Single(inner.Requests); // never retried against User B's session
+        Assert.Single(inner.Requests); // never retried/replayed against User B's session
         // User B's freshly-established session must be completely untouched
-        // by User A's stale request - neither refreshed nor cleared.
+        // by User A's stale request - access token, refresh token, and
+        // session id all unchanged from immediately after the switch.
         Assert.Equal("B-access", await tokenStore.GetAccessTokenAsync());
         Assert.Equal("B-refresh", await tokenStore.GetRefreshTokenAsync());
+        Assert.NotNull(bSessionIdAfterSwitch);
+        Assert.Equal(bSessionIdAfterSwitch, await tokenStore.GetSessionIdAsync());
     }
 
     [Fact]

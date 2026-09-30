@@ -30,6 +30,22 @@ public interface ITokenStore
     /// </summary>
     Task<string?> GetSessionIdAsync();
 
+    /// <summary>
+    /// Atomically captures the access token, refresh token, and session id
+    /// as one internally-consistent <see cref="TokenSessionSnapshot"/> -
+    /// guaranteed to never be "torn" by a concurrent
+    /// <see cref="SaveTokensAsync"/> or <see cref="ClearAsync"/> call
+    /// landing partway through the read (unlike calling
+    /// <see cref="GetAccessTokenAsync"/>, <see cref="GetRefreshTokenAsync"/>,
+    /// and <see cref="GetSessionIdAsync"/> separately, which leaves a
+    /// window between each call for a logout and/or login to complete).
+    /// AuthenticatedHttpMessageHandler uses this exclusively for its own
+    /// reads for exactly this reason - a request must capture (and later
+    /// re-verify) a single consistent view of "which session am I
+    /// operating under," never a mix of two different sessions' fields.
+    /// </summary>
+    Task<TokenSessionSnapshot> GetSnapshotAsync();
+
     /// <summary>Persists a new access/refresh token pair. Pass
     /// <paramref name="isNewSession"/> = true only when this call
     /// establishes a brand new authenticated session (login/register);

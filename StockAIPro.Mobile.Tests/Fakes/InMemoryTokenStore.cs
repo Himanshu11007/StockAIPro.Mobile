@@ -10,27 +10,23 @@ public sealed class InMemoryTokenStore : ITokenStore
     private string? _accessToken;
     private string? _refreshToken;
     private string? _sessionId;
-    private int _getRefreshTokenCallCount;
-    private int _getSessionIdCallCount;
+    private int _getSnapshotCallCount;
     private int _sessionCounter;
 
     public int ClearCallCount { get; private set; }
     public int SaveCallCount { get; private set; }
 
     /// <summary>Invoked (with the 1-based call index) just before
-    /// GetRefreshTokenAsync returns - lets tests simulate a concurrent
-    /// logout/rotation landing between two specific reads of the refresh
-    /// token (e.g. the read before acquiring the refresh lock vs. the
-    /// re-read after acquiring it).</summary>
-    public Action<int>? OnGetRefreshToken { get; set; }
-
-    /// <summary>Invoked (with the 1-based call index) just before
-    /// GetSessionIdAsync returns - lets tests simulate an account switch
-    /// (logout, or logout-then-login as a different/same account) landing
-    /// between two specific reads of the session id (e.g. the read taken
-    /// when a request is first sent vs. the re-read after acquiring the
-    /// refresh lock).</summary>
-    public Action<int>? OnGetSessionId { get; set; }
+    /// GetSnapshotAsync returns - lets tests simulate a concurrent logout
+    /// and/or login (account switch or same-account rotation) landing
+    /// between two specific snapshot reads (e.g. the snapshot taken when a
+    /// request is first sent vs. the re-read after acquiring the refresh
+    /// lock). Because the fake mutates its fields before returning the
+    /// snapshot captured from them, a hook that calls ClearAsync/
+    /// SaveTokensAsync here reproduces "the switch fully completed before
+    /// this atomic read", matching what a real lock-protected store would
+    /// also observe.</summary>
+    public Action<int>? OnGetSnapshot { get; set; }
 
     public InMemoryTokenStore() { }
 
@@ -43,18 +39,15 @@ public sealed class InMemoryTokenStore : ITokenStore
 
     public Task<string?> GetAccessTokenAsync() => Task.FromResult(_accessToken);
 
-    public Task<string?> GetRefreshTokenAsync()
-    {
-        var callIndex = ++_getRefreshTokenCallCount;
-        OnGetRefreshToken?.Invoke(callIndex);
-        return Task.FromResult(_refreshToken);
-    }
+    public Task<string?> GetRefreshTokenAsync() => Task.FromResult(_refreshToken);
 
-    public Task<string?> GetSessionIdAsync()
+    public Task<string?> GetSessionIdAsync() => Task.FromResult(_sessionId);
+
+    public Task<TokenSessionSnapshot> GetSnapshotAsync()
     {
-        var callIndex = ++_getSessionIdCallCount;
-        OnGetSessionId?.Invoke(callIndex);
-        return Task.FromResult(_sessionId);
+        var callIndex = ++_getSnapshotCallCount;
+        OnGetSnapshot?.Invoke(callIndex);
+        return Task.FromResult(new TokenSessionSnapshot(_accessToken, _refreshToken, _sessionId));
     }
 
     public Task SaveTokensAsync(string accessToken, string refreshToken, bool isNewSession = false)
