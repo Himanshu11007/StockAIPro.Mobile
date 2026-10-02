@@ -26,3 +26,12 @@ public interface IAppleSignInService
 /// </summary>
 public sealed class AppleSignInNotConfiguredException() : Exception(
     "Sign in with Apple isn't set up yet for this app. See docs/AUTHENTICATION.md \"Apple setup\".");
+
+/// <summary>
+/// Thrown when the native Sign in with Apple flow itself fails for a
+/// reason other than the user cancelling (cancellation returns null
+/// instead - see IAppleSignInService.SignInAsync) or "not configured". The
+/// message is always safe to show directly to the user.
+/// </summary>
+public sealed class AppleSignInFailedException(string message, Exception? inner = null)
+    : Exception(message, inner);

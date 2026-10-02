@@ -252,7 +252,11 @@
                 _statusMessage = "Google account linked.";
             }
         }
-        catch (GoogleSignInNotConfiguredException ex)
+        catch (GoogleSignInNotConfiguredException)
+        {
+            _errorMessage = "Google sign-in is not configured on this device.";
+        }
+        catch (GoogleSignInFailedException ex)
         {
             _errorMessage = ex.Message;
         }
@@ -280,7 +284,11 @@
                 _statusMessage = "Apple account linked.";
             }
         }
-        catch (AppleSignInNotConfiguredException ex)
+        catch (AppleSignInNotConfiguredException)
+        {
+            _errorMessage = "Apple sign-in is currently unavailable.";
+        }
+        catch (AppleSignInFailedException ex)
         {
             _errorMessage = ex.Message;
         }

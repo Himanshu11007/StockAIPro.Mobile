@@ -78,7 +78,10 @@
         }
         catch (ApiException ex) when (ex.Kind == ApiErrorKind.TooManyRequests)
         {
-            _errorMessage = "Please wait before requesting another code.";
+            // The backend's own message distinguishes "resend too soon" from
+            // "too many codes for this destination/network" - both are
+            // already user-safe, generic text (see auth/otp_service.py).
+            _errorMessage = ex.Message;
         }
         catch (ApiException ex) when (ex.Kind == ApiErrorKind.NetworkUnavailable)
         {
@@ -111,7 +114,11 @@
         }
         catch (ApiException ex) when (ex.Kind == ApiErrorKind.Unauthorized)
         {
-            _errorMessage = "That code is invalid, expired, or has already been used.";
+            // The backend already distinguishes "expired" / "already used" /
+            // "invalid" / "too many attempts" with user-safe wording (see
+            // auth/otp_service.py) - surface it directly rather than
+            // collapsing all four into one vaguer message.
+            _errorMessage = ex.Message;
         }
         catch (ApiException ex) when (ex.Kind == ApiErrorKind.NetworkUnavailable)
         {

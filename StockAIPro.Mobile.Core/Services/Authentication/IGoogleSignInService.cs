@@ -26,3 +26,14 @@ public interface IGoogleSignInService
 /// </summary>
 public sealed class GoogleSignInNotConfiguredException() : Exception(
     "Google Sign-In isn't set up yet for this app. See docs/AUTHENTICATION.md \"Google setup\".");
+
+/// <summary>
+/// Thrown when the native Google Sign-In flow itself fails for a reason
+/// other than the user cancelling (cancellation returns null instead - see
+/// IGoogleSignInService.SignInAsync) or "not configured" - e.g. no Google
+/// account on the device, Play Services unavailable, or a transient
+/// Credential Manager error. The message is always safe to show directly
+/// to the user (never a raw provider/Java exception message).
+/// </summary>
+public sealed class GoogleSignInFailedException(string message, Exception? inner = null)
+    : Exception(message, inner);

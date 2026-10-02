@@ -107,12 +107,16 @@
         {
             var idToken = await GoogleSignIn.SignInAsync();
             if (idToken is null)
-                return; // user cancelled the native sign-in flow
+                { _errorMessage = "Sign-in was cancelled."; return; }
 
             await AuthService.LoginWithGoogleAsync(idToken);
             await NavigateAfterLoginAsync();
         }
-        catch (GoogleSignInNotConfiguredException ex)
+        catch (GoogleSignInNotConfiguredException)
+        {
+            _errorMessage = "Google sign-in is not configured on this device.";
+        }
+        catch (GoogleSignInFailedException ex)
         {
             _errorMessage = ex.Message;
         }
@@ -138,12 +142,16 @@
         {
             var identityToken = await AppleSignIn.SignInAsync();
             if (identityToken is null)
-                return; // user cancelled the native sign-in flow
+                { _errorMessage = "Sign-in was cancelled."; return; }
 
             await AuthService.LoginWithAppleAsync(identityToken);
             await NavigateAfterLoginAsync();
         }
-        catch (AppleSignInNotConfiguredException ex)
+        catch (AppleSignInNotConfiguredException)
+        {
+            _errorMessage = "Apple sign-in is currently unavailable.";
+        }
+        catch (AppleSignInFailedException ex)
         {
             _errorMessage = ex.Message;
         }

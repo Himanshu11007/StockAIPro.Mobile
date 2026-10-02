@@ -73,6 +73,32 @@
         <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.0" />
     </ItemGroup>
 
+    <!-- Google Sign-In on Android: Credential Manager is Google's current
+         supported mechanism (the older GoogleSignInClient/GoogleSignInOptions
+         API is deprecated, and custom-URI-scheme OAuth browser redirects
+         were blocked by Google for Android apps in 2022 - see
+         docs/AUTHENTICATION.md "Google setup" for citations). These are the
+         official .NET for Android bindings (net10.0-android-targeting,
+         actively published) for androidx.credentials and Google's identity
+         client libraries - not an abandoned/unofficial package. PlayServicesAuth
+         is included for devices below Android 14, where Credential Manager
+         isn't a system component and needs the Play Services-backed
+         implementation. -->
+    <ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">
+        <PackageReference Include="Xamarin.AndroidX.Credentials" Version="1.6.0.1" />
+        <PackageReference Include="Xamarin.AndroidX.Credentials.PlayServicesAuth" Version="1.6.0.2" />
+        <PackageReference Include="Xamarin.GoogleAndroid.Libraries.Identity.GoogleId" Version="1.1.0.13" />
+        <!-- Pinned explicitly: Credential Manager's dependency chain pulls
+             in a newer Xamarin.AndroidX.Fragment than some other existing
+             AndroidX dependency's Fragment.Ktx expects, which otherwise
+             resolves to two incompatible versions and fails D8/R8 dexing
+             with a duplicate-class error. Pinning both to the same 1.9.0
+             release keeps exactly one copy of Fragment's classes in the
+             final APK. -->
+        <PackageReference Include="Xamarin.AndroidX.Fragment" Version="1.9.0" />
+        <PackageReference Include="Xamarin.AndroidX.Fragment.Ktx" Version="1.9.0" />
+    </ItemGroup>
+
     <ItemGroup>
         <!-- Platform-independent API/auth layer - see that project's own
              comment for why it's separate. -->
