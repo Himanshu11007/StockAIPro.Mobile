@@ -29,4 +29,37 @@ public interface IAuthService
     /// credentials, invalid/expired refresh token, or backend unreachable -
     /// callers should not treat "false" as necessarily an error to show).</summary>
     Task<bool> TryRestoreSessionAsync(CancellationToken ct = default);
+
+    // ── Phase 8: Google / Apple / OTP sign-in ───────────────────────────────
+    // Each establishes a brand new session exactly like LoginAsync/
+    // RegisterAsync (isNewSession: true) - see AuthService.EstablishSessionAsync.
+
+    Task LoginWithGoogleAsync(string idToken, CancellationToken ct = default);
+    Task LoginWithAppleAsync(string identityToken, CancellationToken ct = default);
+    Task RequestOtpAsync(string destination, CancellationToken ct = default);
+    Task VerifyOtpAsync(string destination, string code, CancellationToken ct = default);
+
+    // ── Phase 8: account linking ─────────────────────────────────────────────
+
+    Task<LinkedIdentityResponse> LinkGoogleAsync(string idToken, CancellationToken ct = default);
+    Task<LinkedIdentityResponse> LinkAppleAsync(string identityToken, CancellationToken ct = default);
+    Task<List<LinkedIdentityResponse>> GetLinkedIdentitiesAsync(CancellationToken ct = default);
+    Task UnlinkIdentityAsync(string provider, CancellationToken ct = default);
+
+    // ── Phase 8: device / session management ────────────────────────────────
+
+    Task<string> GetDeviceIdAsync();
+    Task<List<SessionResponse>> GetSessionsAsync(CancellationToken ct = default);
+    Task RevokeSessionAsync(int sessionId, CancellationToken ct = default);
+
+    /// <summary>Sign out all devices (exceptCurrent: false) or every OTHER
+    /// device (exceptCurrent: true). When exceptCurrent is false, this
+    /// device's own session was just revoked too - local credentials are
+    /// cleared and IsAuthenticated flips to false immediately, same as
+    /// LogoutAsync. Returns the number of sessions revoked.</summary>
+    Task<int> SignOutAllDevicesAsync(bool exceptCurrent, CancellationToken ct = default);
+
+    /// <summary>Tells the backend whether this device has a local PIN
+    /// configured - purely informational, never sends the PIN itself.</summary>
+    Task SetPinEnabledAsync(bool enabled, CancellationToken ct = default);
 }

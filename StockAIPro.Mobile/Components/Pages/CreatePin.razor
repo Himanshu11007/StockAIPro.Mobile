@@ -1,0 +1,81 @@
+@page "/pin/create"
+@using StockAIPro.Mobile.Services.Authentication
+@inject IAuthService AuthService
+@inject IPinService PinService
+@inject NavigationManager Navigation
+
+<div class="sai-card">
+    <div class="sai-card-title">Create your PIN</div>
+    <p>Use a 4-digit PIN to quickly unlock StockAI Pro on this device. Your account password, Google, Apple, and OTP sign-in all still work everywhere else - this PIN only unlocks the app on this device.</p>
+
+    <EditForm Model="this" OnValidSubmit="SubmitAsync">
+        <div class="mb-3">
+            <label for="pin">Enter 4-digit PIN</label>
+            <InputText id="pin" class="form-control" @bind-Value="_pin" type="password" inputmode="numeric" maxlength="4" />
+        </div>
+
+        <div class="mb-3">
+            <label for="confirmPin">Confirm PIN</label>
+            <InputText id="confirmPin" class="form-control" @bind-Value="_confirmPin" type="password" inputmode="numeric" maxlength="4" />
+        </div>
+
+        @if (!string.IsNullOrEmpty(_errorMessage))
+        {
+            <p class="text-danger" role="alert">@_errorMessage</p>
+        }
+
+        <button type="submit" class="btn btn-primary w-100 mb-2" disabled="@_isBusy">
+            @(_isBusy ? "Saving..." : "Continue")
+        </button>
+    </EditForm>
+
+    <button class="btn btn-link w-100" @onclick="Skip" disabled="@_isBusy">
+        Skip for now
+    </button>
+</div>
+
+@code {
+    private string _pin = string.Empty;
+    private string _confirmPin = string.Empty;
+    private bool _isBusy;
+    private string? _errorMessage;
+
+    private async Task SubmitAsync()
+    {
+        _errorMessage = null;
+        _isBusy = true;
+        try
+        {
+            // SetPinAsync validates format/match itself; catch only the
+            // ArgumentException it raises on bad input, nothing else -
+            // this call never touches the network.
+            await PinService.SetPinAsync(_pin, _confirmPin);
+
+            // Purely informational on the backend - lets other devices'
+            // session lists show "PIN enabled" for this one. Best-effort:
+            // the PIN is already safely stored locally even if this fails
+            // (e.g. no connectivity right after signing in), so don't block
+            // the user on it.
+            try
+            {
+                await AuthService.SetPinEnabledAsync(true);
+            }
+            catch (Services.Api.ApiException)
+            {
+            }
+
+            Navigation.NavigateTo("/account");
+        }
+        catch (ArgumentException ex)
+        {
+            _errorMessage = ex.Message;
+        }
+        finally
+        {
+            _isBusy = false;
+        }
+    }
+
+    private void Skip() => Navigation.NavigateTo("/account");
+
+}

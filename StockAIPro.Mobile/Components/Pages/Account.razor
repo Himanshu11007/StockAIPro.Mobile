@@ -1,6 +1,11 @@
 @page "/account"
+@using StockAIPro.Mobile.Models.Auth
 @using StockAIPro.Mobile.Services.Api
+@using StockAIPro.Mobile.Services.Authentication
 @inject IAuthService AuthService
+@inject IPinService PinService
+@inject IGoogleSignInService GoogleSignIn
+@inject IAppleSignInService AppleSignIn
 @inject NavigationManager Navigation
 @implements IDisposable
 
@@ -21,7 +26,7 @@
         var user = AuthService.CurrentUser;
 
         <div class="sai-metric-grid mb-3">
-            <MetricCard Label="Email" Value="@user.Email" />
+            <MetricCard Label="Email / Phone" Value="@(user.Email ?? user.Phone ?? "—")" />
             <MetricCard Label="Status" Value="@(user.IsActive ? "Active" : "Inactive")" />
             <MetricCard Label="@(user.Roles.Count == 1 ? "Role" : "Roles")" Value="@string.Join(", ", user.Roles)" />
             <MetricCard Label="Created" Value="@user.CreatedAt.ToLocalTime().ToString("d MMM yyyy")" />
@@ -40,8 +45,51 @@
             @(_isBusy ? "Working..." : "Refresh profile")
         </button>
 
-        <button class="btn btn-outline-danger w-100" @onclick="LogoutAsync" disabled="@_isBusy">
+        <button class="btn btn-outline-danger w-100 mb-4" @onclick="LogoutAsync" disabled="@_isBusy">
             Logout
+        </button>
+
+        <div class="sai-card-title">Security</div>
+
+        @if (_isPinSet)
+        {
+            <p>A PIN is set up for this device.</p>
+            <button class="btn btn-outline-secondary w-100 mb-2" @onclick="RemovePinAsync" disabled="@_isBusy">
+                Remove PIN from this device
+            </button>
+        }
+        else
+        {
+            <p><a href="/pin/create">Set up a PIN</a> for faster unlock on this device.</p>
+        }
+
+        <button class="btn btn-outline-secondary w-100 mb-2" @onclick="SignOutOtherDevicesAsync" disabled="@_isBusy">
+            Sign out all other devices
+        </button>
+        <button class="btn btn-outline-danger w-100 mb-4" @onclick="SignOutAllDevicesAsync" disabled="@_isBusy">
+            Sign out all devices
+        </button>
+
+        <div class="sai-card-title">Linked sign-in methods</div>
+        @if (_identities is { Count: > 0 })
+        {
+            <ul>
+                @foreach (var identity in _identities)
+                {
+                    <li>@identity.Provider @(identity.Email is null ? "" : $"({identity.Email})")</li>
+                }
+            </ul>
+        }
+        else
+        {
+            <p>No Google or Apple account linked.</p>
+        }
+
+        <button class="btn btn-outline-secondary w-100 mb-2" @onclick="LinkGoogleAsync" disabled="@_isBusy">
+            Link Google account
+        </button>
+        <button class="btn btn-outline-secondary w-100" @onclick="LinkAppleAsync" disabled="@_isBusy">
+            Link Apple account
         </button>
     }
 </div>
@@ -49,8 +97,10 @@
 @code {
     private bool _isLoading = true;
     private bool _isBusy;
+    private bool _isPinSet;
     private string? _statusMessage;
     private string? _errorMessage;
+    private List<LinkedIdentityResponse> _identities = [];
 
     protected override async Task OnInitializedAsync()
     {
@@ -63,6 +113,21 @@
             // session is already established (it's a no-op cost either way
             // here since we only reach this branch when not authenticated).
             await AuthService.TryRestoreSessionAsync();
+        }
+
+        _isPinSet = await PinService.IsPinSetAsync();
+
+        if (AuthService.IsAuthenticated)
+        {
+            try
+            {
+                _identities = await AuthService.GetLinkedIdentitiesAsync();
+            }
+            catch (ApiException)
+            {
+                // Non-critical for this page - leave the list empty rather
+                // than blocking the rest of the account page on it.
+            }
         }
 
         _isLoading = false;
@@ -104,6 +169,129 @@
             _isBusy = false;
         }
         Navigation.NavigateTo("/login");
+    }
+
+    private async Task RemovePinAsync()
+    {
+        _isBusy = true;
+        try
+        {
+            await PinService.ClearPinAsync();
+            _isPinSet = false;
+            try
+            {
+                await AuthService.SetPinEnabledAsync(false);
+            }
+            catch (ApiException)
+            {
+                // Best-effort - the PIN is already gone locally either way.
+            }
+            _statusMessage = "PIN removed from this device.";
+        }
+        finally
+        {
+            _isBusy = false;
+        }
+    }
+
+    private async Task SignOutOtherDevicesAsync()
+    {
+        _statusMessage = null;
+        _errorMessage = null;
+        _isBusy = true;
+        try
+        {
+            var count = await AuthService.SignOutAllDevicesAsync(exceptCurrent: true);
+            _statusMessage = $"Signed out {count} other device(s). This device stays signed in.";
+        }
+        catch (ApiException ex)
+        {
+            _errorMessage = ex.Message;
+        }
+        finally
+        {
+            _isBusy = false;
+        }
+    }
+
+    private async Task SignOutAllDevicesAsync()
+    {
+        _errorMessage = null;
+        _isBusy = true;
+        try
+        {
+            // AuthService clears local credentials itself once the server
+            // confirms the revocation (exceptCurrent: false includes this
+            // device) - only navigate away once that has actually happened,
+            // so a failed/offline attempt doesn't strand the UI on /login
+            // while this device's own session is still technically valid.
+            await AuthService.SignOutAllDevicesAsync(exceptCurrent: false);
+            Navigation.NavigateTo("/login");
+        }
+        catch (ApiException ex)
+        {
+            _errorMessage = ex.Message;
+        }
+        finally
+        {
+            _isBusy = false;
+        }
+    }
+
+    private async Task LinkGoogleAsync()
+    {
+        _errorMessage = null;
+        _isBusy = true;
+        try
+        {
+            var idToken = await GoogleSignIn.SignInAsync();
+            if (idToken is not null)
+            {
+                await AuthService.LinkGoogleAsync(idToken);
+                _identities = await AuthService.GetLinkedIdentitiesAsync();
+                _statusMessage = "Google account linked.";
+            }
+        }
+        catch (GoogleSignInNotConfiguredException ex)
+        {
+            _errorMessage = ex.Message;
+        }
+        catch (ApiException ex)
+        {
+            _errorMessage = ex.Message;
+        }
+        finally
+        {
+            _isBusy = false;
+        }
+    }
+
+    private async Task LinkAppleAsync()
+    {
+        _errorMessage = null;
+        _isBusy = true;
+        try
+        {
+            var identityToken = await AppleSignIn.SignInAsync();
+            if (identityToken is not null)
+            {
+                await AuthService.LinkAppleAsync(identityToken);
+                _identities = await AuthService.GetLinkedIdentitiesAsync();
+                _statusMessage = "Apple account linked.";
+            }
+        }
+        catch (AppleSignInNotConfiguredException ex)
+        {
+            _errorMessage = ex.Message;
+        }
+        catch (ApiException ex)
+        {
+            _errorMessage = ex.Message;
+        }
+        finally
+        {
+            _isBusy = false;
+        }
     }
 
     private void OnAuthStateChanged() => InvokeAsync(StateHasChanged);

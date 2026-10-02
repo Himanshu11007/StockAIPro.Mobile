@@ -15,7 +15,7 @@ public class AuthServiceTests
             LoginResult = () => Canned.Tokens("access-1", "refresh-1"),
             CurrentUserResult = () => Canned.Profile("a@example.com"),
         };
-        var service = new AuthService(api, tokenStore);
+        var service = new AuthService(api, tokenStore, new InMemoryDeviceIdentityService());
         var stateChangedCount = 0;
         service.AuthStateChanged += () => stateChangedCount++;
 
@@ -35,7 +35,7 @@ public class AuthServiceTests
     public async Task RegisterAsync_also_establishes_authenticated_state()
     {
         var api = new FakeAuthApiClient { RegisterResult = () => Canned.Tokens("access-r", "refresh-r") };
-        var service = new AuthService(api, new InMemoryTokenStore());
+        var service = new AuthService(api, new InMemoryTokenStore(), new InMemoryDeviceIdentityService());
 
         await service.RegisterAsync("new@example.com", "password1");
 
@@ -53,7 +53,7 @@ public class AuthServiceTests
         // never-logged-in instance).
         var api = new FakeAuthApiClient();
         var failingLogoutApi = new ThrowingLogoutAuthApiClient(api);
-        var service = new AuthService(failingLogoutApi, tokenStore);
+        var service = new AuthService(failingLogoutApi, tokenStore, new InMemoryDeviceIdentityService());
 
         await service.LoginAsync("a@example.com", "password1"); // delegates to the inner fake, succeeds
         Assert.True(service.IsAuthenticated);
@@ -71,7 +71,7 @@ public class AuthServiceTests
     [Fact]
     public async Task TryRestoreSessionAsync_with_no_stored_credentials_returns_false()
     {
-        var service = new AuthService(new FakeAuthApiClient(), new InMemoryTokenStore());
+        var service = new AuthService(new FakeAuthApiClient(), new InMemoryTokenStore(), new InMemoryDeviceIdentityService());
 
         var restored = await service.TryRestoreSessionAsync();
 
@@ -84,7 +84,7 @@ public class AuthServiceTests
     {
         var tokenStore = new InMemoryTokenStore("access-1", "refresh-1");
         var api = new FakeAuthApiClient { CurrentUserResult = () => Canned.Profile("restored@example.com") };
-        var service = new AuthService(api, tokenStore);
+        var service = new AuthService(api, tokenStore, new InMemoryDeviceIdentityService());
 
         var restored = await service.TryRestoreSessionAsync();
 
@@ -101,7 +101,7 @@ public class AuthServiceTests
         {
             CurrentUserResult = () => throw new ApiException(ApiErrorKind.Unauthorized, "Invalid or expired refresh token", 401),
         };
-        var service = new AuthService(api, tokenStore);
+        var service = new AuthService(api, tokenStore, new InMemoryDeviceIdentityService());
 
         var restored = await service.TryRestoreSessionAsync();
 
@@ -121,7 +121,7 @@ public class AuthServiceTests
         {
             CurrentUserResult = () => throw ApiException.NetworkUnavailable(new HttpRequestException("down")),
         };
-        var service = new AuthService(api, tokenStore);
+        var service = new AuthService(api, tokenStore, new InMemoryDeviceIdentityService());
 
         var restored = await service.TryRestoreSessionAsync();
 
@@ -141,7 +141,7 @@ public class AuthServiceTests
         {
             CurrentUserResult = () => throw new ApiException(ApiErrorKind.ServerError, "Internal server error", 500),
         };
-        var service = new AuthService(api, tokenStore);
+        var service = new AuthService(api, tokenStore, new InMemoryDeviceIdentityService());
 
         var restored = await service.TryRestoreSessionAsync();
 
@@ -161,7 +161,7 @@ public class AuthServiceTests
         {
             CurrentUserResult = () => throw new ApiException(ApiErrorKind.Forbidden, "Forbidden", 403),
         };
-        var service = new AuthService(api, tokenStore);
+        var service = new AuthService(api, tokenStore, new InMemoryDeviceIdentityService());
 
         var restored = await service.TryRestoreSessionAsync();
 
@@ -181,7 +181,7 @@ public class AuthServiceTests
         {
             CurrentUserResult = () => throw new ApiException(ApiErrorKind.TooManyRequests, "Too many requests", 429),
         };
-        var service = new AuthService(api, tokenStore);
+        var service = new AuthService(api, tokenStore, new InMemoryDeviceIdentityService());
 
         var restored = await service.TryRestoreSessionAsync();
 
@@ -201,7 +201,7 @@ public class AuthServiceTests
         {
             CurrentUserResult = () => throw new ApiException(ApiErrorKind.Unknown, "Unexpected error", 599),
         };
-        var service = new AuthService(api, tokenStore);
+        var service = new AuthService(api, tokenStore, new InMemoryDeviceIdentityService());
 
         var restored = await service.TryRestoreSessionAsync();
 
@@ -220,7 +220,7 @@ public class AuthServiceTests
         // be swallowed or mistaken for a 401.
         var tokenStore = new InMemoryTokenStore("access-1", "refresh-1");
         var api = new FakeAuthApiClient();
-        var service = new AuthService(api, tokenStore);
+        var service = new AuthService(api, tokenStore, new InMemoryDeviceIdentityService());
         using var cts = new CancellationTokenSource();
         cts.Cancel();
 
@@ -236,11 +236,13 @@ public class AuthServiceTests
     /// failure without needing a whole new fake implementation.</summary>
     private sealed class ThrowingLogoutAuthApiClient(FakeAuthApiClient inner) : Services.Api.IAuthApiClient
     {
-        public Task<Models.Auth.TokenResponse> RegisterAsync(string email, string password, CancellationToken ct = default) =>
-            inner.RegisterAsync(email, password, ct);
+        public Task<Models.Auth.TokenResponse> RegisterAsync(
+            string email, string password, string? deviceId = null, string? deviceName = null, CancellationToken ct = default) =>
+            inner.RegisterAsync(email, password, deviceId, deviceName, ct);
 
-        public Task<Models.Auth.TokenResponse> LoginAsync(string email, string password, CancellationToken ct = default) =>
-            inner.LoginAsync(email, password, ct);
+        public Task<Models.Auth.TokenResponse> LoginAsync(
+            string email, string password, string? deviceId = null, string? deviceName = null, CancellationToken ct = default) =>
+            inner.LoginAsync(email, password, deviceId, deviceName, ct);
 
         public Task<Models.Auth.TokenResponse> RefreshAsync(string refreshToken, CancellationToken ct = default) =>
             inner.RefreshAsync(refreshToken, ct);
@@ -250,5 +252,41 @@ public class AuthServiceTests
 
         public Task<Models.Auth.UserProfileResponse> GetCurrentUserAsync(CancellationToken ct = default) =>
             inner.GetCurrentUserAsync(ct);
+
+        public Task<Models.Auth.TokenResponse> LoginWithGoogleAsync(string idToken, string? deviceId, string? deviceName, CancellationToken ct = default) =>
+            inner.LoginWithGoogleAsync(idToken, deviceId, deviceName, ct);
+
+        public Task<Models.Auth.TokenResponse> LoginWithAppleAsync(string identityToken, string? deviceId, string? deviceName, CancellationToken ct = default) =>
+            inner.LoginWithAppleAsync(identityToken, deviceId, deviceName, ct);
+
+        public Task RequestOtpAsync(string destination, CancellationToken ct = default) =>
+            inner.RequestOtpAsync(destination, ct);
+
+        public Task<Models.Auth.TokenResponse> VerifyOtpAsync(string destination, string code, string? deviceId, string? deviceName, CancellationToken ct = default) =>
+            inner.VerifyOtpAsync(destination, code, deviceId, deviceName, ct);
+
+        public Task<Models.Auth.LinkedIdentityResponse> LinkGoogleAsync(string idToken, CancellationToken ct = default) =>
+            inner.LinkGoogleAsync(idToken, ct);
+
+        public Task<Models.Auth.LinkedIdentityResponse> LinkAppleAsync(string identityToken, CancellationToken ct = default) =>
+            inner.LinkAppleAsync(identityToken, ct);
+
+        public Task<List<Models.Auth.LinkedIdentityResponse>> GetLinkedIdentitiesAsync(CancellationToken ct = default) =>
+            inner.GetLinkedIdentitiesAsync(ct);
+
+        public Task UnlinkIdentityAsync(string provider, CancellationToken ct = default) =>
+            inner.UnlinkIdentityAsync(provider, ct);
+
+        public Task<List<Models.Auth.SessionResponse>> GetSessionsAsync(CancellationToken ct = default) =>
+            inner.GetSessionsAsync(ct);
+
+        public Task RevokeSessionAsync(int sessionId, CancellationToken ct = default) =>
+            inner.RevokeSessionAsync(sessionId, ct);
+
+        public Task<Models.Auth.RevokeAllSessionsResponse> RevokeAllSessionsAsync(bool exceptCurrent, string? currentDeviceId, CancellationToken ct = default) =>
+            inner.RevokeAllSessionsAsync(exceptCurrent, currentDeviceId, ct);
+
+        public Task SetPinEnabledAsync(string deviceId, bool enabled, CancellationToken ct = default) =>
+            inner.SetPinEnabledAsync(deviceId, enabled, ct);
     }
 }

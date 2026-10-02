@@ -1,6 +1,10 @@
 @page "/login"
 @using StockAIPro.Mobile.Services.Api
+@using StockAIPro.Mobile.Services.Authentication
 @inject IAuthService AuthService
+@inject IPinService PinService
+@inject IGoogleSignInService GoogleSignIn
+@inject IAppleSignInService AppleSignIn
 @inject NavigationManager Navigation
 @implements IDisposable
 
@@ -9,11 +13,22 @@
 
     @if (AuthService.IsAuthenticated)
     {
-        <p>You're already signed in as <strong>@AuthService.CurrentUser?.Email</strong>.</p>
+        <p>You're already signed in as <strong>@(AuthService.CurrentUser?.Email ?? AuthService.CurrentUser?.Phone ?? "—")</strong>.</p>
         <p><a href="/account">Go to Account</a></p>
     }
     else
     {
+        <button class="btn btn-outline-secondary w-100 mb-2" @onclick="SignInWithGoogleAsync" disabled="@_isSubmitting">
+            Continue with Google
+        </button>
+        <button class="btn btn-outline-secondary w-100 mb-3" @onclick="SignInWithAppleAsync" disabled="@_isSubmitting">
+            Continue with Apple
+        </button>
+
+        <p class="text-center mb-3">OR</p>
+
+        <p class="mb-3"><a href="/login/otp">Login with OTP</a></p>
+
         <EditForm Model="_form" OnValidSubmit="SubmitAsync">
             <DataAnnotationsValidator />
 
@@ -64,7 +79,7 @@
         try
         {
             await AuthService.LoginAsync(_form.Email, _form.Password);
-            Navigation.NavigateTo("/account");
+            await NavigateAfterLoginAsync();
         }
         catch (ApiException ex) when (ex.Kind == ApiErrorKind.NetworkUnavailable)
         {
@@ -82,6 +97,77 @@
         {
             _isSubmitting = false;
         }
+    }
+
+    private async Task SignInWithGoogleAsync()
+    {
+        _errorMessage = null;
+        _isSubmitting = true;
+        try
+        {
+            var idToken = await GoogleSignIn.SignInAsync();
+            if (idToken is null)
+                return; // user cancelled the native sign-in flow
+
+            await AuthService.LoginWithGoogleAsync(idToken);
+            await NavigateAfterLoginAsync();
+        }
+        catch (GoogleSignInNotConfiguredException ex)
+        {
+            _errorMessage = ex.Message;
+        }
+        catch (ApiException ex) when (ex.Kind == ApiErrorKind.NetworkUnavailable)
+        {
+            _errorMessage = "Could not reach the StockAI Pro server. Check your connection and try again.";
+        }
+        catch (ApiException ex)
+        {
+            _errorMessage = ex.Message;
+        }
+        finally
+        {
+            _isSubmitting = false;
+        }
+    }
+
+    private async Task SignInWithAppleAsync()
+    {
+        _errorMessage = null;
+        _isSubmitting = true;
+        try
+        {
+            var identityToken = await AppleSignIn.SignInAsync();
+            if (identityToken is null)
+                return; // user cancelled the native sign-in flow
+
+            await AuthService.LoginWithAppleAsync(identityToken);
+            await NavigateAfterLoginAsync();
+        }
+        catch (AppleSignInNotConfiguredException ex)
+        {
+            _errorMessage = ex.Message;
+        }
+        catch (ApiException ex) when (ex.Kind == ApiErrorKind.NetworkUnavailable)
+        {
+            _errorMessage = "Could not reach the StockAI Pro server. Check your connection and try again.";
+        }
+        catch (ApiException ex)
+        {
+            _errorMessage = ex.Message;
+        }
+        finally
+        {
+            _isSubmitting = false;
+        }
+    }
+
+    private async Task NavigateAfterLoginAsync()
+    {
+        // First successful authentication on this device with no PIN set
+        // yet -> offer to set one up (Task 13's "Create your PIN" screen).
+        // Already has one -> nothing to do here, PinUnlock.razor is only
+        // shown on a later cold start, not immediately after a fresh login.
+        Navigation.NavigateTo(await PinService.IsPinSetAsync() ? "/account" : "/pin/create");
     }
 
     private sealed class LoginForm

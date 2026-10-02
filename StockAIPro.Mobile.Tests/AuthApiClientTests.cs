@@ -203,6 +203,6 @@ public class AuthApiClientTests
         // The caller cancelled its own token - this must surface as a
         // cancellation, not be reinterpreted as "server unreachable".
         await Assert.ThrowsAnyAsync<OperationCanceledException>(
-            () => client.LoginAsync("a@b.com", "password1", cts.Token));
+            () => client.LoginAsync("a@b.com", "password1", ct: cts.Token));
     }
 }

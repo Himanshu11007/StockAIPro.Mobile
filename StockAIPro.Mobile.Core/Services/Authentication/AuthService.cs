@@ -7,16 +7,18 @@ public sealed class AuthService : IAuthService
 {
     private readonly IAuthApiClient _authApiClient;
     private readonly ITokenStore _tokenStore;
+    private readonly IDeviceIdentityService _deviceIdentity;
 
     public bool IsAuthenticated { get; private set; }
     public UserProfileResponse? CurrentUser { get; private set; }
 
     public event Action? AuthStateChanged;
 
-    public AuthService(IAuthApiClient authApiClient, ITokenStore tokenStore)
+    public AuthService(IAuthApiClient authApiClient, ITokenStore tokenStore, IDeviceIdentityService deviceIdentity)
     {
         _authApiClient = authApiClient;
         _tokenStore = tokenStore;
+        _deviceIdentity = deviceIdentity;
     }
 
     public async Task RegisterAsync(string email, string password, CancellationToken ct = default)
@@ -25,14 +27,91 @@ public sealed class AuthService : IAuthService
         // (see api/routes/auth.py:register -> TokenResponse, identical
         // shape to login) - establishing a session here reflects the
         // backend's actual behavior, it is not an assumption made on top of it.
-        var tokens = await _authApiClient.RegisterAsync(email, password, ct);
+        var (deviceId, deviceName) = await GetDeviceInfoAsync();
+        var tokens = await _authApiClient.RegisterAsync(email, password, deviceId, deviceName, ct);
         await EstablishSessionAsync(tokens, ct);
     }
 
     public async Task LoginAsync(string email, string password, CancellationToken ct = default)
     {
-        var tokens = await _authApiClient.LoginAsync(email, password, ct);
+        var (deviceId, deviceName) = await GetDeviceInfoAsync();
+        var tokens = await _authApiClient.LoginAsync(email, password, deviceId, deviceName, ct);
         await EstablishSessionAsync(tokens, ct);
+    }
+
+    public async Task LoginWithGoogleAsync(string idToken, CancellationToken ct = default)
+    {
+        var (deviceId, deviceName) = await GetDeviceInfoAsync();
+        var tokens = await _authApiClient.LoginWithGoogleAsync(idToken, deviceId, deviceName, ct);
+        await EstablishSessionAsync(tokens, ct);
+    }
+
+    public async Task LoginWithAppleAsync(string identityToken, CancellationToken ct = default)
+    {
+        var (deviceId, deviceName) = await GetDeviceInfoAsync();
+        var tokens = await _authApiClient.LoginWithAppleAsync(identityToken, deviceId, deviceName, ct);
+        await EstablishSessionAsync(tokens, ct);
+    }
+
+    public Task RequestOtpAsync(string destination, CancellationToken ct = default) =>
+        _authApiClient.RequestOtpAsync(destination, ct);
+
+    public async Task VerifyOtpAsync(string destination, string code, CancellationToken ct = default)
+    {
+        var (deviceId, deviceName) = await GetDeviceInfoAsync();
+        var tokens = await _authApiClient.VerifyOtpAsync(destination, code, deviceId, deviceName, ct);
+        await EstablishSessionAsync(tokens, ct);
+    }
+
+    public Task<LinkedIdentityResponse> LinkGoogleAsync(string idToken, CancellationToken ct = default) =>
+        _authApiClient.LinkGoogleAsync(idToken, ct);
+
+    public Task<LinkedIdentityResponse> LinkAppleAsync(string identityToken, CancellationToken ct = default) =>
+        _authApiClient.LinkAppleAsync(identityToken, ct);
+
+    public Task<List<LinkedIdentityResponse>> GetLinkedIdentitiesAsync(CancellationToken ct = default) =>
+        _authApiClient.GetLinkedIdentitiesAsync(ct);
+
+    public Task UnlinkIdentityAsync(string provider, CancellationToken ct = default) =>
+        _authApiClient.UnlinkIdentityAsync(provider, ct);
+
+    public Task<string> GetDeviceIdAsync() => _deviceIdentity.GetDeviceIdAsync();
+
+    public Task<List<SessionResponse>> GetSessionsAsync(CancellationToken ct = default) =>
+        _authApiClient.GetSessionsAsync(ct);
+
+    public Task RevokeSessionAsync(int sessionId, CancellationToken ct = default) =>
+        _authApiClient.RevokeSessionAsync(sessionId, ct);
+
+    public async Task<int> SignOutAllDevicesAsync(bool exceptCurrent, CancellationToken ct = default)
+    {
+        var currentDeviceId = await _deviceIdentity.GetDeviceIdAsync();
+        var result = await _authApiClient.RevokeAllSessionsAsync(
+            exceptCurrent, exceptCurrent ? currentDeviceId : null, ct);
+
+        if (!exceptCurrent)
+        {
+            // This device's own session was included in that revocation -
+            // stop presenting as authenticated locally now rather than
+            // waiting for the next request to discover it via a 401.
+            await _tokenStore.ClearAsync();
+            SetUnauthenticated();
+        }
+
+        return result.RevokedCount;
+    }
+
+    public async Task SetPinEnabledAsync(bool enabled, CancellationToken ct = default)
+    {
+        var deviceId = await _deviceIdentity.GetDeviceIdAsync();
+        await _authApiClient.SetPinEnabledAsync(deviceId, enabled, ct);
+    }
+
+    private async Task<(string? DeviceId, string? DeviceName)> GetDeviceInfoAsync()
+    {
+        var deviceId = await _deviceIdentity.GetDeviceIdAsync();
+        var deviceName = await _deviceIdentity.GetDeviceNameAsync();
+        return (deviceId, deviceName);
     }
 
     public async Task LogoutAsync(CancellationToken ct = default)

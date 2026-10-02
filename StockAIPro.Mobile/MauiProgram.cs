@@ -34,6 +34,21 @@ namespace StockAIPro.Mobile
             services.AddSingleton<ITokenStore, SecureTokenStore>();
             services.AddSingleton<IAuthApiClient, AuthApiClient>();
             services.AddSingleton<IAuthService, AuthService>();
+            services.AddSingleton<IDeviceIdentityService, DeviceIdentityService>();
+            // IPinStore is a singleton for the same reason ITokenStore is -
+            // see SecureTokenStore's own comment: its internal lock only
+            // protects against concurrent writes if exactly one instance
+            // exists app-wide.
+            services.AddSingleton<IPinStore, SecurePinStore>();
+            services.AddSingleton<IPinService, PinService>();
+            // Both fail closed (see GoogleSignInNotConfiguredException /
+            // AppleSignInNotConfiguredException) until real native SDK
+            // wiring + provider credentials are added - see
+            // docs/AUTHENTICATION.md "Google setup" / "Apple setup". Safe to
+            // register regardless: nothing calls SignInAsync() except a user
+            // tapping the corresponding button.
+            services.AddSingleton<IGoogleSignInService, GoogleSignInService>();
+            services.AddSingleton<IAppleSignInService, AppleSignInService>();
             services.AddSingleton<IStockApiClient, StockApiClient>();
             services.AddSingleton<IWatchlistApiClient, WatchlistApiClient>();
             services.AddSingleton<IAnalysisApiClient, AnalysisApiClient>();

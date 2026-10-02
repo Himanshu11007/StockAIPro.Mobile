@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace StockAIPro.Mobile.Models.Auth;
 
-/// <summary>Matches api/schemas_auth.py:RegisterRequest (email, password).</summary>
+/// <summary>Matches api/schemas_auth.py:RegisterRequest.</summary>
 public sealed class RegisterRequest
 {
     [JsonPropertyName("email")]
@@ -10,4 +10,10 @@ public sealed class RegisterRequest
 
     [JsonPropertyName("password")]
     public required string Password { get; init; }
+
+    [JsonPropertyName("device_id")]
+    public string? DeviceId { get; init; }
+
+    [JsonPropertyName("device_name")]
+    public string? DeviceName { get; init; }
 }

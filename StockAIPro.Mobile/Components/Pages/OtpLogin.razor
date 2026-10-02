@@ -1,0 +1,129 @@
+@page "/login/otp"
+@using StockAIPro.Mobile.Services.Api
+@using StockAIPro.Mobile.Services.Authentication
+@inject IAuthService AuthService
+@inject IPinService PinService
+@inject NavigationManager Navigation
+
+<div class="sai-card">
+    @if (_step == Step.EnterDestination)
+    {
+        <div class="sai-card-title">Login with OTP</div>
+
+        <EditForm Model="this" OnValidSubmit="SendOtpAsync">
+            <div class="mb-3">
+                <label for="destination">Email or mobile number</label>
+                <InputText id="destination" class="form-control" @bind-Value="_destination" placeholder="you@example.com or +911234567890" />
+            </div>
+
+            @if (!string.IsNullOrEmpty(_errorMessage))
+            {
+                <p class="text-danger" role="alert">@_errorMessage</p>
+            }
+
+            <button type="submit" class="btn btn-primary w-100" disabled="@_isBusy">
+                @(_isBusy ? "Sending..." : "Send OTP")
+            </button>
+        </EditForm>
+    }
+    else
+    {
+        <div class="sai-card-title">Verify OTP</div>
+        <p>Enter the code sent to <strong>@_destination</strong>.</p>
+
+        <EditForm Model="this" OnValidSubmit="VerifyOtpAsync">
+            <div class="mb-3">
+                <InputText class="form-control" @bind-Value="_code" placeholder="123456" maxlength="8" />
+            </div>
+
+            @if (!string.IsNullOrEmpty(_errorMessage))
+            {
+                <p class="text-danger" role="alert">@_errorMessage</p>
+            }
+
+            <button type="submit" class="btn btn-primary w-100 mb-2" disabled="@_isBusy">
+                @(_isBusy ? "Verifying..." : "Verify")
+            </button>
+        </EditForm>
+
+        <button class="btn btn-link w-100" @onclick="SendOtpAsync" disabled="@_isBusy">
+            Resend OTP
+        </button>
+    }
+</div>
+
+@code {
+    private enum Step { EnterDestination, EnterCode }
+
+    private Step _step = Step.EnterDestination;
+    private string _destination = string.Empty;
+    private string _code = string.Empty;
+    private bool _isBusy;
+    private string? _errorMessage;
+
+    private async Task SendOtpAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_destination))
+        {
+            _errorMessage = "Enter an email address or phone number.";
+            return;
+        }
+
+        _errorMessage = null;
+        _isBusy = true;
+        try
+        {
+            await AuthService.RequestOtpAsync(_destination);
+            _step = Step.EnterCode;
+        }
+        catch (ApiException ex) when (ex.Kind == ApiErrorKind.TooManyRequests)
+        {
+            _errorMessage = "Please wait before requesting another code.";
+        }
+        catch (ApiException ex) when (ex.Kind == ApiErrorKind.NetworkUnavailable)
+        {
+            _errorMessage = "Could not reach the StockAI Pro server. Check your connection and try again.";
+        }
+        catch (ApiException ex)
+        {
+            _errorMessage = ex.Message;
+        }
+        finally
+        {
+            _isBusy = false;
+        }
+    }
+
+    private async Task VerifyOtpAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_code))
+        {
+            _errorMessage = "Enter the code you received.";
+            return;
+        }
+
+        _errorMessage = null;
+        _isBusy = true;
+        try
+        {
+            await AuthService.VerifyOtpAsync(_destination, _code);
+            Navigation.NavigateTo(await PinService.IsPinSetAsync() ? "/account" : "/pin/create");
+        }
+        catch (ApiException ex) when (ex.Kind == ApiErrorKind.Unauthorized)
+        {
+            _errorMessage = "That code is invalid, expired, or has already been used.";
+        }
+        catch (ApiException ex) when (ex.Kind == ApiErrorKind.NetworkUnavailable)
+        {
+            _errorMessage = "Could not reach the StockAI Pro server. Check your connection and try again.";
+        }
+        catch (ApiException ex)
+        {
+            _errorMessage = ex.Message;
+        }
+        finally
+        {
+            _isBusy = false;
+        }
+    }
+}

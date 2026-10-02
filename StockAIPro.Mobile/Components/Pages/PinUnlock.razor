@@ -1,0 +1,115 @@
+@page "/pin-unlock"
+@using StockAIPro.Mobile.Services.Api
+@using StockAIPro.Mobile.Services.Authentication
+@inject IAuthService AuthService
+@inject IPinService PinService
+@inject NavigationManager Navigation
+
+<div class="sai-card">
+    <div class="sai-card-title">Welcome back</div>
+
+    @if (_isUnlocking)
+    {
+        <LoadingState Message="Unlocking..." />
+    }
+    else
+    {
+        <p>Enter your PIN</p>
+
+        <EditForm Model="this" OnValidSubmit="UnlockAsync">
+            <div class="mb-3">
+                <InputText class="form-control" @bind-Value="_pin" type="password" inputmode="numeric" maxlength="4" autofocus />
+            </div>
+
+            @if (!string.IsNullOrEmpty(_errorMessage))
+            {
+                <p class="text-danger" role="alert">@_errorMessage</p>
+            }
+
+            <button type="submit" class="btn btn-primary w-100 mb-2">
+                Unlock
+            </button>
+        </EditForm>
+
+        <button class="btn btn-link w-100" @onclick="UseAnotherLoginMethodAsync">
+            Use another login method
+        </button>
+    }
+</div>
+
+@code {
+    private string _pin = string.Empty;
+    private string? _errorMessage;
+    private bool _isUnlocking;
+
+    private async Task UnlockAsync()
+    {
+        _errorMessage = null;
+        var result = await PinService.VerifyPinAsync(_pin);
+        _pin = string.Empty;
+
+        switch (result.Outcome)
+        {
+            case PinVerifyOutcome.Success:
+                await FinishUnlockAsync();
+                break;
+
+            case PinVerifyOutcome.WrongPin:
+                _errorMessage = result.AttemptsRemaining is { } remaining
+                    ? $"Incorrect PIN. {remaining} attempt(s) remaining."
+                    : "Incorrect PIN.";
+                break;
+
+            case PinVerifyOutcome.LockedOut:
+                var seconds = (int)Math.Ceiling((result.LockoutRemaining ?? TimeSpan.Zero).TotalSeconds);
+                _errorMessage = $"Too many incorrect attempts. Try again in {seconds}s, or use another login method below.";
+                break;
+
+            case PinVerifyOutcome.NoPinSet:
+                // Shouldn't normally happen (this page is only reached when
+                // a PIN is set), but fall through to full login rather than
+                // getting stuck if it somehow does.
+                await UseAnotherLoginMethodAsync();
+                break;
+        }
+    }
+
+    private async Task FinishUnlockAsync()
+    {
+        _isUnlocking = true;
+        try
+        {
+            // The PIN only proved "whoever is holding this device knows the
+            // 4 digits" - it never proves the server still considers this
+            // session valid. TryRestoreSessionAsync goes through the real
+            // refresh/access-token pipeline (AuthenticatedHttpMessageHandler,
+            // TokenSessionSnapshot) and is the ONLY thing that actually
+            // re-establishes IsAuthenticated. If the refresh token was
+            // revoked server-side (sign-out-all-devices, an expired
+            // session, ...), this returns false and the user is sent to
+            // full re-authentication - a correct PIN never bypasses that.
+            var restored = await AuthService.TryRestoreSessionAsync();
+            if (restored)
+            {
+                Navigation.NavigateTo("/account");
+            }
+            else
+            {
+                await PinService.ClearPinAsync();
+                Navigation.NavigateTo("/login");
+            }
+        }
+        finally
+        {
+            _isUnlocking = false;
+        }
+    }
+
+    private async Task UseAnotherLoginMethodAsync()
+    {
+        // Always available regardless of lockout state - a PIN lockout must
+        // never be a dead end.
+        await PinService.ClearPinAsync();
+        Navigation.NavigateTo("/login");
+    }
+}

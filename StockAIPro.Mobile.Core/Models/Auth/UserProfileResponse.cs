@@ -6,6 +6,10 @@ namespace StockAIPro.Mobile.Models.Auth;
 /// Matches api/schemas_auth.py:UserProfileResponse exactly, as returned by
 /// GET /auth/me. This is the authoritative current-user representation -
 /// never construct one locally from the login email.
+///
+/// Email/Phone are both nullable: a Google/Apple-only account may have no
+/// email, and a phone-only OTP account has no email either - never assume
+/// one is present without checking.
 /// </summary>
 public sealed class UserProfileResponse
 {
@@ -13,7 +17,10 @@ public sealed class UserProfileResponse
     public int Id { get; init; }
 
     [JsonPropertyName("email")]
-    public required string Email { get; init; }
+    public string? Email { get; init; }
+
+    [JsonPropertyName("phone")]
+    public string? Phone { get; init; }
 
     [JsonPropertyName("is_active")]
     public bool IsActive { get; init; }

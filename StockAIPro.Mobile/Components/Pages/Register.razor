@@ -1,6 +1,8 @@
 @page "/register"
 @using StockAIPro.Mobile.Services.Api
+@using StockAIPro.Mobile.Services.Authentication
 @inject IAuthService AuthService
+@inject IPinService PinService
 @inject NavigationManager Navigation
 @implements IDisposable
 
@@ -9,7 +11,7 @@
 
     @if (AuthService.IsAuthenticated)
     {
-        <p>You're already signed in as <strong>@AuthService.CurrentUser?.Email</strong>.</p>
+        <p>You're already signed in as <strong>@(AuthService.CurrentUser?.Email ?? AuthService.CurrentUser?.Phone ?? "—")</strong>.</p>
         <p><a href="/account">Go to Account</a></p>
     }
     else
@@ -77,7 +79,7 @@
         try
         {
             await AuthService.RegisterAsync(_form.Email, _form.Password);
-            Navigation.NavigateTo("/account");
+            Navigation.NavigateTo(await PinService.IsPinSetAsync() ? "/account" : "/pin/create");
         }
         catch (ApiException ex) when (ex.Kind == ApiErrorKind.NetworkUnavailable)
         {

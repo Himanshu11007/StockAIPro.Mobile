@@ -1,5 +1,7 @@
 @inherits LayoutComponentBase
 @inject IAuthService AuthService
+@inject IPinService PinService
+@inject NavigationManager Navigation
 @implements IDisposable
 
 <div class="app-shell">
@@ -26,6 +28,19 @@
     protected override async Task OnInitializedAsync()
     {
         AuthService.AuthStateChanged += OnAuthStateChanged;
+
+        if (await PinService.IsPinSetAsync())
+        {
+            // A PIN gate exists for this device - require it before
+            // touching the stored session at all. PinUnlock.razor itself
+            // calls TryRestoreSessionAsync() after a correct PIN (the exact
+            // same call this branch would otherwise make directly), so the
+            // existing refresh/session-restore pipeline is never bypassed,
+            // only deferred behind the PIN check.
+            Navigation.NavigateTo("/pin-unlock");
+            return;
+        }
+
         await AuthService.TryRestoreSessionAsync();
     }
 
