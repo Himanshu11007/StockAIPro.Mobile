@@ -15,6 +15,14 @@ namespace StockAIPro.Mobile
         protected override void OnCreate(Bundle? savedInstanceState)
         {
             base.OnCreate(savedInstanceState);
+            // Dark app chrome: light status/navigation bar icons so the clock
+            // and indicators stay readable above the StockLens header.
+            if (Window is { } window)
+            {
+                var insets = AndroidX.Core.View.WindowCompat.GetInsetsController(window, window.DecorView);
+                insets.AppearanceLightStatusBars = false;
+                insets.AppearanceLightNavigationBars = false;
+            }
             FirebaseSetup.HandleIntent(Intent);
         }
 

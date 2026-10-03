@@ -5,7 +5,7 @@ using System.Text.Json.Serialization;
 
 namespace StockAIPro.Mobile.Models.Product;
 
-// Display-only models for the backend's product API (FQVF, StockAI Score,
+// Display-only models for the backend's product API (FQVF, StockLens Score,
 // Top Investment Candidates, app configuration). The mobile app performs no
 // scoring or FQVF calculation - every value here is rendered as delivered.
 // Nullable everywhere the backend may legitimately send null (data not

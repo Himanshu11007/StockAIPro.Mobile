@@ -48,7 +48,7 @@ else if (_prefs is { } p)
             <input type="checkbox" @bind="p.NewTopCandidate" @bind:after="SaveAsync" /></label>
         <label class="sai-toggle"><span>Top Candidate removed / downgraded<div class="sai-action-desc">With the reason (score, risk or data quality)</div></span>
             <input type="checkbox" @bind="p.TopCandidateRemoved" @bind:after="SaveAsync" /></label>
-        <label class="sai-toggle"><span>StockAI Score changes<div class="sai-action-desc">Material changes of Top Candidates only</div></span>
+        <label class="sai-toggle"><span>StockLens Score changes<div class="sai-action-desc">Material changes of Top Candidates only</div></span>
             <input type="checkbox" @bind="p.ScoreChanges" @bind:after="SaveAsync" /></label>
         <label class="sai-toggle"><span>FQVF changes<div class="sai-action-desc">Top Candidates whose passed checks change materially</div></span>
             <input type="checkbox" @bind="p.FqvfChanges" @bind:after="SaveAsync" /></label>
@@ -90,7 +90,7 @@ else if (_prefs is { } p)
     {
         <div class="sai-action-desc">Saved.</div>
     }
-    <div class="sai-action-desc text-muted">StockAI Pro limits how many notifications you receive and never repeats the same update.</div>
+    <div class="sai-action-desc text-muted">StockLens limits how many notifications you receive and never repeats the same update.</div>
 }
 
 @code {

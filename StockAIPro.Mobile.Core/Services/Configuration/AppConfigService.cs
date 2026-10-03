@@ -14,7 +14,7 @@ namespace StockAIPro.Mobile.Services.Configuration;
 public sealed class AppConfigService
 {
     public const string FallbackDisclaimer =
-        "StockAI Pro provides research and analysis, not investment advice. Scores rank stocks on " +
+        "StockLens provides research and analysis, not investment advice. Scores rank stocks on " +
         "available data; they are not predictions or guarantees of returns.";
 
     private readonly IProductApiClient _api;

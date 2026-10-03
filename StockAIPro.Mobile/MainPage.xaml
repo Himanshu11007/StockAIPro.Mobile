@@ -3,7 +3,9 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:local="clr-namespace:StockAIPro.Mobile"
              xmlns:components="clr-namespace:StockAIPro.Mobile.Components"
-             x:Class="StockAIPro.Mobile.MainPage">
+             x:Class="StockAIPro.Mobile.MainPage"
+             SafeAreaEdges="All"
+             BackgroundColor="#161B22">
 
     <BlazorWebView x:Name="blazorWebView" HostPage="wwwroot/index.html">
         <BlazorWebView.RootComponents>

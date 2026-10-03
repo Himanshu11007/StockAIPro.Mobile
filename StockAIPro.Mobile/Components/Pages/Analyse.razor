@@ -1,12 +1,12 @@
 @page "/analyse"
 @* Stock Search: pick any active stock from the backend's Stock Master and
-   open its Investment Analysis (StockAI Score + FQVF). Analysis itself is
+   open its Investment Analysis (StockLens Score + FQVF). Analysis itself is
    computed by the backend - see StockDetail.razor. *@
 @inject NavigationManager Navigation
 
 <div class="sai-card">
     <div class="sai-card-title">Analyse a stock</div>
-    <div class="sai-action-desc mb-2">Search the stock master, then open its StockAI Score and Fundamental Quality &amp; Value Framework analysis.</div>
+    <div class="sai-action-desc mb-2">Search the stock master, then open its StockLens Score and Fundamental Quality &amp; Value Framework analysis.</div>
     <StockSearch OnSelect="OnStockSelected" />
 </div>
 

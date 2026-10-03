@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-    <application android:allowBackup="true" android:icon="@mipmap/appicon" android:roundIcon="@mipmap/appicon_round" android:supportsRtl="true" android:networkSecurityConfig="@xml/network_security_config"></application>
+    <application android:allowBackup="true" android:icon="@mipmap/appicon" android:roundIcon="@mipmap/appicon_round" android:supportsRtl="true" android:networkSecurityConfig="@xml/network_security_config">
+        <!-- Status-bar icon for FCM notifications shown by the system while the
+             app is in the background: white silhouette of the StockLens icon. -->
+        <meta-data android:name="com.google.firebase.messaging.default_notification_icon" android:resource="@drawable/ic_stat_stocklens" />
+        <meta-data android:name="com.google.firebase.messaging.default_notification_color" android:resource="@color/stocklens_notification" />
+        <meta-data android:name="com.google.firebase.messaging.default_notification_channel_id" android:value="stockai_alerts" />
+    </application>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
     <!-- Android 13+: asked only when the user enables push in Notification Settings. -->

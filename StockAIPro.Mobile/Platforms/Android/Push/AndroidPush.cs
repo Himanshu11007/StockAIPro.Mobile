@@ -55,7 +55,7 @@ public static class FirebaseSetup
     public static void CreateChannel(Context context)
     {
         if (Build.VERSION.SdkInt < BuildVersionCodes.O) return;
-        var channel = new NotificationChannel(ChannelId, "StockAI alerts", NotificationImportance.Default)
+        var channel = new NotificationChannel(ChannelId, "StockLens alerts", NotificationImportance.Default)
         {
             Description = "Top Candidate changes, watchlist alerts, daily summaries and market regime updates",
         };
@@ -172,7 +172,8 @@ public sealed class StockAiFirebaseMessagingService : FirebaseMessagingService
             ? parsed : System.Environment.TickCount;
         var pending = PendingIntent.GetActivity(this, id, intent, PendingIntentFlags.UpdateCurrent | PendingIntentFlags.Immutable);
         var builder = new NotificationCompat.Builder(this, FirebaseSetup.ChannelId)
-            .SetSmallIcon(Resource.Mipmap.appicon)
+            .SetSmallIcon(Resource.Drawable.ic_stat_stocklens)
+            .SetColor(unchecked((int)0xFF3B82F6))
             .SetContentTitle(n.Title)
             .SetContentText(n.Body)
             .SetStyle(new NotificationCompat.BigTextStyle().BigText(n.Body))

@@ -1,5 +1,5 @@
 @page "/top-picks"
-@* Top Investment Candidates: the backend's ranked list (FQVF + StockAI
+@* Top Investment Candidates: the backend's ranked list (FQVF + StockLens
    Score) from its latest completed full analysis run. Sorting and filtering
    only reorder/hide the delivered list; nothing is re-scored here. *@
 @inject IProductApiClient ProductApi
@@ -9,7 +9,7 @@
 
 <div class="sai-card">
     <div class="sai-card-title">Top Investment Candidates</div>
-    <div class="sai-action-desc">The highest-ranked stocks by StockAI Score that pass the data-quality, liquidity and freshness rules. An analytical ranking to support your own research.</div>
+    <div class="sai-action-desc">The highest-ranked stocks by StockLens Score that pass the data-quality, liquidity and freshness rules. An analytical ranking to support your own research.</div>
 </div>
 
 @if (_loading)
@@ -49,7 +49,7 @@ else if (_data is { } data)
             <div class="sai-filters mt-2">
                 <select class="form-select" aria-label="Sort by" @bind="_sort">
                     <option value="rank">Sort: Rank</option>
-                    <option value="score">Sort: StockAI Score</option>
+                    <option value="score">Sort: StockLens Score</option>
                     <option value="fqvf">Sort: FQVF score</option>
                     <option value="risk">Sort: Lowest risk</option>
                 </select>
@@ -81,7 +81,7 @@ else if (_data is { } data)
                     </div>
                     <div class="sai-score">
                         <div class="sai-score-value">@ProductFormat.Score(item.StockAiScore)</div>
-                        <div class="sai-score-label">StockAI Score</div>
+                        <div class="sai-score-label">StockLens Score</div>
                     </div>
                 </div>
                 <AnalysisLabels Labels="item.Labels" />

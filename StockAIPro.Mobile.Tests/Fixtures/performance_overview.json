@@ -36,7 +36,7 @@
             "success_rate": 50.0
           }
         ],
-        "caveat": "Retired. These signals were generated with a look-ahead defect in the ML direction input (docs/PRODUCTION_TEMPORAL_INTEGRITY.md) and are not comparable to the current StockAI Score. Shown for transparency only; they are not evidence of skill.",
+        "caveat": "Retired. These signals were generated with a look-ahead defect in the ML direction input (docs/PRODUCTION_TEMPORAL_INTEGRITY.md) and are not comparable to the current StockLens Score. Shown for transparency only; they are not evidence of skill.",
         "count": 1679,
         "horizon": "Validated after at least 5 trading days; actual holding 6\u201354 days (average 25)",
         "methodology": "BUY/SELL/HOLD signals from the earlier ML-and-technical engine, recorded before the temporal-integrity fix.",
@@ -76,7 +76,7 @@
       },
       "ranking_v1_validation": {
         "benchmark": "NIFTY 50 and the equal-weight eligible universe",
-        "conclusion": "The validation did not establish a statistically reliable stock-selection edge. The StockAI Score is provided as a transparent analytical ranking; its live results are being tracked prospectively below.",
+        "conclusion": "The validation did not establish a statistically reliable stock-selection edge. The StockLens Score is provided as a transparent analytical ranking; its live results are being tracked prospectively below.",
         "document": "docs/RANKING_VALIDATION_V1.md",
         "horizon": "3 months (primary); 1, 6 and 12 months also reported",
         "limitations": [
@@ -84,7 +84,7 @@
           "Universe uses current index membership (survivorship bias)",
           "Price returns only; no transaction costs"
         ],
-        "methodology": "Production StockAI Score recomputed at 39 month-ends (Jul 2023 \u2013 Sep 2026) using only data available at each date; development period Jul 2023 \u2013 Dec 2024, final test period Jan 2025 \u2013 Sep 2026 used once.",
+        "methodology": "Production StockLens Score recomputed at 39 month-ends (Jul 2023 \u2013 Sep 2026) using only data available at each date; development period Jul 2023 \u2013 Dec 2024, final test period Jan 2025 \u2013 Sep 2026 used once.",
         "observations": {
           "eligible_per_date": "144\u2013190",
           "ranking_dates": 39,

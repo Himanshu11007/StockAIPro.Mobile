@@ -29,7 +29,7 @@
         <MauiXamlInflator>SourceGen</MauiXamlInflator>
 
         <!-- Display name -->
-        <ApplicationTitle>StockAI Pro</ApplicationTitle>
+        <ApplicationTitle>StockLens</ApplicationTitle>
 
         <!-- App Identifier -->
         <ApplicationId>com.companyname.stockaipro.mobile</ApplicationId>
@@ -50,10 +50,20 @@
 
     <ItemGroup>
         <!-- App Icon -->
-        <MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#512BD4" />
+        <!-- App icon: the approved StockLens master icon (generated from the
+             backend repo's branding/stocklens-icon-master.png by
+             scripts/generate_brand_assets.py). appicon.svg is a plain black
+             background matching the master's outer corners. Android adaptive
+             icons are masked to a circle/squircle, so the artwork is scaled to
+             stay fully visible; iOS uses it full-bleed. -->
+        <MauiIcon Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'"
+                  Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\stocklens_icon.png" ForegroundScale="0.65" Color="#000000" />
+        <MauiIcon Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) != 'android'"
+                  Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\stocklens_icon.png" ForegroundScale="1.0" Color="#000000" />
 
         <!-- Splash Screen -->
-        <MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#512BD4" BaseSize="128,128" />
+        <!-- Splash: the StockLens icon on the app background colour. -->
+        <MauiSplashScreen Include="Resources\Splash\stocklens_splash.png" Color="#0D1117" BaseSize="160,160" />
 
         <!-- Images -->
         <MauiImage Include="Resources\Images\*" />

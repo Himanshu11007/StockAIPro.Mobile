@@ -99,7 +99,7 @@ public sealed class PushRegistrationService : IDisposable
                     "Push delivery is not configured in this app build. Notifications still appear in the Notification Center."));
             if (permission == PushPermission.Denied)
                 return Set(new(PushRegistrationStatus.PermissionDenied,
-                    "Notifications are turned off for StockAI Pro in your device settings. You can still see them in the Notification Center."));
+                    "Notifications are turned off for StockLens in your device settings. You can still see them in the Notification Center."));
             if (token is null)
                 return Set(new(PushRegistrationStatus.Failed,
                     "This device did not provide a push token yet. Notifications still appear in the Notification Center."));

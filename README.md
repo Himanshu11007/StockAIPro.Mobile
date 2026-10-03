@@ -1,6 +1,6 @@
 # StockAIPro.Mobile
 
-.NET MAUI Blazor Hybrid app (Android, iOS) for StockAI Pro. The app is a
+.NET MAUI Blazor Hybrid app (Android, iOS) for StockLens. The app is a
 thin client: every score, FQVF check, ranking, explanation, feature flag and
 disclaimer comes from the backend
 ([stock-prediction-app](https://github.com/Himanshu11007/stock-prediction-app)).
@@ -13,7 +13,7 @@ disclaimer comes from the backend
 
 ## Screens
 
-Home · Analyse (stock search) · Stock Analysis (StockAI Score, components,
+Home · Analyse (stock search) · Stock Analysis (StockLens Score, components,
 positive factors, risks, 18 Fundamental Quality & Value Framework checks,
 market data, informational ML signal, data freshness, on-demand analysis) ·
 Top Investment Candidates · Watchlist · Performance · AI Intelligence ·

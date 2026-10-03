@@ -40,6 +40,6 @@ public sealed class ApiException : Exception
 
     public static ApiException NetworkUnavailable(Exception inner) =>
         new(ApiErrorKind.NetworkUnavailable,
-            "Could not reach the StockAI Pro server. Check your connection and try again.",
+            "Could not reach the StockLens server. Check your connection and try again.",
             null, inner);
 }

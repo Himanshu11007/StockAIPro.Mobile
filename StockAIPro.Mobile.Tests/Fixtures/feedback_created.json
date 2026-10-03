@@ -2,13 +2,13 @@
   "data": {
     "admin_note": null,
     "category": "STALE_DATA",
-    "created_at": "2026-10-03T14:21:03.835499+00:00",
+    "created_at": "2026-10-03T15:48:42.903038+00:00",
     "id": 1,
     "message": "Price looks old",
     "status": "NEW",
     "symbol": "S03.NS",
-    "updated_at": "2026-10-03T14:21:03.835499+00:00"
+    "updated_at": "2026-10-03T15:48:42.903038+00:00"
   },
-  "message": "Report #1 recorded. The StockAI Pro team reviews reports in the admin console; you can see its status under Account > My reports.",
+  "message": "Report #1 recorded. The StockLens team reviews reports in the admin console; you can see its status under Account > My reports.",
   "success": true
 }

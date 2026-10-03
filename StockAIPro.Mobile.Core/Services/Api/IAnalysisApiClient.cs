@@ -3,7 +3,7 @@ using StockAIPro.Mobile.Models.Analysis;
 namespace StockAIPro.Mobile.Services.Api;
 
 /// <summary>
-/// POST /api/v1/analyze-stock - runs the full StockAI Pro analysis pipeline
+/// POST /api/v1/analyze-stock - runs the full StockLens analysis pipeline
 /// for one symbol (see api/routes/analysis.py). This is the ONLY source of
 /// analysis results; the mobile app must never compute its own signal,
 /// score, or confidence.

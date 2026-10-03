@@ -11,7 +11,7 @@
     "exchange": "NSE",
     "explanation": {
       "missing": [],
-      "note": "The StockAI Score is an analytical ranking of stocks against each other on the data shown; it is not a forecast or a guarantee of returns.",
+      "note": "The StockLens Score is an analytical ranking of stocks against each other on the data shown; it is not a forecast or a guarantee of returns.",
       "strengths": [
         "Quality",
         "Valuation",
@@ -21,7 +21,7 @@
         "Sector Outlook",
         "Price Regime"
       ],
-      "summary": "Ranked 15 of 30 eligible stocks, inside the Top 20 Investment Candidates. StockAI Score 75.0/100 is the weighted average of the components below (data coverage 95%). Strongest: Quality 75, Valuation 75, Financial Health 75. Weakest: Risk 20.",
+      "summary": "Ranked 15 of 30 eligible stocks, inside the Top 20 Investment Candidates. StockLens Score 75.0/100 is the weighted average of the components below (data coverage 95%). Strongest: Quality 75, Valuation 75, Financial Health 75. Weakest: Risk 20.",
       "weaknesses": [
         "Risk"
       ]
@@ -42,7 +42,7 @@
     },
     "freshness_status": {
       "analysis_age_days": 0,
-      "analysis_computed_at": "2026-10-03T12:21:03.431805+00:00",
+      "analysis_computed_at": "2026-10-03T13:48:42.505793+00:00",
       "fiscal_period_end": null,
       "fundamentals_fetched_at": null,
       "issues": [],
@@ -86,7 +86,7 @@
     "market": {
       "as_of_date": "2026-10-03",
       "close": 1234.5,
-      "fetched_at": "2026-10-03T11:21:03.431805+00:00",
+      "fetched_at": "2026-10-03T12:48:42.505793+00:00",
       "issues": [],
       "status": "OK",
       "technical": {
@@ -115,7 +115,7 @@
     },
     "market_regime": {
       "as_of_date": "2026-10-03",
-      "computed_at": "2026-10-03T12:21:03.431805+00:00",
+      "computed_at": "2026-10-03T13:48:42.505793+00:00",
       "index": "^NSEI",
       "reason": null,
       "regime": "Sideways",
@@ -190,7 +190,7 @@
           "weight": 0
         }
       ],
-      "computed_at": "2026-10-03T12:21:03.431805+00:00",
+      "computed_at": "2026-10-03T13:48:42.505793+00:00",
       "eligible_for_top_picks": true,
       "engine_version": "ranking-v1.0",
       "ineligible_reasons": [],

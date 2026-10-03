@@ -5,7 +5,7 @@ namespace StockAIPro.Mobile.Services.Api;
 
 /// <summary>
 /// The backend's product API: Top Investment Candidates, per-stock
-/// investment analysis (StockAI Score + FQVF), market regime and the
+/// investment analysis (StockLens Score + FQVF), market regime and the
 /// backend-controlled app configuration. Thin by design: every value is
 /// computed by the backend and displayed as delivered.
 /// </summary>

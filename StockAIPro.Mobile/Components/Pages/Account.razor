@@ -244,7 +244,7 @@
         }
         catch (ApiException ex) when (ex.Kind == ApiErrorKind.NetworkUnavailable)
         {
-            _errorMessage = "Could not reach the StockAI Pro server. Check your connection and try again.";
+            _errorMessage = "Could not reach the StockLens server. Check your connection and try again.";
         }
         catch (ApiException ex)
         {

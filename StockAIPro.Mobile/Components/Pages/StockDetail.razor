@@ -1,5 +1,5 @@
 @page "/stock/{Symbol}"
-@* Investment Analysis for one stock: StockAI Score with components and
+@* Investment Analysis for one stock: StockLens Score with components and
    reasons, the 18 Fundamental Quality & Value Framework checks, market
    and technical data, the informational ML signal and data freshness.
    Everything is rendered exactly as the backend returns it. *@
@@ -42,7 +42,7 @@ else if (_a is { } a)
             </div>
             <div class="sai-score">
                 <div class="sai-score-value">@ProductFormat.Score(a.Ranking.StockAiScore)</div>
-                <div class="sai-score-label">StockAI Score</div>
+                <div class="sai-score-label">StockLens Score</div>
             </div>
         </div>
         <AnalysisLabels Labels="a.Labels" />
