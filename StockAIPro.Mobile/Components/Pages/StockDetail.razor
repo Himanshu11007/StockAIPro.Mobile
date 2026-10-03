@@ -1,0 +1,272 @@
+@page "/stock/{Symbol}"
+@* Investment Analysis for one stock: StockAI Score with components and
+   reasons, the 18 Fundamental Quality & Value Framework checks, market
+   and technical data, the informational ML signal and data freshness.
+   Everything is rendered exactly as the backend returns it. *@
+@inject IProductApiClient ProductApi
+@inject AppConfigService AppConfig
+@inject NavigationManager Navigation
+@implements IDisposable
+
+@if (_loading)
+{
+    <LoadingState Message="@(_refreshing ? "Analysing - fetching latest data (this can take up to 30 seconds)..." : "Loading analysis...")" />
+}
+else if (_notAnalysed)
+{
+    <div class="sai-card">
+        <div class="sai-card-title">@Symbol</div>
+        <div class="sai-action-desc">@_error</div>
+        <button class="btn btn-primary w-100 mt-3" @onclick="RefreshAsync">Analyse now</button>
+    </div>
+}
+else if (_error is not null)
+{
+    @if (_errorKind == ApiErrorKind.Unauthorized)
+    {
+        <ErrorState Title="Session expired" Message="@_error" RetryLabel="Sign in again" OnRetry="@(() => Navigation.NavigateTo("/login"))" />
+    }
+    else
+    {
+        <ErrorState Title="@(_errorKind == ApiErrorKind.Conflict ? "Engine busy" : "Could not load analysis")" Message="@_error" OnRetry="LoadAsync" />
+    }
+}
+else if (_a is { } a)
+{
+    <div class="sai-card">
+        <div class="d-flex justify-content-between align-items-start">
+            <div>
+                <div class="sai-card-title">@a.Name</div>
+                <div class="sai-action-desc">@a.Symbol @(a.Sector is null ? "" : $"- {a.Sector}") @(a.Industry is null ? "" : $"/ {a.Industry}")</div>
+            </div>
+            <div class="sai-score">
+                <div class="sai-score-value">@ProductFormat.Score(a.Ranking.StockAiScore)</div>
+                <div class="sai-score-label">StockAI Score</div>
+            </div>
+        </div>
+        <div class="sai-metric-grid mt-2">
+            <MetricCard Label="Rank" Value="@(a.Ranking.Rank?.ToString() ?? ProductFormat.Missing)" />
+            <MetricCard Label="Data coverage" Value="@ProductFormat.Percent(a.Ranking.ScoreCoverage, 0)" />
+            <MetricCard Label="Price" Value="@ProductFormat.Price(a.Market?.Close)" />
+            <MetricCard Label="FQVF score" Value="@ProductFormat.Score(a.Fqvf.Score)" />
+        </div>
+        @if (!a.Ranking.EligibleForTopPicks && a.Ranking.IneligibleReasons.Count > 0)
+        {
+            <div class="sai-note mt-2">Not in Top Investment Candidates: @string.Join("; ", a.Ranking.IneligibleReasons)</div>
+        }
+        <button class="btn btn-secondary btn-sm mt-2" @onclick="RefreshAsync">Refresh analysis</button>
+    </div>
+
+    <div class="sai-tabs">
+        @foreach (var tab in Tabs)
+        {
+            <button class="sai-tab @(tab == _tab ? "active" : "")" @onclick="() => _tab = tab">@tab</button>
+        }
+    </div>
+
+    @if (_tab == "Overview")
+    {
+        @if (a.Ranking.Positives.Count > 0)
+        {
+            <div class="sai-card">
+                <div class="sai-section-title">Positive factors</div>
+                <ul class="sai-list sai-list-positive">@foreach (var p in a.Ranking.Positives) { <li>@p</li> }</ul>
+            </div>
+        }
+        @if (a.Ranking.Risks.Count > 0)
+        {
+            <div class="sai-card">
+                <div class="sai-section-title">Risks</div>
+                <ul class="sai-list sai-list-negative">@foreach (var r in a.Ranking.Risks) { <li>@r</li> }</ul>
+            </div>
+        }
+        <div class="sai-card">
+            <div class="sai-section-title">Score components</div>
+            @foreach (var c in a.Ranking.Components.Where(c => c.Weight > 0))
+            {
+                <div class="sai-row">
+                    <div>
+                        <div>@c.Label <span class="text-muted">(weight @c.Weight.ToString("0"))</span></div>
+                        <div class="sai-action-desc">@c.Basis</div>
+                    </div>
+                    <div class="sai-row-value">@(c.Score is null ? "Not available" : ProductFormat.Score(c.Score))</div>
+                </div>
+            }
+        </div>
+    }
+    else if (_tab == "FQVF")
+    {
+        <div class="sai-card">
+            <div class="sai-section-title">Fundamental Quality &amp; Value Framework</div>
+            <div class="sai-action-desc">@a.Fqvf.Summary - coverage @ProductFormat.Percent(a.Fqvf.Coverage, 0). "Not available" means the data is missing; it is not a failure.</div>
+        </div>
+        @foreach (var check in a.Fqvf.Checks)
+        {
+            <div class="sai-card">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div class="sai-action-title">@check.Id. @check.Name</div>
+                    <span class="sai-badge @ProductFormat.StatusCss(check.Status)">@ProductFormat.StatusLabel(check.Status)@(check.Grade is null ? "" : $" ({check.Grade.ToLowerInvariant()})")</span>
+                </div>
+                <div class="mt-1"><span class="text-muted">Value:</span> @check.DisplayValue</div>
+                <div class="sai-action-desc">@check.Explanation</div>
+                <div class="sai-action-desc"><span class="text-muted">Threshold:</span> @check.Threshold</div>
+                <div class="sai-action-desc text-muted">@(check.Source ?? "")@(check.SourceTimestamp is null ? "" : $" - {ProductFormat.Date(check.SourceTimestamp)}")@(check.Scored ? "" : " - informational")</div>
+            </div>
+        }
+    }
+    else if (_tab == "Market")
+    {
+        @if (a.Market is { } m)
+        {
+            <div class="sai-card">
+                <div class="sai-section-title">Market data (@m.Status, as of @ProductFormat.Date(m.AsOfDate))</div>
+                <div class="sai-metric-grid">
+                    <MetricCard Label="Close" Value="@ProductFormat.Price(m.Close)" />
+                    <MetricCard Label="20-day return" Value="@ProductFormat.Percent(m.Technical?.Return20d)" />
+                    <MetricCard Label="60-day return" Value="@ProductFormat.Percent(m.Technical?.Return60d)" />
+                    <MetricCard Label="1-year return" Value="@ProductFormat.Percent(m.Technical?.Return250d)" />
+                    <MetricCard Label="Volatility (ann.)" Value="@ProductFormat.Percent(m.Technical?.VolatilityAnnual)" />
+                    <MetricCard Label="Max drawdown 1y" Value="@ProductFormat.Percent(m.Technical?.MaxDrawdown1y)" />
+                    <MetricCard Label="RSI" Value="@ProductFormat.Score(m.Technical?.Rsi)" />
+                    <MetricCard Label="Stock regime" Value="@(m.Technical?.Regime ?? ProductFormat.Missing)" />
+                </div>
+                @if (m.Issues.Count > 0)
+                {
+                    <div class="sai-note mt-2">Data issues: @string.Join("; ", m.Issues)</div>
+                }
+            </div>
+        }
+        else
+        {
+            <EmptyState Title="No market data" Message="Market data was not available for this stock in the latest run." />
+        }
+        @if (a.MlSignal is { } ml)
+        {
+            <div class="sai-card">
+                <div class="sai-section-title">ML direction signal (informational)</div>
+                @if (ml.Available)
+                {
+                    <div>Next-day direction: <strong>@ml.Direction</strong> (P(up) @ProductFormat.Percent(ml.ProbabilityUp))</div>
+                }
+                else
+                {
+                    <div class="text-muted">Not available: @ml.Reason</div>
+                }
+                <div class="sai-action-desc mt-1">@ml.Disclaimer</div>
+            </div>
+        }
+    }
+    else if (_tab == "Data")
+    {
+        <div class="sai-card">
+            <div class="sai-section-title">Data freshness</div>
+            @foreach (var kv in a.Freshness)
+            {
+                <div class="sai-row"><div>@ProductFormat.FreshnessLabel(kv.Key)</div><div class="sai-row-value">@ProductFormat.Date(kv.Value)</div></div>
+            }
+            <div class="sai-row"><div>Data status</div><div class="sai-row-value">@(a.DataStatus ?? ProductFormat.Missing)</div></div>
+            @if (!string.IsNullOrEmpty(a.DataStatusReason))
+            {
+                <div class="sai-action-desc">@a.DataStatusReason</div>
+            }
+        </div>
+        <div class="sai-card">
+            <div class="sai-section-title">Engine</div>
+            <div class="sai-row"><div>Ranking engine</div><div class="sai-row-value">@a.Engine?.Ranking</div></div>
+            <div class="sai-row"><div>FQVF version</div><div class="sai-row-value">@a.Engine?.Fqvf</div></div>
+            <div class="sai-row"><div>Run</div><div class="sai-row-value">@a.Engine?.RunId</div></div>
+            <div class="sai-row"><div>Computed</div><div class="sai-row-value">@ProductFormat.Date(a.Ranking.ComputedAt)</div></div>
+        </div>
+    }
+
+    <Disclaimer Text="@AppConfig.Disclaimer" />
+}
+
+@code {
+    [Parameter] public string Symbol { get; set; } = "";
+
+    private static readonly string[] Tabs = ["Overview", "FQVF", "Market", "Data"];
+    private string _tab = "Overview";
+    private StockAnalysis? _a;
+    private bool _loading = true;
+    private bool _refreshing;
+    private bool _notAnalysed;
+    private string? _error;
+    private ApiErrorKind? _errorKind;
+    private CancellationTokenSource _cts = new();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        _cts.Cancel();
+        _cts = new CancellationTokenSource();
+        await LoadAsync();
+    }
+
+    private void Reset()
+    {
+        _error = null;
+        _errorKind = null;
+        _notAnalysed = false;
+    }
+
+    private async Task LoadAsync()
+    {
+        Reset();
+        _loading = true;
+        StateHasChanged();
+        try
+        {
+            _a = await ProductApi.GetStockAnalysisAsync(Symbol, _cts.Token);
+        }
+        catch (ApiException ex) when (ex.Kind == ApiErrorKind.NotFound)
+        {
+            _a = null;
+            _notAnalysed = true;
+            _error = ex.Message;
+        }
+        catch (ApiException ex)
+        {
+            _error = ex.Message;
+            _errorKind = ex.Kind;
+        }
+        catch (OperationCanceledException)
+        {
+            return;
+        }
+        catch (Exception)
+        {
+            _error = "The server returned data the app could not read.";
+        }
+        _loading = false;
+        StateHasChanged();
+    }
+
+    private async Task RefreshAsync()
+    {
+        Reset();
+        _loading = _refreshing = true;
+        StateHasChanged();
+        try
+        {
+            _a = await ProductApi.RefreshStockAnalysisAsync(Symbol, _cts.Token);
+        }
+        catch (ApiException ex)
+        {
+            _error = ex.Message;
+            _errorKind = ex.Kind;
+            _notAnalysed = ex.Kind == ApiErrorKind.NotFound;
+        }
+        catch (OperationCanceledException)
+        {
+            return;
+        }
+        catch (Exception)
+        {
+            _error = "The server returned data the app could not read.";
+        }
+        _loading = _refreshing = false;
+        StateHasChanged();
+    }
+
+    public void Dispose() => _cts.Cancel();
+}

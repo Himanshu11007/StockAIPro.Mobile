@@ -99,6 +99,26 @@
         <PackageReference Include="Xamarin.AndroidX.Fragment.Ktx" Version="1.9.0" />
     </ItemGroup>
 
+    <!-- Backend API URL (see ApiConfiguration / docs/MOBILE_SETUP.md):
+           dotnet build -p:StockAIProApiBaseUrl=http://192.168.1.20:8000   (physical device, LAN)
+           dotnet publish -c Release -p:StockAIProApiBaseUrl=https://api.example.com
+         Debug builds without it use the local development backend
+         (10.0.2.2 on the Android emulator). Release builds require it and
+         require HTTPS, so a developer machine address can never ship. -->
+    <ItemGroup Condition="'$(StockAIProApiBaseUrl)' != ''">
+        <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+            <_Parameter1>StockAIProApiBaseUrl</_Parameter1>
+            <_Parameter2>$(StockAIProApiBaseUrl)</_Parameter2>
+        </AssemblyAttribute>
+    </ItemGroup>
+
+    <Target Name="ValidateApiBaseUrl" BeforeTargets="BeforeBuild" Condition="'$(Configuration)' == 'Release'">
+        <Error Condition="'$(StockAIProApiBaseUrl)' == ''"
+               Text="Release builds require -p:StockAIProApiBaseUrl=https://your-api-host (see docs/MOBILE_SETUP.md)." />
+        <Error Condition="'$(StockAIProApiBaseUrl)' != '' and !$([System.String]::Copy('$(StockAIProApiBaseUrl)').StartsWith('https://'))"
+               Text="Release builds require an HTTPS StockAIProApiBaseUrl." />
+    </Target>
+
     <ItemGroup>
         <!-- Platform-independent API/auth layer - see that project's own
              comment for why it's separate. -->

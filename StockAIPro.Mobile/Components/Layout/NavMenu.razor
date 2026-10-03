@@ -1,11 +1,38 @@
 @* Bottom navigation bar shown only for authenticated screens (MainLayout
-   only renders this component when AuthService.IsAuthenticated). *@
+   only renders this component when AuthService.IsAuthenticated). Items are
+   hidden when the backend disables the feature (GET /app/config). *@
+@inject AppConfigService AppConfig
+@implements IDisposable
+
 <nav class="sai-bottom-nav">
     <NavLink class="sai-nav-item" href="" Match="NavLinkMatch.All">Home</NavLink>
-    <NavLink class="sai-nav-item" href="analyse">Analyse</NavLink>
-    <NavLink class="sai-nav-item" href="top-picks">Top Picks</NavLink>
-    <NavLink class="sai-nav-item" href="watchlist">Watchlist</NavLink>
-    <NavLink class="sai-nav-item" href="performance">Performance</NavLink>
-    <NavLink class="sai-nav-item" href="intelligence">AI Intel</NavLink>
+    @if (AppConfig.IsEnabled("stock_analysis"))
+    {
+        <NavLink class="sai-nav-item" href="analyse">Analyse</NavLink>
+    }
+    @if (AppConfig.IsEnabled("top_picks"))
+    {
+        <NavLink class="sai-nav-item" href="top-picks">Candidates</NavLink>
+    }
+    @if (AppConfig.IsEnabled("watchlist"))
+    {
+        <NavLink class="sai-nav-item" href="watchlist">Watchlist</NavLink>
+    }
+    @if (AppConfig.IsEnabled("performance"))
+    {
+        <NavLink class="sai-nav-item" href="performance">Performance</NavLink>
+    }
+    @if (AppConfig.IsEnabled("intelligence"))
+    {
+        <NavLink class="sai-nav-item" href="intelligence">AI Intel</NavLink>
+    }
     <NavLink class="sai-nav-item" href="account">Account</NavLink>
 </nav>
+
+@code {
+    protected override void OnInitialized() => AppConfig.Changed += OnChanged;
+
+    private void OnChanged() => InvokeAsync(StateHasChanged);
+
+    public void Dispose() => AppConfig.Changed -= OnChanged;
+}

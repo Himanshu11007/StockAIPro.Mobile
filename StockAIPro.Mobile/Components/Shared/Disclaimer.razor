@@ -1,0 +1,7 @@
+@* Backend-controlled disclaimer (GET /app/config, AppConfigService falls
+   back to a built-in text if the server is unreachable). *@
+<div class="sai-disclaimer">@Text</div>
+
+@code {
+    [Parameter, EditorRequired] public string Text { get; set; } = "";
+}

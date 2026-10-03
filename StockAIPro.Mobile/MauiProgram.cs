@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System.Reflection;
+using Microsoft.Extensions.Logging;
 using StockAIPro.Mobile.Services.Api;
 using StockAIPro.Mobile.Services.Authentication;
 using StockAIPro.Mobile.Services.Configuration;
@@ -24,9 +25,26 @@ namespace StockAIPro.Mobile
     		builder.Logging.AddDebug();
 #endif
 
+            ConfigureApiBaseUrl();
             RegisterApiAndAuthServices(builder.Services);
 
             return builder.Build();
+        }
+
+        /// <summary>Applies the build-time API URL (MSBuild property
+        /// StockAIProApiBaseUrl, emitted as assembly metadata by the csproj)
+        /// - see ApiConfiguration for the resolution rules.</summary>
+        private static void ConfigureApiBaseUrl()
+        {
+            var configured = typeof(MauiProgram).Assembly
+                .GetCustomAttributes<AssemblyMetadataAttribute>()
+                .FirstOrDefault(a => a.Key == "StockAIProApiBaseUrl")?.Value;
+#if DEBUG
+            const bool isRelease = false;
+#else
+            const bool isRelease = true;
+#endif
+            ApiConfiguration.Initialize(configured, isRelease);
         }
 
         private static void RegisterApiAndAuthServices(IServiceCollection services)
@@ -55,6 +73,8 @@ namespace StockAIPro.Mobile
             services.AddSingleton<ITopPicksApiClient, TopPicksApiClient>();
             services.AddSingleton<IPerformanceApiClient, PerformanceApiClient>();
             services.AddSingleton<IIntelligenceApiClient, IntelligenceApiClient>();
+            services.AddSingleton<IProductApiClient, ProductApiClient>();
+            services.AddSingleton<AppConfigService>();
 
             // Transient: IHttpClientFactory constructs a fresh handler
             // instance per HttpClient it builds, per its own lifecycle
@@ -77,6 +97,15 @@ namespace StockAIPro.Mobile
             {
                 client.BaseAddress = new Uri(ApiConfiguration.BaseUrl);
                 client.Timeout = TimeSpan.FromSeconds(30);
+            }).AddHttpMessageHandler<AuthenticatedHttpMessageHandler>();
+
+            // Same auth pipeline, longer timeout: on-demand stock analysis
+            // (POST /stocks/{symbol}/analysis/refresh) fetches provider data
+            // synchronously and can take 10-30 seconds.
+            services.AddHttpClient(ApiConfiguration.AuthenticatedLongRunningClientName, client =>
+            {
+                client.BaseAddress = new Uri(ApiConfiguration.BaseUrl);
+                client.Timeout = TimeSpan.FromSeconds(120);
             }).AddHttpMessageHandler<AuthenticatedHttpMessageHandler>();
         }
     }

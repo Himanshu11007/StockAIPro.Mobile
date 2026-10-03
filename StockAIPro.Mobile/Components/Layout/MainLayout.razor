@@ -1,6 +1,7 @@
 @inherits LayoutComponentBase
 @inject IAuthService AuthService
 @inject IPinService PinService
+@inject AppConfigService AppConfig
 @inject NavigationManager Navigation
 @implements IDisposable
 
@@ -28,6 +29,10 @@
     protected override async Task OnInitializedAsync()
     {
         AuthService.AuthStateChanged += OnAuthStateChanged;
+
+        // Backend-controlled feature flags/disclaimer (public endpoint).
+        // Not awaited: it never throws and must not delay session restore.
+        _ = AppConfig.LoadAsync();
 
         if (await PinService.IsPinSetAsync())
         {

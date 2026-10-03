@@ -1,78 +1,160 @@
 @page "/"
 @inject IAuthService AuthService
+@inject IProductApiClient ProductApi
+@inject AppConfigService AppConfig
 @implements IDisposable
 
 @if (AuthService.IsAuthenticated)
 {
     <div class="sai-card">
         <div class="sai-card-title">Welcome back@(string.IsNullOrEmpty(AuthService.CurrentUser?.Email) ? "" : $", {AuthService.CurrentUser!.Email}")</div>
-        <div class="sai-action-desc">Connected to StockAI Pro.</div>
+        <div class="sai-action-desc">Transparent stock analysis: StockAI Score and the Fundamental Quality &amp; Value Framework.</div>
     </div>
+
+    @if (AppConfig.Announcement is { } announcement)
+    {
+        <div class="sai-note">@announcement</div>
+    }
+
+    @if (_regime is { } regime)
+    {
+        <div class="sai-card">
+            <div class="sai-section-title">Market regime (@(regime.Index ?? "index"))</div>
+            <div><strong>@(regime.Regime ?? ProductFormat.Missing)</strong> <span class="text-muted">as of @ProductFormat.Date(regime.AsOfDate)</span></div>
+            @if (!string.IsNullOrEmpty(regime.Reason))
+            {
+                <div class="sai-action-desc">@regime.Reason</div>
+            }
+        </div>
+    }
+    else if (_regimeError is not null)
+    {
+        <div class="sai-action-desc mb-2">Market regime unavailable: @_regimeError</div>
+    }
 
     <div class="sai-section-title">Quick actions</div>
     <div class="sai-action-list">
-        <NavLink class="sai-action-item" href="analyse">
-            <div>
-                <div class="sai-action-title">Analyse a stock</div>
-                <div class="sai-action-desc">Run a full analysis on any stock</div>
-            </div>
-            <span class="sai-action-arrow">›</span>
-        </NavLink>
-        <NavLink class="sai-action-item" href="top-picks">
-            <div>
-                <div class="sai-action-title">Top AI Picks</div>
-                <div class="sai-action-desc">View the latest recommendations</div>
-            </div>
-            <span class="sai-action-arrow">›</span>
-        </NavLink>
-        <NavLink class="sai-action-item" href="watchlist">
-            <div>
-                <div class="sai-action-title">Watchlist</div>
-                <div class="sai-action-desc">Track the stocks you care about</div>
-            </div>
-            <span class="sai-action-arrow">›</span>
-        </NavLink>
-        <NavLink class="sai-action-item" href="performance">
-            <div>
-                <div class="sai-action-title">Performance</div>
-                <div class="sai-action-desc">Historical engine analytics</div>
-            </div>
-            <span class="sai-action-arrow">›</span>
-        </NavLink>
-        <NavLink class="sai-action-item" href="intelligence">
-            <div>
-                <div class="sai-action-title">AI Intelligence</div>
-                <div class="sai-action-desc">Engine-wide insights and observations</div>
-            </div>
-            <span class="sai-action-arrow">›</span>
-        </NavLink>
+        @if (AppConfig.IsEnabled("top_picks"))
+        {
+            <NavLink class="sai-action-item" href="top-picks">
+                <div>
+                    <div class="sai-action-title">Top Investment Candidates</div>
+                    <div class="sai-action-desc">Highest-ranked stocks by StockAI Score</div>
+                </div>
+                <span class="sai-action-arrow">›</span>
+            </NavLink>
+        }
+        @if (AppConfig.IsEnabled("stock_analysis"))
+        {
+            <NavLink class="sai-action-item" href="analyse">
+                <div>
+                    <div class="sai-action-title">Analyse a stock</div>
+                    <div class="sai-action-desc">StockAI Score, FQVF checks, risks and data freshness</div>
+                </div>
+                <span class="sai-action-arrow">›</span>
+            </NavLink>
+        }
+        @if (AppConfig.IsEnabled("watchlist"))
+        {
+            <NavLink class="sai-action-item" href="watchlist">
+                <div>
+                    <div class="sai-action-title">Watchlist</div>
+                    <div class="sai-action-desc">Track the stocks you care about</div>
+                </div>
+                <span class="sai-action-arrow">›</span>
+            </NavLink>
+        }
+        @if (AppConfig.IsEnabled("performance"))
+        {
+            <NavLink class="sai-action-item" href="performance">
+                <div>
+                    <div class="sai-action-title">Performance</div>
+                    <div class="sai-action-desc">Historical engine analytics</div>
+                </div>
+                <span class="sai-action-arrow">›</span>
+            </NavLink>
+        }
+        @if (AppConfig.IsEnabled("intelligence"))
+        {
+            <NavLink class="sai-action-item" href="intelligence">
+                <div>
+                    <div class="sai-action-title">AI Intelligence</div>
+                    <div class="sai-action-desc">Engine-wide insights and observations</div>
+                </div>
+                <span class="sai-action-arrow">›</span>
+            </NavLink>
+        }
     </div>
+
+    <Disclaimer Text="@AppConfig.Disclaimer" />
 }
 else
 {
     <div class="sai-card">
         <div class="sai-card-title">StockAI Pro</div>
-        <div class="sai-action-desc">AI-Powered Stock Intelligence.</div>
+        <div class="sai-action-desc">Transparent stock analysis and ranking.</div>
         <p class="mt-3">
             <a href="/login" class="btn btn-primary">Login</a>
             <a href="/register" class="btn btn-secondary ms-2">Register</a>
         </p>
     </div>
+    <Disclaimer Text="@AppConfig.Disclaimer" />
 }
 
 @code {
+    private MarketRegimeInfo? _regime;
+    private string? _regimeError;
+    private bool _regimeRequested;
+
     // Session restoration (MainLayout.OnInitializedAsync) completes AFTER
     // this page's first render, so without this subscription the page
     // keeps showing "not signed in" even once IsAuthenticated flips to
-    // true - caught during Phase 7A's own emulator test (restart the app
-    // with a stored session: the backend call succeeded but this page
-    // stayed on the logged-out view).
-    protected override void OnInitialized()
+    // true - caught during Phase 7A's own emulator test.
+    protected override async Task OnInitializedAsync()
     {
         AuthService.AuthStateChanged += OnAuthStateChanged;
+        AppConfig.Changed += OnConfigChanged;
+        await LoadRegimeIfAuthenticatedAsync();
     }
 
-    private void OnAuthStateChanged() => InvokeAsync(StateHasChanged);
+    private async Task LoadRegimeIfAuthenticatedAsync()
+    {
+        if (!AuthService.IsAuthenticated || _regimeRequested) return;
+        _regimeRequested = true;
+        try
+        {
+            _regime = await ProductApi.GetMarketRegimeAsync();
+        }
+        catch (ApiException ex)
+        {
+            _regimeError = ex.Message;
+        }
+        catch (Exception)
+        {
+            _regimeError = "unreadable server response";
+        }
+        await InvokeAsync(StateHasChanged);
+    }
 
-    public void Dispose() => AuthService.AuthStateChanged -= OnAuthStateChanged;
+    private void OnAuthStateChanged()
+    {
+        if (!AuthService.IsAuthenticated)
+        {
+            _regime = null;
+            _regimeRequested = false;
+        }
+        InvokeAsync(async () =>
+        {
+            StateHasChanged();
+            await LoadRegimeIfAuthenticatedAsync();
+        });
+    }
+
+    private void OnConfigChanged() => InvokeAsync(StateHasChanged);
+
+    public void Dispose()
+    {
+        AuthService.AuthStateChanged -= OnAuthStateChanged;
+        AppConfig.Changed -= OnConfigChanged;
+    }
 }

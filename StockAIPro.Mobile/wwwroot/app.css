@@ -430,3 +430,25 @@ label {
         z-index: 1;
     }
 }
+
+/* ── Product analysis (Top Investment Candidates / Stock Analysis) ───────── */
+.sai-clickable { cursor: pointer; }
+.sai-clickable:active { border-color: var(--sai-primary); }
+.sai-score { text-align: right; min-width: 72px; }
+.sai-score-value { font-size: 1.6rem; font-weight: 700; color: var(--sai-primary); line-height: 1; }
+.sai-score-label { font-size: 0.7rem; color: var(--sai-text-muted); }
+.sai-list { padding-left: 1.1rem; margin-bottom: 0.5rem; font-size: 0.85rem; }
+.sai-list-positive li::marker { color: var(--sai-positive); }
+.sai-list-negative li::marker { color: var(--sai-negative); }
+.sai-note { background-color: var(--sai-warning-bg); border: 1px solid var(--sai-warning); border-radius: var(--sai-radius);
+            padding: 0.5rem 0.75rem; font-size: 0.85rem; margin-bottom: 0.75rem; }
+.sai-disclaimer { font-size: 0.75rem; color: var(--sai-text-muted); margin: 1rem 0 0.5rem; }
+.sai-tabs { display: flex; gap: 0.25rem; margin-bottom: 0.75rem; overflow-x: auto; }
+.sai-tab { flex: 1; background: var(--sai-surface); border: 1px solid var(--sai-border); color: var(--sai-text-muted);
+           border-radius: var(--sai-radius); padding: 0.4rem 0.5rem; font-size: 0.85rem; }
+.sai-tab.active { color: var(--sai-text); border-color: var(--sai-primary); }
+.sai-row { display: flex; justify-content: space-between; gap: 0.75rem; padding: 0.35rem 0;
+           border-bottom: 1px solid var(--sai-border); font-size: 0.85rem; }
+.sai-row:last-child { border-bottom: none; }
+.sai-row-value { font-weight: 600; text-align: right; white-space: nowrap; }
+.sai-link { font-size: 0.8rem; color: var(--sai-primary); text-decoration: none; }

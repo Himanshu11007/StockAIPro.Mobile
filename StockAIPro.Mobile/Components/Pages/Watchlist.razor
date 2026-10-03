@@ -34,6 +34,7 @@
                         <div>
                             <div class="sai-action-title">@item.Symbol</div>
                             <div class="sai-action-desc">@item.StockName</div>
+                            <a class="sai-link" href="@($"/stock/{Uri.EscapeDataString(item.Symbol)}")">View analysis ›</a>
                         </div>
                         <button class="btn btn-outline-danger btn-sm" disabled="@(_removingId == item.Id)"
                                 @onclick="() => RemoveAsync(item)">
