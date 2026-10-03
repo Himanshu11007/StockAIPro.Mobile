@@ -1,95 +1,109 @@
 @page "/watchlist"
+@* Watchlist: stocks the user follows, with their latest analysis and
+   per-stock alert switches. All values come from GET /watchlist/overview. *@
 @inject IWatchlistApiClient WatchlistApiClient
 @inject NavigationManager Navigation
 
 <div class="sai-card">
     <div class="sai-card-title">Your Watchlist</div>
+    <div class="sai-action-desc">Follow stocks and be alerted when their analysis changes materially. Alerts also follow your <a href="settings/notifications">notification settings</a>.</div>
+</div>
 
-    @if (_isLoading)
+@if (_isLoading)
+{
+    <LoadingState Message="Loading your watchlist..." />
+}
+else if (_loadError is not null)
+{
+    @if (_loadErrorKind == ApiErrorKind.Unauthorized)
     {
-        <LoadingState Message="Loading your watchlist..." />
+        <ErrorState Title="Session expired" Message="@_loadError" RetryLabel="Sign in again" OnRetry="@(() => Navigation.NavigateTo("/login"))" />
     }
-    else if (_loadError is not null)
+    else
     {
-        @if (_loadErrorKind == ApiErrorKind.Unauthorized)
-        {
-            <ErrorState Title="Session expired" Message="@_loadError" RetryLabel="Sign in again" OnRetry="@(() => Navigation.NavigateTo("/login"))" />
-        }
-        else
-        {
-            <ErrorState Title="Couldn't load your watchlist" Message="@_loadError" OnRetry="LoadAsync" />
-        }
+        <ErrorState Title="Couldn't load your watchlist" Message="@_loadError" OnRetry="LoadAsync" />
     }
-    else if (_items is { Count: 0 })
+}
+else if (_items is { Count: 0 } && !_showAddForm)
+{
+    <EmptyState Title="Your watchlist is empty." Message="Search for a stock to add one." ActionLabel="Add a stock" OnAction="@(() => _showAddForm = true)" />
+}
+else if (_items is not null)
+{
+    @foreach (var item in _items)
     {
-        <EmptyState Title="You haven't added any stocks yet." ActionLabel="@(_showAddForm ? null : "Add a stock")" OnAction="@(() => _showAddForm = true)" />
-    }
-    else if (_items is not null)
-    {
-        <div class="sai-action-list">
-            @foreach (var item in _items)
+        <div class="sai-card">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <a class="sai-action-title" href="@($"/stock/{Uri.EscapeDataString(item.Symbol)}")">@item.StockName</a>
+                    <div class="sai-action-desc">@item.Symbol @(item.Sector is null ? "" : $"- {item.Sector}")</div>
+                </div>
+                <div class="sai-score">
+                    <div class="sai-score-value">@ProductFormat.Score(item.StockAiScore)</div>
+                    <div class="sai-score-label">Score @(item.ScoreChange is null ? "" : $"({ProductFormat.Change(item.ScoreChange)})")</div>
+                </div>
+            </div>
+            <AnalysisLabels Labels="item.Labels" />
+            @if (!item.Analysed)
             {
-                <div class="sai-card mb-2">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div>
-                            <div class="sai-action-title">@item.Symbol</div>
-                            <div class="sai-action-desc">@item.StockName</div>
-                            <a class="sai-link" href="@($"/stock/{Uri.EscapeDataString(item.Symbol)}")">View analysis ›</a>
-                        </div>
-                        <button class="btn btn-outline-danger btn-sm" disabled="@(_removingId == item.Id)"
-                                @onclick="() => RemoveAsync(item)">
-                            @(_removingId == item.Id ? "..." : "Remove")
-                        </button>
-                    </div>
-                    <div class="sai-metric-grid mt-2">
-                        <MetricCard Label="Buy Price" Value="@item.BuyPrice.ToString("0.00")" />
-                        <MetricCard Label="Quantity" Value="@item.Quantity.ToString("0.##")" />
-                        <MetricCard Label="Buy Date" Value="@item.BuyDate" />
-                    </div>
+                <div class="sai-action-desc">Not analysed yet. Open the stock to run an analysis.</div>
+            }
+            else
+            {
+                <div class="sai-metric-grid mt-1">
+                    <MetricCard Label="Rank" Value="@(item.Rank?.ToString() ?? (item.Eligible == false ? "Not eligible" : ProductFormat.Missing))" />
+                    <MetricCard Label="FQVF" Value="@(item.FqvfPassed is { } p ? $"{p}/18 passed" : ProductFormat.Score(item.FqvfScore))" />
+                    <MetricCard Label="Last close" Value="@ProductFormat.Price(item.Price)" />
+                    <MetricCard Label="Close date" Value="@ProductFormat.DateTimeIst(item.PriceAsOf)" />
+                </div>
+                <FreshnessNotice Status="item.FreshnessStatus" Compact="true" />
+                <div class="sai-action-desc">Last update @ProductFormat.DateTimeIst(item.AnalysisComputedAt)@(item.PreviousScore is null ? "" : $" - previous score {ProductFormat.Score(item.PreviousScore)}")</div>
+            }
+            <div class="sai-action-desc mt-1">
+                Alerts: @(item.Alerts.Muted ? "muted" : item.AlertsActive ? "on" : "off (watchlist alerts disabled in settings)")
+                <button class="btn btn-link btn-sm p-0 ms-2" @onclick="() => ToggleAlertPanel(item.Id)">@(_alertPanel == item.Id ? "Hide" : "Alert settings")</button>
+            </div>
+            @if (_alertPanel == item.Id)
+            {
+                <div class="mt-1">
+                    <label class="sai-toggle"><span>Score changes</span><input type="checkbox" @bind="item.Alerts.ScoreChanges" @bind:after="() => SaveAlertsAsync(item)" /></label>
+                    <label class="sai-toggle"><span>Rank / Top Candidate changes</span><input type="checkbox" @bind="item.Alerts.RankChanges" @bind:after="() => SaveAlertsAsync(item)" /></label>
+                    <label class="sai-toggle"><span>FQVF changes</span><input type="checkbox" @bind="item.Alerts.FqvfChanges" @bind:after="() => SaveAlertsAsync(item)" /></label>
+                    <label class="sai-toggle"><span>Data / risk status changes</span><input type="checkbox" @bind="item.Alerts.StatusChanges" @bind:after="() => SaveAlertsAsync(item)" /></label>
+                    <label class="sai-toggle"><span>Mute all alerts for this stock</span><input type="checkbox" @bind="item.Alerts.Muted" @bind:after="() => SaveAlertsAsync(item)" /></label>
                 </div>
             }
+            <button class="btn btn-outline-danger btn-sm mt-2" disabled="@(_removingId == item.Id)" @onclick="() => RemoveAsync(item)">
+                @(_removingId == item.Id ? "Removing..." : "Remove")
+            </button>
         </div>
-
-        @if (!_showAddForm)
-        {
-            <button class="btn btn-primary w-100 mt-2" @onclick="() => _showAddForm = true">Add a stock</button>
-        }
     }
 
-    @if (!string.IsNullOrEmpty(_removeError))
+    @if (!_showAddForm && _items.Count > 0)
     {
-        <p class="text-danger mt-2" role="alert">@_removeError</p>
+        <button class="btn btn-primary w-100 mt-2" @onclick="() => _showAddForm = true">Add a stock</button>
     }
-</div>
+}
+
+@if (!string.IsNullOrEmpty(_actionError))
+{
+    <p class="text-danger mt-2" role="alert">@_actionError</p>
+}
 
 @if (_showAddForm)
 {
     <div class="sai-card">
         <div class="sai-card-title">Add to watchlist</div>
-        <StockSearch OnSelect="OnStockSelectedAsync" />
+        <StockSearch OnSelect="OnStockSelected" />
 
         @if (_selectedStock is { } stock)
         {
             <div class="mt-2">
-                <p>Adding <strong>@stock.Symbol</strong> - @stock.Name</p>
-                <div class="mb-2">
-                    <label for="buy-price">Buy price</label>
-                    <input id="buy-price" type="number" step="0.01" class="form-control" @bind="_buyPrice" />
-                </div>
-                <div class="mb-2">
-                    <label for="buy-date">Buy date</label>
-                    <input id="buy-date" type="date" class="form-control" @bind="_buyDate" />
-                </div>
-                <div class="mb-2">
-                    <label for="quantity">Quantity</label>
-                    <input id="quantity" type="number" step="0.01" class="form-control" @bind="_quantity" />
-                </div>
-
+                <p>Add <strong>@stock.Symbol</strong> - @stock.Name</p>
                 @if (!string.IsNullOrEmpty(_addError))
                 {
                     <p class="text-danger" role="alert">@_addError</p>
                 }
-
                 <button class="btn btn-primary w-100" disabled="@_isAdding" @onclick="AddAsync">
                     @(_isAdding ? "Adding..." : "Add to watchlist")
                 </button>
@@ -104,18 +118,15 @@
     private bool _isLoading = true;
     private string? _loadError;
     private ApiErrorKind? _loadErrorKind;
-    private List<WatchlistItem>? _items;
+    private List<WatchlistOverviewItem>? _items;
 
     private bool _showAddForm;
     private StockSearchResult? _selectedStock;
-    private double _buyPrice;
-    private DateTime _buyDate = DateTime.Today;
-    private double _quantity = 1;
     private bool _isAdding;
     private string? _addError;
-
     private int? _removingId;
-    private string? _removeError;
+    private int? _alertPanel;
+    private string? _actionError;
 
     protected override Task OnInitializedAsync() => LoadAsync();
 
@@ -127,12 +138,16 @@
         StateHasChanged();
         try
         {
-            _items = await WatchlistApiClient.GetMyWatchlistAsync();
+            _items = (await WatchlistApiClient.GetOverviewAsync()).Items;
         }
         catch (ApiException ex)
         {
             _loadError = ex.Message;
             _loadErrorKind = ex.Kind;
+        }
+        catch (Exception)
+        {
+            _loadError = "The server returned data the app could not read.";
         }
         finally
         {
@@ -140,7 +155,7 @@
         }
     }
 
-    private void OnStockSelectedAsync(StockSearchResult stock)
+    private void OnStockSelected(StockSearchResult stock)
     {
         _selectedStock = stock;
         _addError = null;
@@ -151,31 +166,18 @@
         _showAddForm = false;
         _selectedStock = null;
         _addError = null;
-        _buyPrice = 0;
-        _quantity = 1;
-        _buyDate = DateTime.Today;
     }
 
     private async Task AddAsync()
     {
-        if (_selectedStock is null)
-            return;
-
+        if (_selectedStock is null) return;
         _isAdding = true;
         _addError = null;
-        StateHasChanged();
         try
         {
-            var added = await WatchlistApiClient.AddAsync(new WatchlistAddRequest
-            {
-                Symbol = _selectedStock.Symbol,
-                BuyPrice = _buyPrice,
-                BuyDate = _buyDate.ToString("yyyy-MM-dd"),
-                Quantity = _quantity,
-            });
-
-            _items = [.. (_items ?? []), added];
+            await WatchlistApiClient.AddAsync(new WatchlistAddRequest { Symbol = _selectedStock.Symbol });
             CancelAdd();
+            await LoadAsync();
         }
         catch (ApiException ex)
         {
@@ -187,22 +189,36 @@
         }
     }
 
-    private async Task RemoveAsync(WatchlistItem item)
+    private void ToggleAlertPanel(int id) => _alertPanel = _alertPanel == id ? null : id;
+
+    private async Task SaveAlertsAsync(WatchlistOverviewItem item)
     {
-        _removingId = item.Id;
-        _removeError = null;
-        StateHasChanged();
+        _actionError = null;
         try
         {
-            var removed = await WatchlistApiClient.RemoveAsync(item.Id);
-            if (removed)
-                _items = _items?.Where(i => i.Id != item.Id).ToList();
-            else
-                _removeError = "That item is no longer on your watchlist.";
+            item.Alerts = await WatchlistApiClient.UpdateAlertsAsync(item.Id, item.Alerts);
         }
         catch (ApiException ex)
         {
-            _removeError = ex.Message;
+            _actionError = ex.Message;
+            await LoadAsync();
+        }
+    }
+
+    private async Task RemoveAsync(WatchlistOverviewItem item)
+    {
+        _removingId = item.Id;
+        _actionError = null;
+        try
+        {
+            if (await WatchlistApiClient.RemoveAsync(item.Id))
+                _items = _items?.Where(i => i.Id != item.Id).ToList();
+            else
+                _actionError = "That item is no longer on your watchlist.";
+        }
+        catch (ApiException ex)
+        {
+            _actionError = ex.Message;
         }
         finally
         {

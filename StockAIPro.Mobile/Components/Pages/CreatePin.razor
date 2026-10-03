@@ -3,6 +3,7 @@
 @inject IAuthService AuthService
 @inject IPinService PinService
 @inject NavigationManager Navigation
+@inject SignInFlow SignInFlow
 
 <div class="sai-card">
     <div class="sai-card-title">Create your PIN</div>
@@ -64,7 +65,7 @@
             {
             }
 
-            Navigation.NavigateTo("/account");
+            Navigation.NavigateTo(SignInFlow.NextRoute(offerPinSetup: false));
         }
         catch (ArgumentException ex)
         {
@@ -76,6 +77,6 @@
         }
     }
 
-    private void Skip() => Navigation.NavigateTo("/account");
+    private void Skip() => Navigation.NavigateTo(SignInFlow.NextRoute(offerPinSetup: false));
 
 }

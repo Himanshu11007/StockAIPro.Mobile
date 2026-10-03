@@ -23,4 +23,11 @@ public interface IWatchlistApiClient
     /// (see watchlist/service.py:remove_watchlist_item), so a caller can't
     /// probe for another user's item ids.</summary>
     Task<bool> RemoveAsync(int itemId, CancellationToken ct = default);
+
+    /// <summary>Watched stocks with current score, rank, FQVF, price, score
+    /// change, freshness and alert settings.</summary>
+    Task<WatchlistOverview> GetOverviewAsync(CancellationToken ct = default);
+
+    /// <summary>Per-stock alert switches; returns the saved settings.</summary>
+    Task<WatchlistAlerts> UpdateAlertsAsync(int itemId, WatchlistAlerts alerts, CancellationToken ct = default);
 }

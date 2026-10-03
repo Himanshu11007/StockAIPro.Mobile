@@ -4,6 +4,7 @@
 @inject IAuthService AuthService
 @inject IPinService PinService
 @inject NavigationManager Navigation
+@inject SignInFlow SignInFlow
 
 <div class="sai-card">
     @if (_step == Step.EnterDestination)
@@ -110,7 +111,9 @@
         try
         {
             await AuthService.VerifyOtpAsync(_destination, _code);
-            Navigation.NavigateTo(await PinService.IsPinSetAsync() ? "/account" : "/pin/create");
+            // A notification the user tapped while signed out opens first;
+        // otherwise Home, or the optional PIN set-up on a first sign-in here.
+        Navigation.NavigateTo(SignInFlow.NextRoute(offerPinSetup: !await PinService.IsPinSetAsync()));
         }
         catch (ApiException ex) when (ex.Kind == ApiErrorKind.Unauthorized)
         {

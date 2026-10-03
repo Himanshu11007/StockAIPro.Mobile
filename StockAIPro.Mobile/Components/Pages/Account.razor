@@ -7,6 +7,8 @@
 @inject IGoogleSignInService GoogleSignIn
 @inject IAppleSignInService AppleSignIn
 @inject NavigationManager Navigation
+@inject INotificationApiClient NotificationApi
+@inject AppConfigService AppConfig
 @implements IDisposable
 
 <div class="sai-card">
@@ -88,9 +90,63 @@
         <button class="btn btn-outline-secondary w-100 mb-2" @onclick="LinkGoogleAsync" disabled="@_isBusy">
             Link Google account
         </button>
-        <button class="btn btn-outline-secondary w-100" @onclick="LinkAppleAsync" disabled="@_isBusy">
+        <button class="btn btn-outline-secondary w-100 mb-4" @onclick="LinkAppleAsync" disabled="@_isBusy">
             Link Apple account
         </button>
+
+        <div class="sai-card-title">Notifications</div>
+        <div class="sai-action-list mb-4">
+            <a class="sai-action-item" href="notifications"><div class="sai-action-title">Notification Center</div><span class="sai-action-arrow">›</span></a>
+            <a class="sai-action-item" href="settings/notifications"><div class="sai-action-title">Notification settings</div><span class="sai-action-arrow">›</span></a>
+        </div>
+
+        <div class="sai-card-title">Active sessions</div>
+        @if (_sessions is null)
+        {
+            <button class="btn btn-outline-secondary w-100 mb-4" @onclick="LoadSessionsAsync" disabled="@_isBusy">Show signed-in devices</button>
+        }
+        else
+        {
+            <div class="mb-4">
+                @foreach (var sess in _sessions)
+                {
+                    <div class="sai-row">
+                        <div>@(sess.DeviceName ?? "Unknown device")@(sess.DeviceId == _deviceId ? " (this device)" : "")</div>
+                        <div class="sai-row-value">signed in @sess.CreatedAt.ToLocalTime().ToString("d MMM yyyy HH:mm")</div>
+                    </div>
+                }
+                @if (_sessions.Count == 0)
+                {
+                    <div class="sai-action-desc">No active sessions.</div>
+                }
+            </div>
+        }
+
+        <div class="sai-card-title">Help and privacy</div>
+        <div class="sai-action-list mb-3">
+            <a class="sai-action-item" href="report"><div><div class="sai-action-title">Report a problem</div><div class="sai-action-desc">Incorrect or stale data, company information, rankings, or an app problem</div></div><span class="sai-action-arrow">›</span></a>
+            <a class="sai-action-item" href="privacy"><div class="sai-action-title">Privacy and terms</div><span class="sai-action-arrow">›</span></a>
+            <a class="sai-action-item" href="welcome"><div class="sai-action-title">How it works (introduction)</div><span class="sai-action-arrow">›</span></a>
+        </div>
+
+        <div class="sai-card-title">Delete account</div>
+        @if (!_confirmDelete)
+        {
+            <button class="btn btn-outline-danger w-100 mb-3" @onclick="() => _confirmDelete = true" disabled="@_isBusy">Request account deletion</button>
+        }
+        else
+        {
+            <div class="sai-banner sai-banner-warning">
+                Your request is recorded and processed by an administrator. Your account stays active until then.
+                <textarea class="form-control mt-2" rows="2" placeholder="Reason (optional)" @bind="_deleteReason"></textarea>
+                <div class="d-flex gap-2 mt-2">
+                    <button class="btn btn-danger flex-fill" @onclick="RequestDeletionAsync" disabled="@_isBusy">Send request</button>
+                    <button class="btn btn-secondary flex-fill" @onclick="() => _confirmDelete = false">Cancel</button>
+                </div>
+            </div>
+        }
+
+        <div class="sai-action-desc text-muted mt-3">App version @AppInfo.Current.VersionString (build @AppInfo.Current.BuildString)</div>
     }
 </div>
 
@@ -101,6 +157,49 @@
     private string? _statusMessage;
     private string? _errorMessage;
     private List<LinkedIdentityResponse> _identities = [];
+    private List<SessionResponse>? _sessions;
+    private string? _deviceId;
+    private bool _confirmDelete;
+    private string? _deleteReason;
+
+    private async Task LoadSessionsAsync()
+    {
+        _errorMessage = null;
+        _isBusy = true;
+        try
+        {
+            _deviceId = await AuthService.GetDeviceIdAsync();
+            _sessions = await AuthService.GetSessionsAsync();
+        }
+        catch (ApiException ex)
+        {
+            _errorMessage = ex.Message;
+        }
+        finally
+        {
+            _isBusy = false;
+        }
+    }
+
+    private async Task RequestDeletionAsync()
+    {
+        _errorMessage = null;
+        _isBusy = true;
+        try
+        {
+            var receipt = await NotificationApi.RequestAccountDeletionAsync(string.IsNullOrWhiteSpace(_deleteReason) ? null : _deleteReason);
+            _statusMessage = receipt.Message;
+            _confirmDelete = false;
+        }
+        catch (ApiException ex)
+        {
+            _errorMessage = ex.Message;
+        }
+        finally
+        {
+            _isBusy = false;
+        }
+    }
 
     protected override async Task OnInitializedAsync()
     {

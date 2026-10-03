@@ -1,0 +1,1853 @@
+{
+  "data": {
+    "disclaimer": "StockAI Pro provides research and analysis, not investment advice. Scores rank stocks on available data; they are not predictions or guarantees of returns. Past performance does not indicate future results.",
+    "items": [
+      {
+        "components": [
+          {
+            "key": "quality",
+            "label": "Quality",
+            "score": 99.0
+          },
+          {
+            "key": "valuation",
+            "label": "Valuation",
+            "score": 99.0
+          },
+          {
+            "key": "financial_health",
+            "label": "Financial Health",
+            "score": 99.0
+          },
+          {
+            "key": "momentum",
+            "label": "Momentum",
+            "score": 99.0
+          },
+          {
+            "key": "risk",
+            "label": "Risk",
+            "score": 50.0
+          },
+          {
+            "key": "market_regime",
+            "label": "Price Regime",
+            "score": 99.0
+          }
+        ],
+        "computed_at": "2026-10-03T12:21:03.431805+00:00",
+        "engine_version": "ranking-v1.0",
+        "fqvf_counts": {
+          "FAIL": 6,
+          "PASS": 12
+        },
+        "fqvf_score": 66.66666666666666,
+        "fqvf_summary": "12 passed",
+        "freshness": {
+          "market_data_as_of": "2026-10-03"
+        },
+        "freshness_status": {
+          "analysis_age_days": 0,
+          "analysis_computed_at": "2026-10-03T12:21:03.431805+00:00",
+          "fiscal_period_end": null,
+          "fundamentals_fetched_at": null,
+          "issues": [],
+          "market_data_age_days": 0,
+          "market_data_as_of": "2026-10-03",
+          "status": "OK"
+        },
+        "industry": "Software",
+        "labels": [
+          {
+            "key": "top_candidate",
+            "label": "Top Candidate",
+            "tone": "positive"
+          },
+          {
+            "key": "quality",
+            "label": "Strong Quality",
+            "tone": "positive"
+          },
+          {
+            "key": "valuation",
+            "label": "Attractive Valuation",
+            "tone": "positive"
+          },
+          {
+            "key": "financial_health",
+            "label": "Strong Financial Health",
+            "tone": "positive"
+          },
+          {
+            "key": "momentum",
+            "label": "Positive Momentum",
+            "tone": "positive"
+          }
+        ],
+        "name": "Stock 10",
+        "positives": [],
+        "rank": 1,
+        "risks": [],
+        "score_coverage": 0.95,
+        "sector": "IT",
+        "stockai_score": 99.0,
+        "symbol": "S10.NS"
+      },
+      {
+        "components": [
+          {
+            "key": "quality",
+            "label": "Quality",
+            "score": 90.0
+          },
+          {
+            "key": "valuation",
+            "label": "Valuation",
+            "score": 90.0
+          },
+          {
+            "key": "financial_health",
+            "label": "Financial Health",
+            "score": 90.0
+          },
+          {
+            "key": "momentum",
+            "label": "Momentum",
+            "score": 90.0
+          },
+          {
+            "key": "risk",
+            "label": "Risk",
+            "score": 50.0
+          },
+          {
+            "key": "market_regime",
+            "label": "Price Regime",
+            "score": 90.0
+          }
+        ],
+        "computed_at": "2026-10-03T12:21:03.431805+00:00",
+        "engine_version": "ranking-v1.0",
+        "fqvf_counts": {
+          "FAIL": 6,
+          "PASS": 12
+        },
+        "fqvf_score": 66.66666666666666,
+        "fqvf_summary": "12 passed",
+        "freshness": {
+          "market_data_as_of": "2026-10-03"
+        },
+        "freshness_status": {
+          "analysis_age_days": 0,
+          "analysis_computed_at": "2026-10-03T12:21:03.431805+00:00",
+          "fiscal_period_end": null,
+          "fundamentals_fetched_at": null,
+          "issues": [],
+          "market_data_age_days": 0,
+          "market_data_as_of": "2026-10-03",
+          "status": "OK"
+        },
+        "industry": "Software",
+        "labels": [
+          {
+            "key": "top_candidate",
+            "label": "Top Candidate",
+            "tone": "positive"
+          },
+          {
+            "key": "quality",
+            "label": "Strong Quality",
+            "tone": "positive"
+          },
+          {
+            "key": "valuation",
+            "label": "Attractive Valuation",
+            "tone": "positive"
+          },
+          {
+            "key": "financial_health",
+            "label": "Strong Financial Health",
+            "tone": "positive"
+          },
+          {
+            "key": "momentum",
+            "label": "Positive Momentum",
+            "tone": "positive"
+          }
+        ],
+        "name": "Stock 00",
+        "positives": [],
+        "rank": 2,
+        "risks": [],
+        "score_coverage": 0.95,
+        "sector": "IT",
+        "stockai_score": 90.0,
+        "symbol": "S00.NS"
+      },
+      {
+        "components": [
+          {
+            "key": "quality",
+            "label": "Quality",
+            "score": 89.0
+          },
+          {
+            "key": "valuation",
+            "label": "Valuation",
+            "score": 89.0
+          },
+          {
+            "key": "financial_health",
+            "label": "Financial Health",
+            "score": 89.0
+          },
+          {
+            "key": "momentum",
+            "label": "Momentum",
+            "score": 89.0
+          },
+          {
+            "key": "risk",
+            "label": "Risk",
+            "score": 50.0
+          },
+          {
+            "key": "market_regime",
+            "label": "Price Regime",
+            "score": 89.0
+          }
+        ],
+        "computed_at": "2026-10-03T12:21:03.431805+00:00",
+        "engine_version": "ranking-v1.0",
+        "fqvf_counts": {
+          "FAIL": 6,
+          "PASS": 12
+        },
+        "fqvf_score": 66.66666666666666,
+        "fqvf_summary": "12 passed",
+        "freshness": {
+          "market_data_as_of": "2026-10-03"
+        },
+        "freshness_status": {
+          "analysis_age_days": 0,
+          "analysis_computed_at": "2026-10-03T12:21:03.431805+00:00",
+          "fiscal_period_end": null,
+          "fundamentals_fetched_at": null,
+          "issues": [],
+          "market_data_age_days": 0,
+          "market_data_as_of": "2026-10-03",
+          "status": "OK"
+        },
+        "industry": "Oil & Gas",
+        "labels": [
+          {
+            "key": "top_candidate",
+            "label": "Top Candidate",
+            "tone": "positive"
+          },
+          {
+            "key": "quality",
+            "label": "Strong Quality",
+            "tone": "positive"
+          },
+          {
+            "key": "valuation",
+            "label": "Attractive Valuation",
+            "tone": "positive"
+          },
+          {
+            "key": "financial_health",
+            "label": "Strong Financial Health",
+            "tone": "positive"
+          },
+          {
+            "key": "momentum",
+            "label": "Positive Momentum",
+            "tone": "positive"
+          }
+        ],
+        "name": "Stock 01",
+        "positives": [],
+        "rank": 3,
+        "risks": [],
+        "score_coverage": 0.95,
+        "sector": "Energy",
+        "stockai_score": 89.0,
+        "symbol": "S01.NS"
+      },
+      {
+        "components": [
+          {
+            "key": "quality",
+            "label": "Quality",
+            "score": 88.0
+          },
+          {
+            "key": "valuation",
+            "label": "Valuation",
+            "score": 88.0
+          },
+          {
+            "key": "financial_health",
+            "label": "Financial Health",
+            "score": 88.0
+          },
+          {
+            "key": "momentum",
+            "label": "Momentum",
+            "score": 88.0
+          },
+          {
+            "key": "risk",
+            "label": "Risk",
+            "score": 50.0
+          },
+          {
+            "key": "market_regime",
+            "label": "Price Regime",
+            "score": 88.0
+          }
+        ],
+        "computed_at": "2026-10-03T12:21:03.431805+00:00",
+        "engine_version": "ranking-v1.0",
+        "fqvf_counts": {
+          "FAIL": 6,
+          "PASS": 12
+        },
+        "fqvf_score": 66.66666666666666,
+        "fqvf_summary": "12 passed",
+        "freshness": {
+          "market_data_as_of": "2026-10-03"
+        },
+        "freshness_status": {
+          "analysis_age_days": 0,
+          "analysis_computed_at": "2026-10-03T12:21:03.431805+00:00",
+          "fiscal_period_end": null,
+          "fundamentals_fetched_at": null,
+          "issues": [],
+          "market_data_age_days": 0,
+          "market_data_as_of": "2026-10-03",
+          "status": "OK"
+        },
+        "industry": "Software",
+        "labels": [
+          {
+            "key": "top_candidate",
+            "label": "Top Candidate",
+            "tone": "positive"
+          },
+          {
+            "key": "quality",
+            "label": "Strong Quality",
+            "tone": "positive"
+          },
+          {
+            "key": "valuation",
+            "label": "Attractive Valuation",
+            "tone": "positive"
+          },
+          {
+            "key": "financial_health",
+            "label": "Strong Financial Health",
+            "tone": "positive"
+          },
+          {
+            "key": "momentum",
+            "label": "Positive Momentum",
+            "tone": "positive"
+          }
+        ],
+        "name": "Stock 02",
+        "positives": [],
+        "rank": 4,
+        "risks": [],
+        "score_coverage": 0.95,
+        "sector": "IT",
+        "stockai_score": 88.0,
+        "symbol": "S02.NS"
+      },
+      {
+        "components": [
+          {
+            "key": "quality",
+            "label": "Quality",
+            "score": 86.0
+          },
+          {
+            "key": "valuation",
+            "label": "Valuation",
+            "score": 86.0
+          },
+          {
+            "key": "financial_health",
+            "label": "Financial Health",
+            "score": 86.0
+          },
+          {
+            "key": "momentum",
+            "label": "Momentum",
+            "score": 86.0
+          },
+          {
+            "key": "risk",
+            "label": "Risk",
+            "score": 50.0
+          },
+          {
+            "key": "market_regime",
+            "label": "Price Regime",
+            "score": 86.0
+          }
+        ],
+        "computed_at": "2026-10-03T12:21:03.431805+00:00",
+        "engine_version": "ranking-v1.0",
+        "fqvf_counts": {
+          "FAIL": 6,
+          "PASS": 12
+        },
+        "fqvf_score": 66.66666666666666,
+        "fqvf_summary": "12 passed",
+        "freshness": {
+          "market_data_as_of": "2026-10-03"
+        },
+        "freshness_status": {
+          "analysis_age_days": 0,
+          "analysis_computed_at": "2026-10-03T12:21:03.431805+00:00",
+          "fiscal_period_end": null,
+          "fundamentals_fetched_at": null,
+          "issues": [],
+          "market_data_age_days": 0,
+          "market_data_as_of": "2026-10-03",
+          "status": "OK"
+        },
+        "industry": "Software",
+        "labels": [
+          {
+            "key": "top_candidate",
+            "label": "Top Candidate",
+            "tone": "positive"
+          },
+          {
+            "key": "quality",
+            "label": "Strong Quality",
+            "tone": "positive"
+          },
+          {
+            "key": "valuation",
+            "label": "Attractive Valuation",
+            "tone": "positive"
+          },
+          {
+            "key": "financial_health",
+            "label": "Strong Financial Health",
+            "tone": "positive"
+          },
+          {
+            "key": "momentum",
+            "label": "Positive Momentum",
+            "tone": "positive"
+          }
+        ],
+        "name": "Stock 04",
+        "positives": [],
+        "rank": 5,
+        "risks": [],
+        "score_coverage": 0.95,
+        "sector": "IT",
+        "stockai_score": 86.0,
+        "symbol": "S04.NS"
+      },
+      {
+        "components": [
+          {
+            "key": "quality",
+            "label": "Quality",
+            "score": 85.0
+          },
+          {
+            "key": "valuation",
+            "label": "Valuation",
+            "score": 85.0
+          },
+          {
+            "key": "financial_health",
+            "label": "Financial Health",
+            "score": 85.0
+          },
+          {
+            "key": "momentum",
+            "label": "Momentum",
+            "score": 85.0
+          },
+          {
+            "key": "risk",
+            "label": "Risk",
+            "score": 50.0
+          },
+          {
+            "key": "market_regime",
+            "label": "Price Regime",
+            "score": 85.0
+          }
+        ],
+        "computed_at": "2026-10-03T12:21:03.431805+00:00",
+        "engine_version": "ranking-v1.0",
+        "fqvf_counts": {
+          "FAIL": 6,
+          "PASS": 12
+        },
+        "fqvf_score": 66.66666666666666,
+        "fqvf_summary": "12 passed",
+        "freshness": {
+          "market_data_as_of": "2026-10-03"
+        },
+        "freshness_status": {
+          "analysis_age_days": 0,
+          "analysis_computed_at": "2026-10-03T12:21:03.431805+00:00",
+          "fiscal_period_end": null,
+          "fundamentals_fetched_at": null,
+          "issues": [],
+          "market_data_age_days": 0,
+          "market_data_as_of": "2026-10-03",
+          "status": "OK"
+        },
+        "industry": "Oil & Gas",
+        "labels": [
+          {
+            "key": "top_candidate",
+            "label": "Top Candidate",
+            "tone": "positive"
+          },
+          {
+            "key": "quality",
+            "label": "Strong Quality",
+            "tone": "positive"
+          },
+          {
+            "key": "valuation",
+            "label": "Attractive Valuation",
+            "tone": "positive"
+          },
+          {
+            "key": "financial_health",
+            "label": "Strong Financial Health",
+            "tone": "positive"
+          },
+          {
+            "key": "momentum",
+            "label": "Positive Momentum",
+            "tone": "positive"
+          }
+        ],
+        "name": "Stock 05",
+        "positives": [],
+        "rank": 6,
+        "risks": [],
+        "score_coverage": 0.95,
+        "sector": "Energy",
+        "stockai_score": 85.0,
+        "symbol": "S05.NS"
+      },
+      {
+        "components": [
+          {
+            "key": "quality",
+            "label": "Quality",
+            "score": 84.0
+          },
+          {
+            "key": "valuation",
+            "label": "Valuation",
+            "score": 84.0
+          },
+          {
+            "key": "financial_health",
+            "label": "Financial Health",
+            "score": 84.0
+          },
+          {
+            "key": "momentum",
+            "label": "Momentum",
+            "score": 84.0
+          },
+          {
+            "key": "risk",
+            "label": "Risk",
+            "score": 50.0
+          },
+          {
+            "key": "market_regime",
+            "label": "Price Regime",
+            "score": 84.0
+          }
+        ],
+        "computed_at": "2026-10-03T12:21:03.431805+00:00",
+        "engine_version": "ranking-v1.0",
+        "fqvf_counts": {
+          "FAIL": 6,
+          "PASS": 12
+        },
+        "fqvf_score": 66.66666666666666,
+        "fqvf_summary": "12 passed",
+        "freshness": {
+          "market_data_as_of": "2026-10-03"
+        },
+        "freshness_status": {
+          "analysis_age_days": 0,
+          "analysis_computed_at": "2026-10-03T12:21:03.431805+00:00",
+          "fiscal_period_end": null,
+          "fundamentals_fetched_at": null,
+          "issues": [],
+          "market_data_age_days": 0,
+          "market_data_as_of": "2026-10-03",
+          "status": "OK"
+        },
+        "industry": "Software",
+        "labels": [
+          {
+            "key": "top_candidate",
+            "label": "Top Candidate",
+            "tone": "positive"
+          },
+          {
+            "key": "quality",
+            "label": "Strong Quality",
+            "tone": "positive"
+          },
+          {
+            "key": "valuation",
+            "label": "Attractive Valuation",
+            "tone": "positive"
+          },
+          {
+            "key": "financial_health",
+            "label": "Strong Financial Health",
+            "tone": "positive"
+          },
+          {
+            "key": "momentum",
+            "label": "Positive Momentum",
+            "tone": "positive"
+          }
+        ],
+        "name": "Stock 06",
+        "positives": [],
+        "rank": 7,
+        "risks": [],
+        "score_coverage": 0.95,
+        "sector": "IT",
+        "stockai_score": 84.0,
+        "symbol": "S06.NS"
+      },
+      {
+        "components": [
+          {
+            "key": "quality",
+            "label": "Quality",
+            "score": 83.0
+          },
+          {
+            "key": "valuation",
+            "label": "Valuation",
+            "score": 83.0
+          },
+          {
+            "key": "financial_health",
+            "label": "Financial Health",
+            "score": 83.0
+          },
+          {
+            "key": "momentum",
+            "label": "Momentum",
+            "score": 83.0
+          },
+          {
+            "key": "risk",
+            "label": "Risk",
+            "score": 50.0
+          },
+          {
+            "key": "market_regime",
+            "label": "Price Regime",
+            "score": 83.0
+          }
+        ],
+        "computed_at": "2026-10-03T12:21:03.431805+00:00",
+        "engine_version": "ranking-v1.0",
+        "fqvf_counts": {
+          "FAIL": 6,
+          "PASS": 12
+        },
+        "fqvf_score": 66.66666666666666,
+        "fqvf_summary": "12 passed",
+        "freshness": {
+          "market_data_as_of": "2026-10-03"
+        },
+        "freshness_status": {
+          "analysis_age_days": 0,
+          "analysis_computed_at": "2026-10-03T12:21:03.431805+00:00",
+          "fiscal_period_end": null,
+          "fundamentals_fetched_at": null,
+          "issues": [],
+          "market_data_age_days": 0,
+          "market_data_as_of": "2026-10-03",
+          "status": "OK"
+        },
+        "industry": "Oil & Gas",
+        "labels": [
+          {
+            "key": "top_candidate",
+            "label": "Top Candidate",
+            "tone": "positive"
+          },
+          {
+            "key": "quality",
+            "label": "Strong Quality",
+            "tone": "positive"
+          },
+          {
+            "key": "valuation",
+            "label": "Attractive Valuation",
+            "tone": "positive"
+          },
+          {
+            "key": "financial_health",
+            "label": "Strong Financial Health",
+            "tone": "positive"
+          },
+          {
+            "key": "momentum",
+            "label": "Positive Momentum",
+            "tone": "positive"
+          }
+        ],
+        "name": "Stock 07",
+        "positives": [],
+        "rank": 8,
+        "risks": [],
+        "score_coverage": 0.95,
+        "sector": "Energy",
+        "stockai_score": 83.0,
+        "symbol": "S07.NS"
+      },
+      {
+        "components": [
+          {
+            "key": "quality",
+            "label": "Quality",
+            "score": 82.0
+          },
+          {
+            "key": "valuation",
+            "label": "Valuation",
+            "score": 82.0
+          },
+          {
+            "key": "financial_health",
+            "label": "Financial Health",
+            "score": 82.0
+          },
+          {
+            "key": "momentum",
+            "label": "Momentum",
+            "score": 82.0
+          },
+          {
+            "key": "risk",
+            "label": "Risk",
+            "score": 50.0
+          },
+          {
+            "key": "market_regime",
+            "label": "Price Regime",
+            "score": 82.0
+          }
+        ],
+        "computed_at": "2026-10-03T12:21:03.431805+00:00",
+        "engine_version": "ranking-v1.0",
+        "fqvf_counts": {
+          "FAIL": 6,
+          "PASS": 12
+        },
+        "fqvf_score": 66.66666666666666,
+        "fqvf_summary": "12 passed",
+        "freshness": {
+          "market_data_as_of": "2026-10-03"
+        },
+        "freshness_status": {
+          "analysis_age_days": 0,
+          "analysis_computed_at": "2026-10-03T12:21:03.431805+00:00",
+          "fiscal_period_end": null,
+          "fundamentals_fetched_at": null,
+          "issues": [],
+          "market_data_age_days": 0,
+          "market_data_as_of": "2026-10-03",
+          "status": "OK"
+        },
+        "industry": "Software",
+        "labels": [
+          {
+            "key": "top_candidate",
+            "label": "Top Candidate",
+            "tone": "positive"
+          },
+          {
+            "key": "quality",
+            "label": "Strong Quality",
+            "tone": "positive"
+          },
+          {
+            "key": "valuation",
+            "label": "Attractive Valuation",
+            "tone": "positive"
+          },
+          {
+            "key": "financial_health",
+            "label": "Strong Financial Health",
+            "tone": "positive"
+          },
+          {
+            "key": "momentum",
+            "label": "Positive Momentum",
+            "tone": "positive"
+          }
+        ],
+        "name": "Stock 08",
+        "positives": [],
+        "rank": 9,
+        "risks": [],
+        "score_coverage": 0.95,
+        "sector": "IT",
+        "stockai_score": 82.0,
+        "symbol": "S08.NS"
+      },
+      {
+        "components": [
+          {
+            "key": "quality",
+            "label": "Quality",
+            "score": 81.0
+          },
+          {
+            "key": "valuation",
+            "label": "Valuation",
+            "score": 81.0
+          },
+          {
+            "key": "financial_health",
+            "label": "Financial Health",
+            "score": 81.0
+          },
+          {
+            "key": "momentum",
+            "label": "Momentum",
+            "score": 81.0
+          },
+          {
+            "key": "risk",
+            "label": "Risk",
+            "score": 50.0
+          },
+          {
+            "key": "market_regime",
+            "label": "Price Regime",
+            "score": 81.0
+          }
+        ],
+        "computed_at": "2026-10-03T12:21:03.431805+00:00",
+        "engine_version": "ranking-v1.0",
+        "fqvf_counts": {
+          "FAIL": 6,
+          "PASS": 12
+        },
+        "fqvf_score": 66.66666666666666,
+        "fqvf_summary": "12 passed",
+        "freshness": {
+          "market_data_as_of": "2026-10-03"
+        },
+        "freshness_status": {
+          "analysis_age_days": 0,
+          "analysis_computed_at": "2026-10-03T12:21:03.431805+00:00",
+          "fiscal_period_end": null,
+          "fundamentals_fetched_at": null,
+          "issues": [],
+          "market_data_age_days": 0,
+          "market_data_as_of": "2026-10-03",
+          "status": "OK"
+        },
+        "industry": "Oil & Gas",
+        "labels": [
+          {
+            "key": "top_candidate",
+            "label": "Top Candidate",
+            "tone": "positive"
+          },
+          {
+            "key": "quality",
+            "label": "Strong Quality",
+            "tone": "positive"
+          },
+          {
+            "key": "valuation",
+            "label": "Attractive Valuation",
+            "tone": "positive"
+          },
+          {
+            "key": "financial_health",
+            "label": "Strong Financial Health",
+            "tone": "positive"
+          },
+          {
+            "key": "momentum",
+            "label": "Positive Momentum",
+            "tone": "positive"
+          }
+        ],
+        "name": "Stock 09",
+        "positives": [],
+        "rank": 10,
+        "risks": [],
+        "score_coverage": 0.95,
+        "sector": "Energy",
+        "stockai_score": 81.0,
+        "symbol": "S09.NS"
+      },
+      {
+        "components": [
+          {
+            "key": "quality",
+            "label": "Quality",
+            "score": 79.0
+          },
+          {
+            "key": "valuation",
+            "label": "Valuation",
+            "score": 79.0
+          },
+          {
+            "key": "financial_health",
+            "label": "Financial Health",
+            "score": 79.0
+          },
+          {
+            "key": "momentum",
+            "label": "Momentum",
+            "score": 79.0
+          },
+          {
+            "key": "risk",
+            "label": "Risk",
+            "score": 50.0
+          },
+          {
+            "key": "market_regime",
+            "label": "Price Regime",
+            "score": 79.0
+          }
+        ],
+        "computed_at": "2026-10-03T12:21:03.431805+00:00",
+        "engine_version": "ranking-v1.0",
+        "fqvf_counts": {
+          "FAIL": 6,
+          "PASS": 12
+        },
+        "fqvf_score": 66.66666666666666,
+        "fqvf_summary": "12 passed",
+        "freshness": {
+          "market_data_as_of": "2026-10-03"
+        },
+        "freshness_status": {
+          "analysis_age_days": 0,
+          "analysis_computed_at": "2026-10-03T12:21:03.431805+00:00",
+          "fiscal_period_end": null,
+          "fundamentals_fetched_at": null,
+          "issues": [],
+          "market_data_age_days": 0,
+          "market_data_as_of": "2026-10-03",
+          "status": "OK"
+        },
+        "industry": "Oil & Gas",
+        "labels": [
+          {
+            "key": "top_candidate",
+            "label": "Top Candidate",
+            "tone": "positive"
+          },
+          {
+            "key": "quality",
+            "label": "Strong Quality",
+            "tone": "positive"
+          },
+          {
+            "key": "valuation",
+            "label": "Attractive Valuation",
+            "tone": "positive"
+          },
+          {
+            "key": "financial_health",
+            "label": "Strong Financial Health",
+            "tone": "positive"
+          },
+          {
+            "key": "momentum",
+            "label": "Positive Momentum",
+            "tone": "positive"
+          }
+        ],
+        "name": "Stock 11",
+        "positives": [],
+        "rank": 11,
+        "risks": [],
+        "score_coverage": 0.95,
+        "sector": "Energy",
+        "stockai_score": 79.0,
+        "symbol": "S11.NS"
+      },
+      {
+        "components": [
+          {
+            "key": "quality",
+            "label": "Quality",
+            "score": 78.0
+          },
+          {
+            "key": "valuation",
+            "label": "Valuation",
+            "score": 78.0
+          },
+          {
+            "key": "financial_health",
+            "label": "Financial Health",
+            "score": 78.0
+          },
+          {
+            "key": "momentum",
+            "label": "Momentum",
+            "score": 78.0
+          },
+          {
+            "key": "risk",
+            "label": "Risk",
+            "score": 50.0
+          },
+          {
+            "key": "market_regime",
+            "label": "Price Regime",
+            "score": 78.0
+          }
+        ],
+        "computed_at": "2026-10-03T12:21:03.431805+00:00",
+        "engine_version": "ranking-v1.0",
+        "fqvf_counts": {
+          "FAIL": 6,
+          "PASS": 12
+        },
+        "fqvf_score": 66.66666666666666,
+        "fqvf_summary": "12 passed",
+        "freshness": {
+          "market_data_as_of": "2026-10-03"
+        },
+        "freshness_status": {
+          "analysis_age_days": 0,
+          "analysis_computed_at": "2026-10-03T12:21:03.431805+00:00",
+          "fiscal_period_end": null,
+          "fundamentals_fetched_at": null,
+          "issues": [],
+          "market_data_age_days": 0,
+          "market_data_as_of": "2026-10-03",
+          "status": "OK"
+        },
+        "industry": "Software",
+        "labels": [
+          {
+            "key": "top_candidate",
+            "label": "Top Candidate",
+            "tone": "positive"
+          },
+          {
+            "key": "quality",
+            "label": "Strong Quality",
+            "tone": "positive"
+          },
+          {
+            "key": "valuation",
+            "label": "Attractive Valuation",
+            "tone": "positive"
+          },
+          {
+            "key": "financial_health",
+            "label": "Strong Financial Health",
+            "tone": "positive"
+          },
+          {
+            "key": "momentum",
+            "label": "Positive Momentum",
+            "tone": "positive"
+          }
+        ],
+        "name": "Stock 12",
+        "positives": [],
+        "rank": 12,
+        "risks": [],
+        "score_coverage": 0.95,
+        "sector": "IT",
+        "stockai_score": 78.0,
+        "symbol": "S12.NS"
+      },
+      {
+        "components": [
+          {
+            "key": "quality",
+            "label": "Quality",
+            "score": 77.0
+          },
+          {
+            "key": "valuation",
+            "label": "Valuation",
+            "score": 77.0
+          },
+          {
+            "key": "financial_health",
+            "label": "Financial Health",
+            "score": 77.0
+          },
+          {
+            "key": "momentum",
+            "label": "Momentum",
+            "score": 77.0
+          },
+          {
+            "key": "risk",
+            "label": "Risk",
+            "score": 50.0
+          },
+          {
+            "key": "market_regime",
+            "label": "Price Regime",
+            "score": 77.0
+          }
+        ],
+        "computed_at": "2026-10-03T12:21:03.431805+00:00",
+        "engine_version": "ranking-v1.0",
+        "fqvf_counts": {
+          "FAIL": 6,
+          "PASS": 12
+        },
+        "fqvf_score": 66.66666666666666,
+        "fqvf_summary": "12 passed",
+        "freshness": {
+          "market_data_as_of": "2026-10-03"
+        },
+        "freshness_status": {
+          "analysis_age_days": 0,
+          "analysis_computed_at": "2026-10-03T12:21:03.431805+00:00",
+          "fiscal_period_end": null,
+          "fundamentals_fetched_at": null,
+          "issues": [],
+          "market_data_age_days": 0,
+          "market_data_as_of": "2026-10-03",
+          "status": "OK"
+        },
+        "industry": "Oil & Gas",
+        "labels": [
+          {
+            "key": "top_candidate",
+            "label": "Top Candidate",
+            "tone": "positive"
+          },
+          {
+            "key": "quality",
+            "label": "Strong Quality",
+            "tone": "positive"
+          },
+          {
+            "key": "valuation",
+            "label": "Attractive Valuation",
+            "tone": "positive"
+          },
+          {
+            "key": "financial_health",
+            "label": "Strong Financial Health",
+            "tone": "positive"
+          },
+          {
+            "key": "momentum",
+            "label": "Positive Momentum",
+            "tone": "positive"
+          }
+        ],
+        "name": "Stock 13",
+        "positives": [],
+        "rank": 13,
+        "risks": [],
+        "score_coverage": 0.95,
+        "sector": "Energy",
+        "stockai_score": 77.0,
+        "symbol": "S13.NS"
+      },
+      {
+        "components": [
+          {
+            "key": "quality",
+            "label": "Quality",
+            "score": 76.0
+          },
+          {
+            "key": "valuation",
+            "label": "Valuation",
+            "score": 76.0
+          },
+          {
+            "key": "financial_health",
+            "label": "Financial Health",
+            "score": 76.0
+          },
+          {
+            "key": "momentum",
+            "label": "Momentum",
+            "score": 76.0
+          },
+          {
+            "key": "risk",
+            "label": "Risk",
+            "score": 50.0
+          },
+          {
+            "key": "market_regime",
+            "label": "Price Regime",
+            "score": 76.0
+          }
+        ],
+        "computed_at": "2026-10-03T12:21:03.431805+00:00",
+        "engine_version": "ranking-v1.0",
+        "fqvf_counts": {
+          "FAIL": 6,
+          "PASS": 12
+        },
+        "fqvf_score": 66.66666666666666,
+        "fqvf_summary": "12 passed",
+        "freshness": {
+          "market_data_as_of": "2026-10-03"
+        },
+        "freshness_status": {
+          "analysis_age_days": 0,
+          "analysis_computed_at": "2026-10-03T12:21:03.431805+00:00",
+          "fiscal_period_end": null,
+          "fundamentals_fetched_at": null,
+          "issues": [],
+          "market_data_age_days": 0,
+          "market_data_as_of": "2026-10-03",
+          "status": "OK"
+        },
+        "industry": "Software",
+        "labels": [
+          {
+            "key": "top_candidate",
+            "label": "Top Candidate",
+            "tone": "positive"
+          },
+          {
+            "key": "quality",
+            "label": "Strong Quality",
+            "tone": "positive"
+          },
+          {
+            "key": "valuation",
+            "label": "Attractive Valuation",
+            "tone": "positive"
+          },
+          {
+            "key": "financial_health",
+            "label": "Strong Financial Health",
+            "tone": "positive"
+          },
+          {
+            "key": "momentum",
+            "label": "Positive Momentum",
+            "tone": "positive"
+          }
+        ],
+        "name": "Stock 14",
+        "positives": [],
+        "rank": 14,
+        "risks": [],
+        "score_coverage": 0.95,
+        "sector": "IT",
+        "stockai_score": 76.0,
+        "symbol": "S14.NS"
+      },
+      {
+        "components": [
+          {
+            "key": "quality",
+            "label": "Quality",
+            "score": 75.0
+          },
+          {
+            "key": "valuation",
+            "label": "Valuation",
+            "score": 75.0
+          },
+          {
+            "key": "financial_health",
+            "label": "Financial Health",
+            "score": 75.0
+          },
+          {
+            "key": "momentum",
+            "label": "Momentum",
+            "score": 75.0
+          },
+          {
+            "key": "risk",
+            "label": "Risk",
+            "score": 20.0
+          },
+          {
+            "key": "market_regime",
+            "label": "Price Regime",
+            "score": 75.0
+          }
+        ],
+        "computed_at": "2026-10-03T12:21:03.431805+00:00",
+        "engine_version": "ranking-v1.0",
+        "fqvf_counts": {
+          "FAIL": 6,
+          "PASS": 12
+        },
+        "fqvf_score": 66.66666666666666,
+        "fqvf_summary": "12 passed",
+        "freshness": {
+          "market_data_as_of": "2026-10-03"
+        },
+        "freshness_status": {
+          "analysis_age_days": 0,
+          "analysis_computed_at": "2026-10-03T12:21:03.431805+00:00",
+          "fiscal_period_end": null,
+          "fundamentals_fetched_at": null,
+          "issues": [],
+          "market_data_age_days": 0,
+          "market_data_as_of": "2026-10-03",
+          "status": "OK"
+        },
+        "industry": "Oil & Gas",
+        "labels": [
+          {
+            "key": "top_candidate",
+            "label": "Top Candidate",
+            "tone": "positive"
+          },
+          {
+            "key": "quality",
+            "label": "Strong Quality",
+            "tone": "positive"
+          },
+          {
+            "key": "valuation",
+            "label": "Attractive Valuation",
+            "tone": "positive"
+          },
+          {
+            "key": "financial_health",
+            "label": "Strong Financial Health",
+            "tone": "positive"
+          },
+          {
+            "key": "momentum",
+            "label": "Positive Momentum",
+            "tone": "positive"
+          },
+          {
+            "key": "high_risk",
+            "label": "High Risk",
+            "tone": "negative"
+          }
+        ],
+        "name": "Stock 03",
+        "positives": [],
+        "rank": 15,
+        "risks": [],
+        "score_coverage": 0.95,
+        "sector": "Energy",
+        "stockai_score": 75.0,
+        "symbol": "S03.NS"
+      },
+      {
+        "components": [
+          {
+            "key": "quality",
+            "label": "Quality",
+            "score": 75.0
+          },
+          {
+            "key": "valuation",
+            "label": "Valuation",
+            "score": 75.0
+          },
+          {
+            "key": "financial_health",
+            "label": "Financial Health",
+            "score": 75.0
+          },
+          {
+            "key": "momentum",
+            "label": "Momentum",
+            "score": 75.0
+          },
+          {
+            "key": "risk",
+            "label": "Risk",
+            "score": 50.0
+          },
+          {
+            "key": "market_regime",
+            "label": "Price Regime",
+            "score": 75.0
+          }
+        ],
+        "computed_at": "2026-10-03T12:21:03.431805+00:00",
+        "engine_version": "ranking-v1.0",
+        "fqvf_counts": {
+          "FAIL": 6,
+          "PASS": 12
+        },
+        "fqvf_score": 66.66666666666666,
+        "fqvf_summary": "12 passed",
+        "freshness": {
+          "market_data_as_of": "2026-10-03"
+        },
+        "freshness_status": {
+          "analysis_age_days": 0,
+          "analysis_computed_at": "2026-10-03T12:21:03.431805+00:00",
+          "fiscal_period_end": null,
+          "fundamentals_fetched_at": null,
+          "issues": [],
+          "market_data_age_days": 0,
+          "market_data_as_of": "2026-10-03",
+          "status": "OK"
+        },
+        "industry": "Oil & Gas",
+        "labels": [
+          {
+            "key": "top_candidate",
+            "label": "Top Candidate",
+            "tone": "positive"
+          },
+          {
+            "key": "quality",
+            "label": "Strong Quality",
+            "tone": "positive"
+          },
+          {
+            "key": "valuation",
+            "label": "Attractive Valuation",
+            "tone": "positive"
+          },
+          {
+            "key": "financial_health",
+            "label": "Strong Financial Health",
+            "tone": "positive"
+          },
+          {
+            "key": "momentum",
+            "label": "Positive Momentum",
+            "tone": "positive"
+          }
+        ],
+        "name": "Stock 15",
+        "positives": [],
+        "rank": 16,
+        "risks": [],
+        "score_coverage": 0.95,
+        "sector": "Energy",
+        "stockai_score": 75.0,
+        "symbol": "S15.NS"
+      },
+      {
+        "components": [
+          {
+            "key": "quality",
+            "label": "Quality",
+            "score": 74.0
+          },
+          {
+            "key": "valuation",
+            "label": "Valuation",
+            "score": 74.0
+          },
+          {
+            "key": "financial_health",
+            "label": "Financial Health",
+            "score": 74.0
+          },
+          {
+            "key": "momentum",
+            "label": "Momentum",
+            "score": 74.0
+          },
+          {
+            "key": "risk",
+            "label": "Risk",
+            "score": 50.0
+          },
+          {
+            "key": "market_regime",
+            "label": "Price Regime",
+            "score": 74.0
+          }
+        ],
+        "computed_at": "2026-10-03T12:21:03.431805+00:00",
+        "engine_version": "ranking-v1.0",
+        "fqvf_counts": {
+          "FAIL": 6,
+          "PASS": 12
+        },
+        "fqvf_score": 66.66666666666666,
+        "fqvf_summary": "12 passed",
+        "freshness": {
+          "market_data_as_of": "2026-10-03"
+        },
+        "freshness_status": {
+          "analysis_age_days": 0,
+          "analysis_computed_at": "2026-10-03T12:21:03.431805+00:00",
+          "fiscal_period_end": null,
+          "fundamentals_fetched_at": null,
+          "issues": [],
+          "market_data_age_days": 0,
+          "market_data_as_of": "2026-10-03",
+          "status": "OK"
+        },
+        "industry": "Software",
+        "labels": [
+          {
+            "key": "top_candidate",
+            "label": "Top Candidate",
+            "tone": "positive"
+          },
+          {
+            "key": "quality",
+            "label": "Strong Quality",
+            "tone": "positive"
+          },
+          {
+            "key": "valuation",
+            "label": "Attractive Valuation",
+            "tone": "positive"
+          },
+          {
+            "key": "financial_health",
+            "label": "Strong Financial Health",
+            "tone": "positive"
+          },
+          {
+            "key": "momentum",
+            "label": "Positive Momentum",
+            "tone": "positive"
+          }
+        ],
+        "name": "Stock 16",
+        "positives": [],
+        "rank": 17,
+        "risks": [],
+        "score_coverage": 0.95,
+        "sector": "IT",
+        "stockai_score": 74.0,
+        "symbol": "S16.NS"
+      },
+      {
+        "components": [
+          {
+            "key": "quality",
+            "label": "Quality",
+            "score": 73.0
+          },
+          {
+            "key": "valuation",
+            "label": "Valuation",
+            "score": 73.0
+          },
+          {
+            "key": "financial_health",
+            "label": "Financial Health",
+            "score": 73.0
+          },
+          {
+            "key": "momentum",
+            "label": "Momentum",
+            "score": 73.0
+          },
+          {
+            "key": "risk",
+            "label": "Risk",
+            "score": 50.0
+          },
+          {
+            "key": "market_regime",
+            "label": "Price Regime",
+            "score": 73.0
+          }
+        ],
+        "computed_at": "2026-10-03T12:21:03.431805+00:00",
+        "engine_version": "ranking-v1.0",
+        "fqvf_counts": {
+          "FAIL": 6,
+          "PASS": 12
+        },
+        "fqvf_score": 66.66666666666666,
+        "fqvf_summary": "12 passed",
+        "freshness": {
+          "market_data_as_of": "2026-10-03"
+        },
+        "freshness_status": {
+          "analysis_age_days": 0,
+          "analysis_computed_at": "2026-10-03T12:21:03.431805+00:00",
+          "fiscal_period_end": null,
+          "fundamentals_fetched_at": null,
+          "issues": [],
+          "market_data_age_days": 0,
+          "market_data_as_of": "2026-10-03",
+          "status": "OK"
+        },
+        "industry": "Oil & Gas",
+        "labels": [
+          {
+            "key": "top_candidate",
+            "label": "Top Candidate",
+            "tone": "positive"
+          },
+          {
+            "key": "quality",
+            "label": "Strong Quality",
+            "tone": "positive"
+          },
+          {
+            "key": "valuation",
+            "label": "Attractive Valuation",
+            "tone": "positive"
+          },
+          {
+            "key": "financial_health",
+            "label": "Strong Financial Health",
+            "tone": "positive"
+          },
+          {
+            "key": "momentum",
+            "label": "Positive Momentum",
+            "tone": "positive"
+          }
+        ],
+        "name": "Stock 17",
+        "positives": [],
+        "rank": 18,
+        "risks": [],
+        "score_coverage": 0.95,
+        "sector": "Energy",
+        "stockai_score": 73.0,
+        "symbol": "S17.NS"
+      },
+      {
+        "components": [
+          {
+            "key": "quality",
+            "label": "Quality",
+            "score": 72.0
+          },
+          {
+            "key": "valuation",
+            "label": "Valuation",
+            "score": 72.0
+          },
+          {
+            "key": "financial_health",
+            "label": "Financial Health",
+            "score": 72.0
+          },
+          {
+            "key": "momentum",
+            "label": "Momentum",
+            "score": 72.0
+          },
+          {
+            "key": "risk",
+            "label": "Risk",
+            "score": 50.0
+          },
+          {
+            "key": "market_regime",
+            "label": "Price Regime",
+            "score": 72.0
+          }
+        ],
+        "computed_at": "2026-10-03T12:21:03.431805+00:00",
+        "engine_version": "ranking-v1.0",
+        "fqvf_counts": {
+          "FAIL": 6,
+          "PASS": 12
+        },
+        "fqvf_score": 66.66666666666666,
+        "fqvf_summary": "12 passed",
+        "freshness": {
+          "market_data_as_of": "2026-10-03"
+        },
+        "freshness_status": {
+          "analysis_age_days": 0,
+          "analysis_computed_at": "2026-10-03T12:21:03.431805+00:00",
+          "fiscal_period_end": null,
+          "fundamentals_fetched_at": null,
+          "issues": [],
+          "market_data_age_days": 0,
+          "market_data_as_of": "2026-10-03",
+          "status": "OK"
+        },
+        "industry": "Software",
+        "labels": [
+          {
+            "key": "top_candidate",
+            "label": "Top Candidate",
+            "tone": "positive"
+          },
+          {
+            "key": "quality",
+            "label": "Strong Quality",
+            "tone": "positive"
+          },
+          {
+            "key": "valuation",
+            "label": "Attractive Valuation",
+            "tone": "positive"
+          },
+          {
+            "key": "financial_health",
+            "label": "Strong Financial Health",
+            "tone": "positive"
+          },
+          {
+            "key": "momentum",
+            "label": "Positive Momentum",
+            "tone": "positive"
+          }
+        ],
+        "name": "Stock 18",
+        "positives": [],
+        "rank": 19,
+        "risks": [],
+        "score_coverage": 0.95,
+        "sector": "IT",
+        "stockai_score": 72.0,
+        "symbol": "S18.NS"
+      },
+      {
+        "components": [
+          {
+            "key": "quality",
+            "label": "Quality",
+            "score": 71.0
+          },
+          {
+            "key": "valuation",
+            "label": "Valuation",
+            "score": 71.0
+          },
+          {
+            "key": "financial_health",
+            "label": "Financial Health",
+            "score": 71.0
+          },
+          {
+            "key": "momentum",
+            "label": "Momentum",
+            "score": 71.0
+          },
+          {
+            "key": "risk",
+            "label": "Risk",
+            "score": 50.0
+          },
+          {
+            "key": "market_regime",
+            "label": "Price Regime",
+            "score": 71.0
+          }
+        ],
+        "computed_at": "2026-10-03T12:21:03.431805+00:00",
+        "engine_version": "ranking-v1.0",
+        "fqvf_counts": {
+          "FAIL": 6,
+          "PASS": 12
+        },
+        "fqvf_score": 66.66666666666666,
+        "fqvf_summary": "12 passed",
+        "freshness": {
+          "market_data_as_of": "2026-10-03"
+        },
+        "freshness_status": {
+          "analysis_age_days": 0,
+          "analysis_computed_at": "2026-10-03T12:21:03.431805+00:00",
+          "fiscal_period_end": null,
+          "fundamentals_fetched_at": null,
+          "issues": [],
+          "market_data_age_days": 0,
+          "market_data_as_of": "2026-10-03",
+          "status": "OK"
+        },
+        "industry": "Oil & Gas",
+        "labels": [
+          {
+            "key": "top_candidate",
+            "label": "Top Candidate",
+            "tone": "positive"
+          },
+          {
+            "key": "quality",
+            "label": "Strong Quality",
+            "tone": "positive"
+          },
+          {
+            "key": "valuation",
+            "label": "Attractive Valuation",
+            "tone": "positive"
+          },
+          {
+            "key": "financial_health",
+            "label": "Strong Financial Health",
+            "tone": "positive"
+          },
+          {
+            "key": "momentum",
+            "label": "Positive Momentum",
+            "tone": "positive"
+          }
+        ],
+        "name": "Stock 19",
+        "positives": [],
+        "rank": 20,
+        "risks": [],
+        "score_coverage": 0.95,
+        "sector": "Energy",
+        "stockai_score": 71.0,
+        "symbol": "S19.NS"
+      }
+    ],
+    "limit": 20,
+    "market_regime": {
+      "as_of_date": "2026-10-03",
+      "computed_at": "2026-10-03T12:21:03.431805+00:00",
+      "index": "^NSEI",
+      "reason": null,
+      "regime": "Sideways",
+      "regime_score": 0.1,
+      "status": "OK"
+    },
+    "run": {
+      "engine_version": "ranking-v1.0",
+      "finished_at": "2026-10-03T12:21:03.431805+00:00",
+      "fqvf_version": "fqvf-v1.0",
+      "run_id": "R2",
+      "status": "COMPLETED",
+      "stocks_analysed": 0
+    },
+    "total_eligible": 30
+  },
+  "message": "20 candidate(s)",
+  "success": true
+}

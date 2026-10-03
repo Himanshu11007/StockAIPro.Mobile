@@ -27,6 +27,15 @@ public interface IProductApiClient
 
     /// <summary>Null when the backend has not computed a regime yet.</summary>
     Task<MarketRegimeInfo?> GetMarketRegimeAsync(CancellationToken ct = default);
+
+    /// <summary>NSE session status (IST) from the backend's market calendar.</summary>
+    Task<MarketStatusInfo> GetMarketStatusAsync(CancellationToken ct = default);
+
+    /// <summary>Performance by methodology (never pooled).</summary>
+    Task<PerformanceOverview> GetPerformanceOverviewAsync(CancellationToken ct = default);
+
+    /// <summary>What each kind of intelligence is and how much it is worth.</summary>
+    Task<IntelligenceOverview> GetIntelligenceOverviewAsync(CancellationToken ct = default);
 }
 
 public sealed class ProductApiClient : IProductApiClient
@@ -76,6 +85,22 @@ public sealed class ProductApiClient : IProductApiClient
         using var response = await BusinessApiSend.SendAsync(
             () => client.PostAsync(Path($"/stocks/{Sym(symbol)}/analysis/refresh"), content: null, ct), ct);
         return await BusinessApiSend.ReadDataOrThrowAsync<StockAnalysis>(response, ct);
+    }
+
+    public Task<MarketStatusInfo> GetMarketStatusAsync(CancellationToken ct = default) =>
+        GetDataAsync<MarketStatusInfo>("/market/status", ct);
+
+    public Task<PerformanceOverview> GetPerformanceOverviewAsync(CancellationToken ct = default) =>
+        GetDataAsync<PerformanceOverview>("/performance/overview", ct);
+
+    public Task<IntelligenceOverview> GetIntelligenceOverviewAsync(CancellationToken ct = default) =>
+        GetDataAsync<IntelligenceOverview>("/intelligence/overview", ct);
+
+    private async Task<T> GetDataAsync<T>(string relative, CancellationToken ct)
+    {
+        var client = _httpClientFactory.CreateClient(ApiConfiguration.AuthenticatedClientName);
+        using var response = await BusinessApiSend.SendAsync(() => client.GetAsync(Path(relative), ct), ct);
+        return await BusinessApiSend.ReadDataOrThrowAsync<T>(response, ct);
     }
 
     public async Task<MarketRegimeInfo?> GetMarketRegimeAsync(CancellationToken ct = default)

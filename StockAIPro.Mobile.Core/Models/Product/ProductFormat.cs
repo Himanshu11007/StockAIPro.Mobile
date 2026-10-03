@@ -56,4 +56,62 @@ public static class ProductFormat
         "sector_outlook_updated_at" => "Sector outlook set",
         _ => key.Replace('_', ' '),
     };
+
+    private static readonly TimeSpan IstOffset = TimeSpan.FromHours(5.5);
+
+    private static bool TryParseInstant(string? iso, out DateTimeOffset value)
+    {
+        value = default;
+        if (string.IsNullOrWhiteSpace(iso)) return false;
+        return DateTimeOffset.TryParse(iso, CultureInfo.InvariantCulture,
+            DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal, out value);
+    }
+
+    /// <summary>ISO timestamp -> "03 Oct 2026 09:35 IST" (India time). A
+    /// date-only value is shown as "03 Oct 2026".</summary>
+    public static string DateTimeIst(string? iso)
+    {
+        if (string.IsNullOrWhiteSpace(iso)) return Missing;
+        if (iso.Length == 10 && DateTime.TryParse(iso, CultureInfo.InvariantCulture, DateTimeStyles.None, out var d))
+            return d.ToString("dd MMM yyyy", CultureInfo.InvariantCulture);
+        return TryParseInstant(iso, out var t)
+            ? t.ToOffset(IstOffset).ToString("dd MMM yyyy HH:mm", CultureInfo.InvariantCulture) + " IST"
+            : iso;
+    }
+
+    /// <summary>"just now", "5 minutes ago", "3 hours ago", "2 days ago".</summary>
+    public static string Relative(string? iso, DateTimeOffset now)
+    {
+        if (!TryParseInstant(iso, out var t)) return Missing;
+        var age = now - t;
+        if (age < TimeSpan.Zero) age = TimeSpan.Zero;
+        if (age.TotalMinutes < 1) return "just now";
+        if (age.TotalMinutes < 60) return Plural((int)age.TotalMinutes, "minute") + " ago";
+        if (age.TotalHours < 24) return Plural((int)age.TotalHours, "hour") + " ago";
+        return Plural((int)age.TotalDays, "day") + " ago";
+    }
+
+    private static string Plural(int n, string unit) => $"{n} {unit}{(n == 1 ? "" : "s")}";
+
+    /// <summary>One freshness line for a list item or header. Stale data is
+    /// never presented as current; unavailable data says so.</summary>
+    public static string FreshnessLine(FreshnessStatus? f, DateTimeOffset now)
+    {
+        if (f is null || f.IsUnavailable) return "Data unavailable";
+        var market = f.MarketDataAsOf is null ? "Market data unavailable" : $"Market data {DateTimeIst(f.MarketDataAsOf)}";
+        var analysis = f.AnalysisComputedAt is null ? "" : $" - analysis {Relative(f.AnalysisComputedAt, now)}";
+        return f.IsStale ? $"Data may be stale. {market}{analysis}" : market + analysis;
+    }
+
+    /// <summary>Signed change, e.g. "+12.5" / "-3.0"; missing -> "-".</summary>
+    public static string Change(double? v) => v is { } x ? x.ToString("+0.0;-0.0;0.0", CultureInfo.InvariantCulture) : Missing;
+
+    /// <summary>CSS class for an analytical label tone.</summary>
+    public static string LabelCss(string? tone) => tone switch
+    {
+        "positive" => "sai-badge-positive",
+        "negative" => "sai-badge-negative",
+        "warning" => "sai-badge-warning",
+        _ => "sai-badge-neutral",
+    };
 }

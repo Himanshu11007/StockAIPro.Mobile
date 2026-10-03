@@ -18,6 +18,8 @@ public sealed class AppConfig
     [JsonPropertyName("announcement")] public string? Announcement { get; init; }
     [JsonPropertyName("top_picks_limit")] public int TopPicksLimit { get; init; }
     [JsonPropertyName("versions")] public JsonElement? Versions { get; init; }
+    [JsonPropertyName("onboarding")] public List<OnboardingPage> Onboarding { get; init; } = new();
+    [JsonPropertyName("legal")] public LegalInfo? Legal { get; init; }
 }
 
 public sealed class MarketRegimeInfo
@@ -55,8 +57,16 @@ public sealed class CandidateItem
     [JsonPropertyName("positives")] public List<string> Positives { get; init; } = new();
     [JsonPropertyName("risks")] public List<string> Risks { get; init; } = new();
     [JsonPropertyName("freshness")] public Dictionary<string, string?> Freshness { get; init; } = new();
+    [JsonPropertyName("freshness_status")] public FreshnessStatus? FreshnessStatus { get; init; }
+    [JsonPropertyName("labels")] public List<AnalysisLabel> Labels { get; init; } = new();
+    [JsonPropertyName("components")] public List<KeyComponent> Components { get; init; } = new();
+    [JsonPropertyName("fqvf_counts")] public Dictionary<string, int>? FqvfCounts { get; init; }
     [JsonPropertyName("engine_version")] public string? EngineVersion { get; init; }
     [JsonPropertyName("computed_at")] public string? ComputedAt { get; init; }
+
+    /// <summary>Risk component score (higher = lower volatility/drawdown).</summary>
+    [JsonIgnore] public double? RiskScore => Components.FirstOrDefault(c => c.Key == "risk")?.Score;
+    [JsonIgnore] public bool IsHighRisk => Labels.Any(l => l.Key == "high_risk");
 }
 
 public sealed class TopCandidatesResponse
@@ -84,6 +94,7 @@ public sealed class RankingInfo
     [JsonPropertyName("stockai_score")] public double? StockAiScore { get; init; }
     [JsonPropertyName("score_coverage")] public double? ScoreCoverage { get; init; }
     [JsonPropertyName("rank")] public int? Rank { get; init; }
+    [JsonPropertyName("universe_rank")] public UniverseRank? UniverseRank { get; init; }
     [JsonPropertyName("eligible_for_top_picks")] public bool EligibleForTopPicks { get; init; }
     [JsonPropertyName("ineligible_reasons")] public List<string> IneligibleReasons { get; init; } = new();
     [JsonPropertyName("components")] public List<ScoreComponent> Components { get; init; } = new();
@@ -161,6 +172,9 @@ public sealed class TechnicalInfo
     [JsonPropertyName("max_drawdown_1y")] public double? MaxDrawdown1y { get; init; }
     [JsonPropertyName("rsi")] public double? Rsi { get; init; }
     [JsonPropertyName("trend_score")] public double? TrendScore { get; init; }
+    [JsonPropertyName("trend_daily")] public TrendInfo? TrendDaily { get; init; }
+    [JsonPropertyName("trend_weekly")] public TrendInfo? TrendWeekly { get; init; }
+    [JsonPropertyName("avg_volume_20d")] public double? AvgVolume20d { get; init; }
     [JsonPropertyName("regime")] public string? Regime { get; init; }
     [JsonPropertyName("regime_reason")] public string? RegimeReason { get; init; }
 }
@@ -206,5 +220,10 @@ public sealed class StockAnalysis
     [JsonPropertyName("market")] public MarketInfo? Market { get; init; }
     [JsonPropertyName("ml_signal")] public MlSignalInfo? MlSignal { get; init; }
     [JsonPropertyName("freshness")] public Dictionary<string, string?> Freshness { get; init; } = new();
+    [JsonPropertyName("freshness_status")] public FreshnessStatus? FreshnessStatus { get; init; }
+    [JsonPropertyName("labels")] public List<AnalysisLabel> Labels { get; init; } = new();
+    [JsonPropertyName("explanation")] public RankExplanation? Explanation { get; init; }
+    [JsonPropertyName("market_regime")] public MarketRegimeInfo? MarketRegime { get; init; }
+    [JsonPropertyName("reference_price")] public ReferencePrice? ReferencePrice { get; init; }
     [JsonPropertyName("engine")] public EngineInfo? Engine { get; init; }
 }

@@ -40,6 +40,7 @@ else if (_results is { Count: > 0 })
                 <div>
                     <div class="sai-action-title">@stock.Symbol</div>
                     <div class="sai-action-desc">@stock.Name</div>
+                    <div class="sai-action-desc text-muted">@string.Join(" / ", new[] { stock.Sector, stock.Industry }.Where(x => !string.IsNullOrEmpty(x)))@(stock.AnalysisEnabled ? "" : " - analysis disabled for this stock")</div>
                 </div>
                 <span class="sai-action-arrow">&#8250;</span>
             </div>

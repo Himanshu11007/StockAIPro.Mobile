@@ -1,0 +1,17 @@
+{
+  "data": {
+    "date": "2026-10-03",
+    "exchange": "NSE",
+    "holiday_calendar_configured": false,
+    "is_open": false,
+    "label": "Closed - weekend",
+    "next_trading_day": "2026-10-05",
+    "note": "Exchange holiday calendar not configured; weekends are recognised, trading holidays are not.",
+    "now_ist": "2026-10-03T19:51+05:30",
+    "session_hours": "Pre-open 09:00-09:15, normal 09:15-15:30, post-close 15:40-16:00 IST",
+    "status": "WEEKEND",
+    "timezone": "Asia/Kolkata (IST, UTC+05:30)"
+  },
+  "message": "Market status",
+  "success": true
+}

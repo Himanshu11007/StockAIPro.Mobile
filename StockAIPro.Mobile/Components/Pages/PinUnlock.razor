@@ -4,6 +4,7 @@
 @inject IAuthService AuthService
 @inject IPinService PinService
 @inject NavigationManager Navigation
+@inject SignInFlow SignInFlow
 
 <div class="sai-card">
     <div class="sai-card-title">Welcome back</div>
@@ -91,7 +92,7 @@
             var restored = await AuthService.TryRestoreSessionAsync();
             if (restored)
             {
-                Navigation.NavigateTo("/account");
+                Navigation.NavigateTo(SignInFlow.NextRoute(offerPinSetup: false));
             }
             else
             {

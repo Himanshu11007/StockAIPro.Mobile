@@ -1,0 +1,214 @@
+{
+  "data": {
+    "data_status": null,
+    "data_status_reason": null,
+    "engine": {
+      "fqvf": "fqvf-v1.0",
+      "ranking": "ranking-v1.0",
+      "run_id": "R2",
+      "run_kind": "RANKING"
+    },
+    "exchange": "NSE",
+    "explanation": {
+      "missing": [],
+      "note": "The StockAI Score is an analytical ranking of stocks against each other on the data shown; it is not a forecast or a guarantee of returns.",
+      "strengths": [
+        "Quality",
+        "Valuation",
+        "Financial Health",
+        "Trend",
+        "Momentum",
+        "Sector Outlook",
+        "Price Regime"
+      ],
+      "summary": "Ranked 15 of 30 eligible stocks, inside the Top 20 Investment Candidates. StockAI Score 75.0/100 is the weighted average of the components below (data coverage 95%). Strongest: Quality 75, Valuation 75, Financial Health 75. Weakest: Risk 20.",
+      "weaknesses": [
+        "Risk"
+      ]
+    },
+    "fqvf": {
+      "checks": [],
+      "counts": {
+        "FAIL": 6,
+        "PASS": 12
+      },
+      "coverage": 0.9,
+      "run_id": "R2",
+      "score": 66.66666666666666,
+      "summary": "12 passed"
+    },
+    "freshness": {
+      "market_data_as_of": "2026-10-03"
+    },
+    "freshness_status": {
+      "analysis_age_days": 0,
+      "analysis_computed_at": "2026-10-03T12:21:03.431805+00:00",
+      "fiscal_period_end": null,
+      "fundamentals_fetched_at": null,
+      "issues": [],
+      "market_data_age_days": 0,
+      "market_data_as_of": "2026-10-03",
+      "status": "OK"
+    },
+    "industry": "Oil & Gas",
+    "labels": [
+      {
+        "key": "top_candidate",
+        "label": "Top Candidate",
+        "tone": "positive"
+      },
+      {
+        "key": "quality",
+        "label": "Strong Quality",
+        "tone": "positive"
+      },
+      {
+        "key": "valuation",
+        "label": "Attractive Valuation",
+        "tone": "positive"
+      },
+      {
+        "key": "financial_health",
+        "label": "Strong Financial Health",
+        "tone": "positive"
+      },
+      {
+        "key": "momentum",
+        "label": "Positive Momentum",
+        "tone": "positive"
+      },
+      {
+        "key": "high_risk",
+        "label": "High Risk",
+        "tone": "negative"
+      }
+    ],
+    "market": {
+      "as_of_date": "2026-10-03",
+      "close": 1234.5,
+      "fetched_at": "2026-10-03T11:21:03.431805+00:00",
+      "issues": [],
+      "status": "OK",
+      "technical": {
+        "atr_pct": null,
+        "avg_volume_20d": null,
+        "max_drawdown_1y": null,
+        "regime": null,
+        "regime_reason": null,
+        "regime_score": null,
+        "return_20d": null,
+        "return_250d": null,
+        "return_60d": 0.05,
+        "rsi": null,
+        "trend_daily": {
+          "score": 0.5,
+          "trend": "UP"
+        },
+        "trend_score": null,
+        "trend_weekly": {
+          "score": 0.0,
+          "trend": "SIDEWAYS"
+        },
+        "volatility_annual": null
+      },
+      "volume": null
+    },
+    "market_regime": {
+      "as_of_date": "2026-10-03",
+      "computed_at": "2026-10-03T12:21:03.431805+00:00",
+      "index": "^NSEI",
+      "reason": null,
+      "regime": "Sideways",
+      "regime_score": 0.1,
+      "status": "OK"
+    },
+    "ml_signal": null,
+    "name": "Stock 03",
+    "ranking": {
+      "components": [
+        {
+          "basis": "test",
+          "key": "quality",
+          "label": "quality",
+          "score": 75.0,
+          "weight": 10
+        },
+        {
+          "basis": "test",
+          "key": "valuation",
+          "label": "valuation",
+          "score": 75.0,
+          "weight": 10
+        },
+        {
+          "basis": "test",
+          "key": "financial_health",
+          "label": "financial_health",
+          "score": 75.0,
+          "weight": 10
+        },
+        {
+          "basis": "test",
+          "key": "technical_trend",
+          "label": "technical_trend",
+          "score": 75.0,
+          "weight": 10
+        },
+        {
+          "basis": "test",
+          "key": "momentum",
+          "label": "momentum",
+          "score": 75.0,
+          "weight": 10
+        },
+        {
+          "basis": "test",
+          "key": "risk",
+          "label": "risk",
+          "score": 20.0,
+          "weight": 10
+        },
+        {
+          "basis": "test",
+          "key": "sector_outlook",
+          "label": "sector_outlook",
+          "score": 75.0,
+          "weight": 10
+        },
+        {
+          "basis": "test",
+          "key": "market_regime",
+          "label": "market_regime",
+          "score": 75.0,
+          "weight": 10
+        },
+        {
+          "basis": "test",
+          "key": "ml_signal",
+          "label": "ml_signal",
+          "score": 75.0,
+          "weight": 0
+        }
+      ],
+      "computed_at": "2026-10-03T12:21:03.431805+00:00",
+      "eligible_for_top_picks": true,
+      "engine_version": "ranking-v1.0",
+      "ineligible_reasons": [],
+      "positives": [],
+      "rank": 15,
+      "risks": [],
+      "run_id": "R2",
+      "score_coverage": 0.95,
+      "stockai_score": 75.0
+    },
+    "reference_price": {
+      "as_of_date": "2026-10-03",
+      "close": 1234.5,
+      "note": "Last daily close used by the analysis (not a live quote)"
+    },
+    "sector": "Energy",
+    "symbol": "S03.NS"
+  },
+  "message": "Analysis retrieved",
+  "success": true
+}

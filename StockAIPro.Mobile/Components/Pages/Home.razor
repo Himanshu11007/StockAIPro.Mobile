@@ -2,44 +2,87 @@
 @inject IAuthService AuthService
 @inject IProductApiClient ProductApi
 @inject AppConfigService AppConfig
+@inject NotificationStateService NotificationState
 @implements IDisposable
 
 @if (AuthService.IsAuthenticated)
 {
     <div class="sai-card">
         <div class="sai-card-title">Welcome back@(string.IsNullOrEmpty(AuthService.CurrentUser?.Email) ? "" : $", {AuthService.CurrentUser!.Email}")</div>
-        <div class="sai-action-desc">Transparent stock analysis: StockAI Score and the Fundamental Quality &amp; Value Framework.</div>
+        <div class="sai-action-desc">Structured, transparent stock analysis: StockAI Score, the 18-check Fundamental Quality &amp; Value Framework, key reasons, key risks and data freshness for every stock.</div>
     </div>
 
     @if (AppConfig.Announcement is { } announcement)
     {
-        <div class="sai-note">@announcement</div>
+        <div class="sai-banner sai-banner-info">@announcement</div>
     }
 
-    @if (_regime is { } regime)
-    {
-        <div class="sai-card">
-            <div class="sai-section-title">Market regime (@(regime.Index ?? "index"))</div>
-            <div><strong>@(regime.Regime ?? ProductFormat.Missing)</strong> <span class="text-muted">as of @ProductFormat.Date(regime.AsOfDate)</span></div>
+    <div class="sai-card">
+        <div class="sai-section-title mt-0">Market status</div>
+        @if (_status is { } st)
+        {
+            <div>
+                <span class="sai-status-dot @(st.IsOpen ? "open" : st.Status is "PRE_OPEN" or "POST_CLOSE" or "CLOSING" ? "pre" : "")"></span>
+                <strong>@st.Label</strong>
+            </div>
+            <div class="sai-action-desc">@st.Exchange - @ProductFormat.DateTimeIst(st.NowIst) - @st.Timezone</div>
+            @if (st.NextTradingDay is { } next)
+            {
+                <div class="sai-action-desc">Next trading day: @ProductFormat.DateTimeIst(next)</div>
+            }
+            @if (!string.IsNullOrEmpty(st.Note))
+            {
+                <div class="sai-action-desc text-muted">@st.Note</div>
+            }
+        }
+        else if (_statusError is not null)
+        {
+            <div class="sai-action-desc">Market status unavailable: @_statusError</div>
+        }
+        else
+        {
+            <div class="sai-action-desc">Loading...</div>
+        }
+
+        <div class="sai-section-title">Market regime (NIFTY 50)</div>
+        @if (_regime is { } regime)
+        {
+            <div><strong>@(regime.Regime ?? "Unavailable")</strong> <span class="text-muted">as of @ProductFormat.DateTimeIst(regime.AsOfDate)</span></div>
             @if (!string.IsNullOrEmpty(regime.Reason))
             {
                 <div class="sai-action-desc">@regime.Reason</div>
             }
-        </div>
-    }
-    else if (_regimeError is not null)
+            <div class="sai-action-desc text-muted">Computed @ProductFormat.Relative(regime.ComputedAt, DateTimeOffset.UtcNow) by the latest analysis run.</div>
+        }
+        else if (_regimeError is not null)
+        {
+            <div class="sai-action-desc">Market regime unavailable: @_regimeError</div>
+        }
+        else if (_loaded)
+        {
+            <div class="sai-action-desc">No market regime has been computed yet. It appears after the first analysis run.</div>
+        }
+    </div>
+
+    @if (AppConfig.IsEnabled("notifications") && NotificationState.UnreadCount > 0)
     {
-        <div class="sai-action-desc mb-2">Market regime unavailable: @_regimeError</div>
+        <a class="sai-card sai-action-item d-flex" href="notifications">
+            <div>
+                <div class="sai-action-title">@NotificationState.UnreadCount unread notification@(NotificationState.UnreadCount == 1 ? "" : "s")</div>
+                <div class="sai-action-desc">See what changed since your last visit</div>
+            </div>
+            <span class="sai-action-arrow">›</span>
+        </a>
     }
 
-    <div class="sai-section-title">Quick actions</div>
+    <div class="sai-section-title">Explore</div>
     <div class="sai-action-list">
         @if (AppConfig.IsEnabled("top_picks"))
         {
             <NavLink class="sai-action-item" href="top-picks">
                 <div>
                     <div class="sai-action-title">Top Investment Candidates</div>
-                    <div class="sai-action-desc">Highest-ranked stocks by StockAI Score</div>
+                    <div class="sai-action-desc">Highest-ranked stocks by StockAI Score, with key reasons and risks</div>
                 </div>
                 <span class="sai-action-arrow">›</span>
             </NavLink>
@@ -49,7 +92,7 @@
             <NavLink class="sai-action-item" href="analyse">
                 <div>
                     <div class="sai-action-title">Analyse a stock</div>
-                    <div class="sai-action-desc">StockAI Score, FQVF checks, risks and data freshness</div>
+                    <div class="sai-action-desc">StockAI Score, 18 FQVF checks, risks and data freshness</div>
                 </div>
                 <span class="sai-action-arrow">›</span>
             </NavLink>
@@ -59,7 +102,7 @@
             <NavLink class="sai-action-item" href="watchlist">
                 <div>
                     <div class="sai-action-title">Watchlist</div>
-                    <div class="sai-action-desc">Track the stocks you care about</div>
+                    <div class="sai-action-desc">Follow stocks and get alerts when their analysis changes</div>
                 </div>
                 <span class="sai-action-arrow">›</span>
             </NavLink>
@@ -69,7 +112,7 @@
             <NavLink class="sai-action-item" href="performance">
                 <div>
                     <div class="sai-action-title">Performance</div>
-                    <div class="sai-action-desc">Historical engine analytics</div>
+                    <div class="sai-action-desc">How the ranking is tracked, by methodology</div>
                 </div>
                 <span class="sai-action-arrow">›</span>
             </NavLink>
@@ -79,7 +122,7 @@
             <NavLink class="sai-action-item" href="intelligence">
                 <div>
                     <div class="sai-action-title">AI Intelligence</div>
-                    <div class="sai-action-desc">Engine-wide insights and observations</div>
+                    <div class="sai-action-desc">What each signal is, and how much weight it carries</div>
                 </div>
                 <span class="sai-action-arrow">›</span>
             </NavLink>
@@ -92,48 +135,62 @@ else
 {
     <div class="sai-card">
         <div class="sai-card-title">StockAI Pro</div>
-        <div class="sai-action-desc">Transparent stock analysis and ranking.</div>
+        <div class="sai-action-desc">Transparent, rules-based analysis of NSE stocks.</div>
         <p class="mt-3">
-            <a href="/login" class="btn btn-primary">Login</a>
-            <a href="/register" class="btn btn-secondary ms-2">Register</a>
+            <a href="/login" class="btn btn-primary">Sign in</a>
+            <a href="/register" class="btn btn-secondary ms-2">Create account</a>
         </p>
+        <a class="sai-link" href="/welcome">How StockAI Pro works</a>
     </div>
     <Disclaimer Text="@AppConfig.Disclaimer" />
 }
 
 @code {
     private MarketRegimeInfo? _regime;
+    private MarketStatusInfo? _status;
     private string? _regimeError;
-    private bool _regimeRequested;
+    private string? _statusError;
+    private bool _requested;
+    private bool _loaded;
 
-    // Session restoration (MainLayout.OnInitializedAsync) completes AFTER
-    // this page's first render, so without this subscription the page
-    // keeps showing "not signed in" even once IsAuthenticated flips to
-    // true - caught during Phase 7A's own emulator test.
+    // Session restoration (MainLayout) completes after this page's first
+    // render, so the page reloads its data when the auth state flips.
     protected override async Task OnInitializedAsync()
     {
         AuthService.AuthStateChanged += OnAuthStateChanged;
-        AppConfig.Changed += OnConfigChanged;
-        await LoadRegimeIfAuthenticatedAsync();
+        AppConfig.Changed += OnChanged;
+        NotificationState.Changed += OnChanged;
+        await LoadIfAuthenticatedAsync();
     }
 
-    private async Task LoadRegimeIfAuthenticatedAsync()
+    private async Task LoadIfAuthenticatedAsync()
     {
-        if (!AuthService.IsAuthenticated || _regimeRequested) return;
-        _regimeRequested = true;
+        if (!AuthService.IsAuthenticated || _requested) return;
+        _requested = true;
+        _ = NotificationState.RefreshAsync();
+        var statusTask = SafeAsync(ProductApi.GetMarketStatusAsync(), e => _statusError = e);
+        var regimeTask = SafeAsync(ProductApi.GetMarketRegimeAsync(), e => _regimeError = e);
+        _status = await statusTask;
+        _regime = await regimeTask;
+        _loaded = true;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private static async Task<T?> SafeAsync<T>(Task<T> task, Action<string> onError) where T : class?
+    {
         try
         {
-            _regime = await ProductApi.GetMarketRegimeAsync();
+            return await task;
         }
         catch (ApiException ex)
         {
-            _regimeError = ex.Message;
+            onError(ex.Message);
         }
         catch (Exception)
         {
-            _regimeError = "unreadable server response";
+            onError("the server returned data the app could not read");
         }
-        await InvokeAsync(StateHasChanged);
+        return null;
     }
 
     private void OnAuthStateChanged()
@@ -141,20 +198,22 @@ else
         if (!AuthService.IsAuthenticated)
         {
             _regime = null;
-            _regimeRequested = false;
+            _status = null;
+            _requested = _loaded = false;
         }
         InvokeAsync(async () =>
         {
             StateHasChanged();
-            await LoadRegimeIfAuthenticatedAsync();
+            await LoadIfAuthenticatedAsync();
         });
     }
 
-    private void OnConfigChanged() => InvokeAsync(StateHasChanged);
+    private void OnChanged() => InvokeAsync(StateHasChanged);
 
     public void Dispose()
     {
         AuthService.AuthStateChanged -= OnAuthStateChanged;
-        AppConfig.Changed -= OnConfigChanged;
+        AppConfig.Changed -= OnChanged;
+        NotificationState.Changed -= OnChanged;
     }
 }

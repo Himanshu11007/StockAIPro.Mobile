@@ -6,6 +6,7 @@
 @inject IGoogleSignInService GoogleSignIn
 @inject IAppleSignInService AppleSignIn
 @inject NavigationManager Navigation
+@inject SignInFlow SignInFlow
 @implements IDisposable
 
 <div class="sai-card">
@@ -175,7 +176,9 @@
         // yet -> offer to set one up (Task 13's "Create your PIN" screen).
         // Already has one -> nothing to do here, PinUnlock.razor is only
         // shown on a later cold start, not immediately after a fresh login.
-        Navigation.NavigateTo(await PinService.IsPinSetAsync() ? "/account" : "/pin/create");
+        // A notification the user tapped while signed out opens first;
+        // otherwise Home, or the optional PIN set-up on a first sign-in here.
+        Navigation.NavigateTo(SignInFlow.NextRoute(offerPinSetup: !await PinService.IsPinSetAsync()));
     }
 
     private sealed class LoginForm

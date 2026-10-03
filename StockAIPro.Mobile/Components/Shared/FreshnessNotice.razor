@@ -1,0 +1,31 @@
+@* Data freshness line. Stale data is flagged as such and unavailable data
+   says so - nothing is presented as current when it is not. *@
+@if (Status is null || Status.IsUnavailable)
+{
+    <div class="sai-banner sai-banner-negative">Data unavailable@(Status?.Issues.Count > 0 ? $": {string.Join("; ", Status.Issues)}" : "")</div>
+}
+else if (Status.IsStale)
+{
+    <div class="sai-banner sai-banner-warning">
+        <strong>Data may be stale.</strong>
+        @string.Join(" ", Status.Issues)
+        <div class="sai-action-desc">Market data: @ProductFormat.DateTimeIst(Status.MarketDataAsOf) - analysis generated @ProductFormat.DateTimeIst(Status.AnalysisComputedAt)</div>
+    </div>
+}
+else if (!Compact)
+{
+    <div class="sai-action-desc mb-2">
+        Analysis generated @ProductFormat.DateTimeIst(Status.AnalysisComputedAt) (@ProductFormat.Relative(Status.AnalysisComputedAt, DateTimeOffset.UtcNow))
+        - market data @ProductFormat.DateTimeIst(Status.MarketDataAsOf)
+        @if (Status.FiscalPeriodEnd is { } fy)
+        {
+            <span> - fundamentals: fiscal year to @ProductFormat.DateTimeIst(fy)</span>
+        }
+    </div>
+}
+
+@code {
+    [Parameter] public FreshnessStatus? Status { get; set; }
+    /// <summary>Compact: show only stale/unavailable warnings.</summary>
+    [Parameter] public bool Compact { get; set; }
+}

@@ -1,0 +1,188 @@
+@page "/settings/notifications"
+@* Notification preferences (stored on the backend, which is the source of
+   truth) and this device's push status. The OS permission prompt is shown
+   only when the user turns push on here - never silently. *@
+@inject INotificationApiClient NotificationApi
+@inject PushRegistrationService PushRegistration
+@inject NavigationManager Navigation
+@implements IDisposable
+
+<div class="sai-card">
+    <div class="sai-card-title">Notification settings</div>
+    <div class="sai-action-desc">Choose which updates you receive. Everything also appears in the Notification Center. Times are India time (IST).</div>
+</div>
+
+@if (_loading)
+{
+    <LoadingState Message="Loading your preferences..." />
+}
+else if (_error is not null && _prefs is null)
+{
+    @if (_errorKind == ApiErrorKind.Unauthorized)
+    {
+        <ErrorState Title="Session expired" Message="@_error" RetryLabel="Sign in again" OnRetry="@(() => Navigation.NavigateTo("/login"))" />
+    }
+    else
+    {
+        <ErrorState Title="Couldn't load your preferences" Message="@_error" OnRetry="LoadAsync" />
+    }
+}
+else if (_prefs is { } p)
+{
+    <div class="sai-card">
+        <div class="sai-section-title mt-0">This device</div>
+        <div class="sai-action-desc mb-2">@PushRegistration.LastResult.Message</div>
+        <label class="sai-toggle">
+            <span>Push notifications on my devices<div class="sai-action-desc">Off = Notification Center only</div></span>
+            <input type="checkbox" checked="@p.PushEnabled" @onchange="e => TogglePush((bool)e.Value!)" />
+        </label>
+        @if (p.PushEnabled && PushRegistration.LastResult.Status != PushRegistrationStatus.Registered)
+        {
+            <button class="btn btn-secondary btn-sm mt-2" disabled="@_saving" @onclick="EnablePushOnDeviceAsync">Allow notifications on this device</button>
+        }
+    </div>
+
+    <div class="sai-card">
+        <div class="sai-section-title mt-0">What to notify me about</div>
+        <label class="sai-toggle"><span>New Top Candidate<div class="sai-action-desc">A stock enters the Top Investment Candidates</div></span>
+            <input type="checkbox" @bind="p.NewTopCandidate" @bind:after="SaveAsync" /></label>
+        <label class="sai-toggle"><span>Top Candidate removed / downgraded<div class="sai-action-desc">With the reason (score, risk or data quality)</div></span>
+            <input type="checkbox" @bind="p.TopCandidateRemoved" @bind:after="SaveAsync" /></label>
+        <label class="sai-toggle"><span>StockAI Score changes<div class="sai-action-desc">Material changes of Top Candidates only</div></span>
+            <input type="checkbox" @bind="p.ScoreChanges" @bind:after="SaveAsync" /></label>
+        <label class="sai-toggle"><span>FQVF changes<div class="sai-action-desc">Top Candidates whose passed checks change materially</div></span>
+            <input type="checkbox" @bind="p.FqvfChanges" @bind:after="SaveAsync" /></label>
+        <label class="sai-toggle"><span>Watchlist alerts<div class="sai-action-desc">Score, rank, FQVF and status changes of stocks you watch (fine-tune per stock in Watchlist)</div></span>
+            <input type="checkbox" @bind="p.WatchlistAlerts" @bind:after="SaveAsync" /></label>
+        <label class="sai-toggle"><span>Daily Top Picks summary<div class="sai-action-desc">Trading days only</div></span>
+            <input type="checkbox" @bind="p.DailySummary" @bind:after="SaveAsync" /></label>
+        @if (p.DailySummary)
+        {
+            <label class="sai-toggle"><span>Summary time (IST)</span>
+                <input type="time" class="form-control w-auto" value="@p.DailySummaryTime" @onchange="e => SetTimeAsync(v => p.DailySummaryTime = v, e)" /></label>
+        }
+        <label class="sai-toggle"><span>Market regime alerts<div class="sai-action-desc">Only material NIFTY 50 regime changes</div></span>
+            <input type="checkbox" @bind="p.MarketRegime" @bind:after="SaveAsync" /></label>
+    </div>
+
+    <div class="sai-card">
+        <div class="sai-section-title mt-0">Quiet hours</div>
+        <label class="sai-toggle"><span>Hold push notifications during quiet hours<div class="sai-action-desc">They are delivered when quiet hours end, and always visible in the app</div></span>
+            <input type="checkbox" @bind="p.QuietHoursEnabled" @bind:after="SaveAsync" /></label>
+        @if (p.QuietHoursEnabled)
+        {
+            <div class="d-flex gap-2 mt-2">
+                <label class="flex-fill">From (IST)<input type="time" class="form-control" value="@p.QuietHoursStart" @onchange="e => SetTimeAsync(v => p.QuietHoursStart = v, e)" /></label>
+                <label class="flex-fill">To (IST)<input type="time" class="form-control" value="@p.QuietHoursEnd" @onchange="e => SetTimeAsync(v => p.QuietHoursEnd = v, e)" /></label>
+            </div>
+        }
+    </div>
+
+    @if (_saving)
+    {
+        <div class="sai-action-desc">Saving...</div>
+    }
+    else if (_error is not null)
+    {
+        <p class="text-danger" role="alert">@_error</p>
+    }
+    else if (_saved)
+    {
+        <div class="sai-action-desc">Saved.</div>
+    }
+    <div class="sai-action-desc text-muted">StockAI Pro limits how many notifications you receive and never repeats the same update.</div>
+}
+
+@code {
+    private NotificationPreferences? _prefs;
+    private bool _loading = true;
+    private bool _saving;
+    private bool _saved;
+    private string? _error;
+    private ApiErrorKind? _errorKind;
+
+    protected override async Task OnInitializedAsync()
+    {
+        PushRegistration.Changed += OnPushChanged;
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        _loading = true;
+        _error = null;
+        try
+        {
+            _prefs = await NotificationApi.GetPreferencesAsync();
+        }
+        catch (ApiException ex)
+        {
+            _error = ex.Message;
+            _errorKind = ex.Kind;
+        }
+        catch (Exception)
+        {
+            _error = "The server returned data the app could not read.";
+        }
+        _loading = false;
+    }
+
+    private async Task SaveAsync()
+    {
+        if (_prefs is null) return;
+        // <input type=time> may deliver HH:MM:SS; the backend expects HH:MM.
+        _prefs.QuietHoursStart = Hhmm(_prefs.QuietHoursStart);
+        _prefs.QuietHoursEnd = Hhmm(_prefs.QuietHoursEnd);
+        _prefs.DailySummaryTime = Hhmm(_prefs.DailySummaryTime);
+        _saving = true;
+        _saved = false;
+        _error = null;
+        StateHasChanged();
+        try
+        {
+            _prefs = await NotificationApi.SavePreferencesAsync(_prefs);
+            _saved = true;
+        }
+        catch (ApiException ex)
+        {
+            _error = ex.Message;
+            await LoadAsync();   // show what the backend actually stored
+        }
+        finally
+        {
+            _saving = false;
+        }
+    }
+
+    private async Task SetTimeAsync(Action<string> set, ChangeEventArgs e)
+    {
+        if (e.Value is string v && v.Length >= 5)
+        {
+            set(v[..5]);
+            await SaveAsync();
+        }
+    }
+
+    private static string Hhmm(string? value) => string.IsNullOrEmpty(value) || value.Length < 5 ? value ?? "" : value[..5];
+
+    private async Task TogglePush(bool enabled)
+    {
+        if (_prefs is null) return;
+        _prefs.PushEnabled = enabled;
+        await SaveAsync();
+        if (enabled)
+            await EnablePushOnDeviceAsync();
+    }
+
+    private async Task EnablePushOnDeviceAsync()
+    {
+        _saving = true;
+        StateHasChanged();
+        await PushRegistration.RegisterAsync(requestPermission: true);
+        _saving = false;
+    }
+
+    private void OnPushChanged() => InvokeAsync(StateHasChanged);
+
+    public void Dispose() => PushRegistration.Changed -= OnPushChanged;
+}

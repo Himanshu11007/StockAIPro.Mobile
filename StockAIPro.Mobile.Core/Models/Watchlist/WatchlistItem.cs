@@ -20,10 +20,10 @@ public sealed class WatchlistItem
     public required string StockName { get; init; }
 
     [JsonPropertyName("buy_price")]
-    public double BuyPrice { get; init; }
+    public double? BuyPrice { get; init; }
 
     [JsonPropertyName("buy_date")]
-    public required string BuyDate { get; init; }
+    public string? BuyDate { get; init; }
 
     [JsonPropertyName("quantity")]
     public double Quantity { get; init; }

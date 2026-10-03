@@ -361,3 +361,7 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+# Push notification credentials / per-project config (never committed; see docs/NOTIFICATIONS.md in the backend repo)
+google-services.json
+GoogleService-Info.plist
+*.p8

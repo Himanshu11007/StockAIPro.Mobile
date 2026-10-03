@@ -4,6 +4,7 @@
    and technical data, the informational ML signal and data freshness.
    Everything is rendered exactly as the backend returns it. *@
 @inject IProductApiClient ProductApi
+@inject IWatchlistApiClient WatchlistApi
 @inject AppConfigService AppConfig
 @inject NavigationManager Navigation
 @implements IDisposable
@@ -44,18 +45,42 @@ else if (_a is { } a)
                 <div class="sai-score-label">StockAI Score</div>
             </div>
         </div>
+        <AnalysisLabels Labels="a.Labels" />
         <div class="sai-metric-grid mt-2">
-            <MetricCard Label="Rank" Value="@(a.Ranking.Rank?.ToString() ?? ProductFormat.Missing)" />
+            <MetricCard Label="@(a.Ranking.UniverseRank is not null ? "Rank (last full run)" : "Rank")" Value="@RankText(a)" />
+            <MetricCard Label="FQVF" Value="@FqvfText(a)" />
+            <MetricCard Label="Reference price" Value="@ProductFormat.Price(a.ReferencePrice?.Close ?? a.Market?.Close)" />
             <MetricCard Label="Data coverage" Value="@ProductFormat.Percent(a.Ranking.ScoreCoverage, 0)" />
-            <MetricCard Label="Price" Value="@ProductFormat.Price(a.Market?.Close)" />
-            <MetricCard Label="FQVF score" Value="@ProductFormat.Score(a.Fqvf.Score)" />
         </div>
+        <div class="sai-action-desc mt-1">Reference price = last daily close as of @ProductFormat.DateTimeIst(a.ReferencePrice?.AsOfDate ?? a.Market?.AsOfDate) (not a live quote).</div>
         @if (!a.Ranking.EligibleForTopPicks && a.Ranking.IneligibleReasons.Count > 0)
         {
             <div class="sai-note mt-2">Not in Top Investment Candidates: @string.Join("; ", a.Ranking.IneligibleReasons)</div>
         }
-        <button class="btn btn-secondary btn-sm mt-2" @onclick="RefreshAsync">Refresh analysis</button>
+        <div class="d-flex flex-wrap gap-2 mt-2">
+            <button class="btn btn-secondary btn-sm" @onclick="RefreshAsync">Refresh analysis</button>
+            @if (_watchItemId is { } wid)
+            {
+                <button class="btn btn-outline-secondary btn-sm" disabled="@_watchBusy" @onclick="() => RemoveFromWatchlistAsync(wid)">On watchlist - remove</button>
+            }
+            else
+            {
+                <button class="btn btn-primary btn-sm" disabled="@_watchBusy" @onclick="AddToWatchlistAsync">Add to watchlist</button>
+            }
+            <a class="btn btn-link btn-sm" href="@($"/report?symbol={Uri.EscapeDataString(a.Symbol)}")">Report a data problem</a>
+        </div>
+        @if (_watchMessage is not null)
+        {
+            <div class="sai-action-desc mt-1" role="status">@_watchMessage</div>
+        }
     </div>
+
+    <FreshnessNotice Status="a.FreshnessStatus" />
+
+    @if (a.MarketRegime is { } regime)
+    {
+        <div class="sai-action-desc mb-2">Market regime (NIFTY 50) at this analysis: <strong>@(regime.Regime ?? "-")</strong> as of @ProductFormat.DateTimeIst(regime.AsOfDate)</div>
+    }
 
     <div class="sai-tabs">
         @foreach (var tab in Tabs)
@@ -66,17 +91,28 @@ else if (_a is { } a)
 
     @if (_tab == "Overview")
     {
+        @if (a.Explanation is { } why)
+        {
+            <div class="sai-card">
+                <div class="sai-section-title mt-0">Why is this stock ranked here?</div>
+                <p class="mb-1">@why.Summary</p>
+                @if (!string.IsNullOrEmpty(why.Note))
+                {
+                    <div class="sai-action-desc">@why.Note</div>
+                }
+            </div>
+        }
         @if (a.Ranking.Positives.Count > 0)
         {
             <div class="sai-card">
-                <div class="sai-section-title">Positive factors</div>
+                <div class="sai-section-title">Positive factors (key reasons)</div>
                 <ul class="sai-list sai-list-positive">@foreach (var p in a.Ranking.Positives) { <li>@p</li> }</ul>
             </div>
         }
         @if (a.Ranking.Risks.Count > 0)
         {
             <div class="sai-card">
-                <div class="sai-section-title">Risks</div>
+                <div class="sai-section-title">Negative factors and risks</div>
                 <ul class="sai-list sai-list-negative">@foreach (var r in a.Ranking.Risks) { <li>@r</li> }</ul>
             </div>
         }
@@ -129,6 +165,8 @@ else if (_a is { } a)
                     <MetricCard Label="Max drawdown 1y" Value="@ProductFormat.Percent(m.Technical?.MaxDrawdown1y)" />
                     <MetricCard Label="RSI" Value="@ProductFormat.Score(m.Technical?.Rsi)" />
                     <MetricCard Label="Stock regime" Value="@(m.Technical?.Regime ?? ProductFormat.Missing)" />
+                    <MetricCard Label="Daily trend" Value="@(m.Technical?.TrendDaily?.Trend ?? ProductFormat.Missing)" />
+                    <MetricCard Label="Weekly trend" Value="@(m.Technical?.TrendWeekly?.Trend ?? ProductFormat.Missing)" />
                 </div>
                 @if (m.Issues.Count > 0)
                 {
@@ -143,7 +181,8 @@ else if (_a is { } a)
         @if (a.MlSignal is { } ml)
         {
             <div class="sai-card">
-                <div class="sai-section-title">ML direction signal (informational)</div>
+                <div class="sai-section-title">ML direction signal - informational only</div>
+                <div class="sai-action-desc mb-1">Not used in the score (weight 0): research did not demonstrate reliable predictive skill.</div>
                 @if (ml.Available)
                 {
                     <div>Next-day direction: <strong>@ml.Direction</strong> (P(up) @ProductFormat.Percent(ml.ProbabilityUp))</div>
@@ -162,7 +201,7 @@ else if (_a is { } a)
             <div class="sai-section-title">Data freshness</div>
             @foreach (var kv in a.Freshness)
             {
-                <div class="sai-row"><div>@ProductFormat.FreshnessLabel(kv.Key)</div><div class="sai-row-value">@ProductFormat.Date(kv.Value)</div></div>
+                <div class="sai-row"><div>@ProductFormat.FreshnessLabel(kv.Key)</div><div class="sai-row-value">@ProductFormat.DateTimeIst(kv.Value)</div></div>
             }
             <div class="sai-row"><div>Data status</div><div class="sai-row-value">@(a.DataStatus ?? ProductFormat.Missing)</div></div>
             @if (!string.IsNullOrEmpty(a.DataStatusReason))
@@ -175,7 +214,8 @@ else if (_a is { } a)
             <div class="sai-row"><div>Ranking engine</div><div class="sai-row-value">@a.Engine?.Ranking</div></div>
             <div class="sai-row"><div>FQVF version</div><div class="sai-row-value">@a.Engine?.Fqvf</div></div>
             <div class="sai-row"><div>Run</div><div class="sai-row-value">@a.Engine?.RunId</div></div>
-            <div class="sai-row"><div>Computed</div><div class="sai-row-value">@ProductFormat.Date(a.Ranking.ComputedAt)</div></div>
+            <div class="sai-row"><div>Analysis generated</div><div class="sai-row-value">@ProductFormat.DateTimeIst(a.Ranking.ComputedAt)</div></div>
+            <div class="sai-row"><div>Run type</div><div class="sai-row-value">@(a.Engine?.RunKind == "SINGLE" ? "On-demand (this stock)" : "Full ranking run")</div></div>
         </div>
     }
 
@@ -194,12 +234,82 @@ else if (_a is { } a)
     private string? _error;
     private ApiErrorKind? _errorKind;
     private CancellationTokenSource _cts = new();
+    private int? _watchItemId;
+    private bool _watchBusy;
+    private string? _watchMessage;
+
+    private static string RankText(StockAnalysis a)
+    {
+        if (a.Ranking.UniverseRank is { Rank: { } r, EligibleTotal: { } n }) return $"{r} of {n}";
+        return a.Ranking.Rank?.ToString() ?? "Not ranked";
+    }
+
+    private static string FqvfText(StockAnalysis a) =>
+        a.Fqvf.Counts.TryGetValue("PASS", out var pass) ? $"{pass}/18 passed" : ProductFormat.Score(a.Fqvf.Score);
+
+    private async Task LoadWatchStateAsync()
+    {
+        try
+        {
+            var items = await WatchlistApi.GetMyWatchlistAsync(_cts.Token);
+            _watchItemId = items.FirstOrDefault(i => string.Equals(i.Symbol, Symbol, StringComparison.OrdinalIgnoreCase))?.Id;
+        }
+        catch (Exception ex) when (ex is ApiException or OperationCanceledException)
+        {
+            _watchItemId = null;
+        }
+    }
+
+    private async Task AddToWatchlistAsync()
+    {
+        _watchBusy = true;
+        _watchMessage = null;
+        try
+        {
+            var added = await WatchlistApi.AddAsync(new WatchlistAddRequest { Symbol = Symbol });
+            _watchItemId = added.Id;
+            _watchMessage = "Added to your watchlist. Alerts follow your watchlist notification settings.";
+        }
+        catch (ApiException ex) when (ex.Kind == ApiErrorKind.Conflict)
+        {
+            await LoadWatchStateAsync();
+        }
+        catch (ApiException ex)
+        {
+            _watchMessage = ex.Message;
+        }
+        finally
+        {
+            _watchBusy = false;
+        }
+    }
+
+    private async Task RemoveFromWatchlistAsync(int id)
+    {
+        _watchBusy = true;
+        _watchMessage = null;
+        try
+        {
+            await WatchlistApi.RemoveAsync(id);
+            _watchItemId = null;
+            _watchMessage = "Removed from your watchlist.";
+        }
+        catch (ApiException ex)
+        {
+            _watchMessage = ex.Message;
+        }
+        finally
+        {
+            _watchBusy = false;
+        }
+    }
 
     protected override async Task OnParametersSetAsync()
     {
         _cts.Cancel();
         _cts = new CancellationTokenSource();
-        await LoadAsync();
+        _watchMessage = null;
+        await Task.WhenAll(LoadAsync(), LoadWatchStateAsync());
     }
 
     private void Reset()

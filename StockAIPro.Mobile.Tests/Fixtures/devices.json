@@ -1,0 +1,18 @@
+{
+  "data": [
+    {
+      "active": true,
+      "app_version": "1.0",
+      "created_at": "2026-10-03T14:21:03.647604+00:00",
+      "device_id": "fixture-device",
+      "invalid_reason": null,
+      "last_active_at": "2026-10-03T14:21:03.645599+00:00",
+      "permission": "granted",
+      "platform": "android",
+      "provider": "fcm",
+      "token": "...-token"
+    }
+  ],
+  "message": "Registered devices",
+  "success": true
+}

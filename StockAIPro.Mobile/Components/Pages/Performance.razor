@@ -1,18 +1,18 @@
 @page "/performance"
-@inject IPerformanceApiClient PerformanceApiClient
+@* Performance by methodology (GET /performance/overview). Incompatible
+   methodologies are shown separately and never pooled into one number. *@
+@inject IProductApiClient ProductApi
+@inject AppConfigService AppConfig
 @inject NavigationManager Navigation
 
 <div class="sai-card">
     <div class="sai-card-title">Performance</div>
-    <div class="sai-action-desc">
-        Historical, observed outcomes over validated recommendations - not a
-        prediction of future results.
-    </div>
+    <div class="sai-action-desc">How the ranking is tracked, separated by methodology. Past results do not indicate future returns.</div>
 </div>
 
-@if (_isLoading)
+@if (_loading)
 {
-    <LoadingState Message="Loading performance analytics..." />
+    <LoadingState Message="Loading performance..." />
 }
 else if (_error is not null)
 {
@@ -25,112 +25,111 @@ else if (_error is not null)
         <ErrorState Title="Couldn't load performance data" Message="@_error" OnRetry="LoadAsync" />
     }
 }
-else if (_summary is { } summary)
+else if (_data?.Sections is { } s)
 {
-    @if (summary.Total == 0)
+    @if (s.Prospective is { } live)
     {
-        <EmptyState Title="No validated recommendations yet" Message="Performance analytics appear once recommendations have been validated." />
-    }
-    else
-    {
-        <div class="sai-metric-grid">
-            <MetricCard Label="Total" Value="@summary.Total.ToString()" />
-            <MetricCard Label="Success Rate" Value="@($"{summary.SuccessRate:0.0}%")" />
-            <MetricCard Label="Successful" Value="@summary.Successful.ToString()" />
-            <MetricCard Label="Failed" Value="@summary.Failed.ToString()" />
-            <MetricCard Label="Avg Return" Value="@($"{summary.AvgReturn:+0.00;-0.00}%")" />
-            <MetricCard Label="Best Return" Value="@($"{summary.BestReturn:+0.00;-0.00}%")" />
-            <MetricCard Label="Worst Return" Value="@($"{summary.WorstReturn:+0.00;-0.00}%")" />
+        <div class="sai-card">
+            <div class="sai-section-title mt-0">@live.Title</div>
+            <div class="sai-action-desc">@live.Methodology</div>
+            <div class="sai-metric-grid mt-2">
+                <MetricCard Label="Ranking runs tracked" Value="@live.RankingRunsTracked.ToString()" />
+                <MetricCard Label="Outcomes recorded" Value="@live.OutcomesRecorded.ToString()" />
+                <MetricCard Label="Tracking since" Value="@ProductFormat.DateTimeIst(live.FirstSnapshot)" />
+                <MetricCard Label="Benchmark" Value="NIFTY 50" />
+            </div>
+            @if (live.Performance.Count == 0)
+            {
+                <EmptyState Title="Performance tracking will appear after enough observations are available."
+                            Message="Each horizon (1, 3, 6, 12 months) is recorded only after it has fully elapsed." />
+            }
+            else
+            {
+                @foreach (var row in live.Performance)
+                {
+                    <div class="sai-row">
+                        <div>@row.Portfolio - @row.Horizon<div class="sai-action-desc">@row.Runs run@(row.Runs == 1 ? "" : "s"), @row.StockOutcomes stock outcomes</div></div>
+                        <div class="sai-row-value text-end">
+                            @ProductFormat.Percent(row.MeanReturn) return
+                            <div class="sai-action-desc">vs NIFTY @ProductFormat.Percent(row.MeanExcessVsNifty) - vs eligible universe @ProductFormat.Percent(row.MeanExcessVsUniverse)</div>
+                        </div>
+                    </div>
+                }
+            }
+            @foreach (var l in live.Limitations) { <div class="sai-action-desc text-muted">- @l</div> }
         </div>
-
-        <div class="sai-section-title">By signal</div>
-        @foreach (var row in _bySignal ?? [])
-        {
-            <div class="sai-card d-flex justify-content-between align-items-center">
-                <div>
-                    <SignalBadge Signal="@row.Signal" />
-                    <span class="sai-action-desc ms-2">@row.Count sample@(row.Count == 1 ? "" : "s")</span>
-                </div>
-                <div class="text-end">
-                    <div class="sai-metric-value" style="font-size:1rem">@row.SuccessRatePercent.ToString("0.0")%</div>
-                    <div class="sai-action-desc">avg @row.AvgReturnPercent.ToString("+0.00;-0.00")%</div>
-                </div>
-            </div>
-        }
-
-        <div class="sai-section-title">By ML confidence</div>
-        @foreach (var row in _byConfidence ?? [])
-        {
-            <div class="sai-card d-flex justify-content-between align-items-center">
-                <div>
-                    <span class="sai-action-title">@row.ConfidenceBand%</span>
-                    <span class="sai-action-desc ms-2">@row.Count sample@(row.Count == 1 ? "" : "s")</span>
-                </div>
-                <div class="text-end">
-                    <div class="sai-metric-value" style="font-size:1rem">@row.SuccessRatePercent.ToString("0.0")%</div>
-                    <div class="sai-action-desc">avg @row.AvgReturnPercent.ToString("+0.00;-0.00")%</div>
-                </div>
-            </div>
-        }
-
-        <div class="sai-section-title">By confluence score</div>
-        @foreach (var row in _byConfluence ?? [])
-        {
-            <div class="sai-card d-flex justify-content-between align-items-center">
-                <div>
-                    <span class="sai-action-title">@row.ConfluenceBand</span>
-                    <span class="sai-action-desc ms-2">@row.Count sample@(row.Count == 1 ? "" : "s")</span>
-                </div>
-                <div class="text-end">
-                    <div class="sai-metric-value" style="font-size:1rem">@row.SuccessRatePercent.ToString("0.0")%</div>
-                    <div class="sai-action-desc">avg @row.AvgReturnPercent.ToString("+0.00;-0.00")%</div>
-                </div>
-            </div>
-        }
     }
+
+    @if (s.Validation is { } v)
+    {
+        <div class="sai-card">
+            <div class="sai-section-title mt-0">@v.Title</div>
+            <div class="sai-action-desc">@v.Methodology</div>
+            <div class="sai-action-desc">Benchmark: @v.Benchmark - horizon: @v.Horizon</div>
+            @foreach (var r in v.Results)
+            {
+                <div class="sai-row"><div>@r.Metric</div><div class="sai-row-value">@r.Value</div></div>
+            }
+            <p class="mt-2 mb-1">@v.Conclusion</p>
+            @foreach (var l in v.Limitations) { <div class="sai-action-desc text-muted">- @l</div> }
+        </div>
+    }
+
+    @foreach (var sig in new[] { s.PostFixSignals, s.LegacySignals })
+    {
+        if (sig is null) continue;
+        <details class="sai-card">
+            <summary>@sig.Title (@sig.Count records)</summary>
+            <div class="sai-action-desc mt-2">@sig.Methodology</div>
+            @if (sig.Caveat is not null)
+            {
+                <div class="sai-banner sai-banner-warning mt-2">@sig.Caveat</div>
+            }
+            @if (sig.Count > 0)
+            {
+                <div class="sai-action-desc">Period: @ProductFormat.DateTimeIst(sig.PeriodStart) - @ProductFormat.DateTimeIst(sig.PeriodEnd). @sig.Horizon</div>
+                @foreach (var g in sig.BySignal)
+                {
+                    <div class="sai-row">
+                        <div><SignalBadge Signal="@g.Signal" /> <span class="sai-action-desc">@g.Count</span></div>
+                        <div class="sai-row-value">@(g.SuccessRate?.ToString("0.0") ?? "-")% met its definition - avg @(g.AvgReturnPct?.ToString("+0.00;-0.00") ?? "-")%</div>
+                    </div>
+                }
+                <div class="sai-action-desc text-muted mt-1">@sig.SuccessDefinition</div>
+            }
+        </details>
+    }
+
+    <div class="sai-action-desc">@_data.Note</div>
+    <Disclaimer Text="@AppConfig.Disclaimer" />
 }
 
 @code {
-    private bool _isLoading = true;
+    private PerformanceOverview? _data;
+    private bool _loading = true;
     private string? _error;
     private ApiErrorKind? _errorKind;
-    private PerformanceSummary? _summary;
-    private List<SignalPerformance>? _bySignal;
-    private List<ConfidencePerformance>? _byConfidence;
-    private List<ConfluencePerformance>? _byConfluence;
 
     protected override Task OnInitializedAsync() => LoadAsync();
 
     private async Task LoadAsync()
     {
-        _isLoading = true;
+        _loading = true;
         _error = null;
-        _errorKind = null;
         StateHasChanged();
         try
         {
-            // Independent read-only calls - fetched together rather than
-            // sequentially since none depends on another's result.
-            var summaryTask = PerformanceApiClient.GetSummaryAsync();
-            var signalTask = PerformanceApiClient.GetBySignalAsync();
-            var confidenceTask = PerformanceApiClient.GetByConfidenceAsync();
-            var confluenceTask = PerformanceApiClient.GetByConfluenceAsync();
-
-            await Task.WhenAll(summaryTask, signalTask, confidenceTask, confluenceTask);
-
-            _summary = summaryTask.Result;
-            _bySignal = signalTask.Result;
-            _byConfidence = confidenceTask.Result;
-            _byConfluence = confluenceTask.Result;
+            _data = await ProductApi.GetPerformanceOverviewAsync();
         }
         catch (ApiException ex)
         {
             _error = ex.Message;
             _errorKind = ex.Kind;
         }
-        finally
+        catch (Exception)
         {
-            _isLoading = false;
+            _error = "The server returned data the app could not read.";
         }
+        _loading = false;
     }
 }

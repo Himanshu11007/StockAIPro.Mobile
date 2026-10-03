@@ -1,0 +1,74 @@
+{
+  "data": {
+    "items": [
+      {
+        "alerts": {
+          "fqvf_changes": true,
+          "muted": false,
+          "rank_changes": true,
+          "score_changes": true,
+          "status_changes": true
+        },
+        "alerts_active": true,
+        "analysed": true,
+        "analysis_computed_at": "2026-10-03T12:21:03.431805+00:00",
+        "buy_date": null,
+        "buy_price": null,
+        "created_at": "2026-10-03T14:21:03.641599+00:00",
+        "eligible": true,
+        "fqvf_passed": 12,
+        "fqvf_score": 66.66666666666666,
+        "freshness_status": {
+          "analysis_age_days": 0,
+          "analysis_computed_at": "2026-10-03T12:21:03.431805+00:00",
+          "fiscal_period_end": null,
+          "fundamentals_fetched_at": null,
+          "issues": [],
+          "market_data_age_days": 0,
+          "market_data_as_of": "2026-10-03",
+          "status": "OK"
+        },
+        "id": 1,
+        "labels": [
+          {
+            "key": "quality",
+            "label": "Strong Quality",
+            "tone": "positive"
+          },
+          {
+            "key": "valuation",
+            "label": "Attractive Valuation",
+            "tone": "positive"
+          },
+          {
+            "key": "financial_health",
+            "label": "Strong Financial Health",
+            "tone": "positive"
+          },
+          {
+            "key": "momentum",
+            "label": "Positive Momentum",
+            "tone": "positive"
+          },
+          {
+            "key": "high_risk",
+            "label": "High Risk",
+            "tone": "negative"
+          }
+        ],
+        "previous_score": 87.0,
+        "price": 1234.5,
+        "price_as_of": "2026-10-03",
+        "quantity": 1.0,
+        "rank": 15,
+        "score_change": -12.0,
+        "sector": "Energy",
+        "stock_name": "Stock 03",
+        "stockai_score": 75.0,
+        "symbol": "S03.NS"
+      }
+    ]
+  },
+  "message": "1 stock(s)",
+  "success": true
+}

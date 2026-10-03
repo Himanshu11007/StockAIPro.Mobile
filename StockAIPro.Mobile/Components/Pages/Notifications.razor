@@ -1,0 +1,179 @@
+@page "/notifications"
+@* Notification Center: every notification the backend created for this user,
+   including ones whose push was suppressed, queued for quiet hours or never
+   delivered - so nothing important is lost because a push was missed. *@
+@inject INotificationApiClient NotificationApi
+@inject NotificationStateService NotificationState
+@inject NavigationManager Navigation
+@implements IDisposable
+
+<div class="sai-card">
+    <div class="d-flex justify-content-between align-items-center">
+        <div class="sai-card-title mb-0">Notifications</div>
+        <a class="sai-link" href="settings/notifications">Settings</a>
+    </div>
+    <div class="sai-tabs mt-2">
+        <button class="sai-tab @(!_unreadOnly ? "active" : "")" @onclick="() => SetFilter(false)">All</button>
+        <button class="sai-tab @(_unreadOnly ? "active" : "")" @onclick="() => SetFilter(true)">Unread (@NotificationState.UnreadCount)</button>
+    </div>
+    @if (NotificationState.UnreadCount > 0)
+    {
+        <button class="btn btn-secondary btn-sm mt-2" disabled="@_busy" @onclick="MarkAllAsync">Mark all as read</button>
+    }
+</div>
+
+@if (_loading)
+{
+    <LoadingState Message="Loading notifications..." />
+}
+else if (_error is not null)
+{
+    @if (_errorKind == ApiErrorKind.Unauthorized)
+    {
+        <ErrorState Title="Session expired" Message="@_error" RetryLabel="Sign in again" OnRetry="@(() => Navigation.NavigateTo("/login"))" />
+    }
+    else
+    {
+        <ErrorState Title="Couldn't load notifications" Message="@_error" OnRetry="ReloadAsync" />
+    }
+}
+else if (_items.Count == 0)
+{
+    <EmptyState Title="You're all caught up." Message="@(_unreadOnly ? "No unread notifications." : "Notifications about Top Candidates, your watchlist and the market appear here. Choose which ones you get in Settings.")" />
+}
+else
+{
+    @foreach (var n in _items)
+    {
+        <div class="sai-card sai-clickable sai-notification @(n.Read ? "" : "unread")" role="button" tabindex="0" @onclick="() => OpenAsync(n)">
+            <div class="sai-notification-meta">
+                <span>@n.TypeLabel@(n.Symbol is null ? "" : $" - {n.Symbol}")</span>
+                <span>@ProductFormat.Relative(n.CreatedAt, DateTimeOffset.UtcNow)</span>
+            </div>
+            <div class="sai-action-title">@n.Title</div>
+            <div class="sai-action-desc">@n.Body</div>
+            <div class="sai-action-desc text-muted mt-1">
+                @ProductFormat.DateTimeIst(n.CreatedAt)@(n.EngineVersion is null ? "" : $" - {n.EngineVersion}")@(n.Read ? "" : " - unread")
+            </div>
+        </div>
+    }
+    @if (_items.Count < _total)
+    {
+        <button class="btn btn-secondary w-100" disabled="@_busy" @onclick="LoadMoreAsync">Show older notifications</button>
+    }
+}
+
+@code {
+    private const int PageSize = 30;
+    private readonly List<NotificationItem> _items = [];
+    private int _total;
+    private bool _unreadOnly;
+    private bool _loading = true;
+    private bool _busy;
+    private string? _error;
+    private ApiErrorKind? _errorKind;
+    private readonly CancellationTokenSource _cts = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        NotificationState.Changed += OnBadge;
+        await ReloadAsync();
+    }
+
+    private async Task SetFilter(bool unreadOnly)
+    {
+        _unreadOnly = unreadOnly;
+        await ReloadAsync();
+    }
+
+    private async Task ReloadAsync()
+    {
+        _items.Clear();
+        _loading = true;
+        _error = null;
+        StateHasChanged();
+        await FetchAsync(0);
+        _loading = false;
+    }
+
+    private Task LoadMoreAsync() => FetchAsync(_items.Count);
+
+    private async Task FetchAsync(int offset)
+    {
+        _busy = true;
+        try
+        {
+            var page = await NotificationApi.GetNotificationsAsync(_unreadOnly, PageSize, offset, _cts.Token);
+            _items.AddRange(page.Items);
+            _total = _unreadOnly ? page.Unread : page.Total;
+            NotificationState.SetCount(page.Unread);
+        }
+        catch (ApiException ex)
+        {
+            _error = ex.Message;
+            _errorKind = ex.Kind;
+        }
+        catch (OperationCanceledException)
+        {
+        }
+        catch (Exception)
+        {
+            _error = "The server returned data the app could not read.";
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+
+    private async Task OpenAsync(NotificationItem n)
+    {
+        if (!n.Read)
+        {
+            n.Read = true;
+            NotificationState.SetCount(NotificationState.UnreadCount - 1);
+            try
+            {
+                await NotificationApi.MarkReadAsync(n.Id);
+            }
+            catch (ApiException)
+            {
+                // Opening the destination matters more than the read flag.
+            }
+        }
+        var route = DeepLinkRouter.ToRoute(n.Route);
+        if (route is not null && route != "/notifications")
+            Navigation.NavigateTo(route);
+        else
+            StateHasChanged();
+    }
+
+    private async Task MarkAllAsync()
+    {
+        _busy = true;
+        try
+        {
+            await NotificationApi.MarkAllReadAsync();
+            foreach (var n in _items) n.Read = true;
+            NotificationState.SetCount(0);
+            if (_unreadOnly) _items.Clear();
+        }
+        catch (ApiException ex)
+        {
+            _error = ex.Message;
+            _errorKind = ex.Kind;
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+
+    private void OnBadge() => InvokeAsync(StateHasChanged);
+
+    public void Dispose()
+    {
+        _cts.Cancel();
+        NotificationState.Changed -= OnBadge;
+    }
+}

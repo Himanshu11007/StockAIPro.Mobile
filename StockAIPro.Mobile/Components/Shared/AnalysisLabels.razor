@@ -1,0 +1,16 @@
+@* Analytical labels from the backend ("Top Candidate", "Strong Quality",
+   "High Risk", "Needs Review", ...) - descriptions of the data, never
+   instructions. *@
+@if (Labels is { Count: > 0 })
+{
+    <div class="sai-labels">
+        @foreach (var l in Labels)
+        {
+            <span class="sai-badge @ProductFormat.LabelCss(l.Tone)">@l.Label</span>
+        }
+    </div>
+}
+
+@code {
+    [Parameter] public List<AnalysisLabel>? Labels { get; set; }
+}

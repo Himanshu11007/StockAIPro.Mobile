@@ -1,0 +1,50 @@
+{
+  "data": {
+    "items": [
+      {
+        "body": "Stock 10's StockAI Score changed from 80.0 to 99.0 (+19.0). Tap to review.",
+        "created_at": "2026-10-03T14:21:03.431805+00:00",
+        "data": {
+          "delta": 19.0,
+          "new": 99.0,
+          "old": 80.0
+        },
+        "engine_version": "ranking-v1.0",
+        "id": 2,
+        "push_status": "SENT",
+        "ranking_run_id": "R2",
+        "read": false,
+        "read_at": null,
+        "route": "/stock/S10.NS",
+        "symbol": "S10.NS",
+        "title": "StockAI Score Update",
+        "type": "SCORE_CHANGE"
+      },
+      {
+        "body": "StockAI Score 87.0 -> 75.0 (-12.0). Tap to view analysis.",
+        "created_at": "2026-10-03T14:21:03.431805+00:00",
+        "data": {
+          "changes": [
+            "StockAI Score 87.0 -> 75.0 (-12.0)"
+          ]
+        },
+        "engine_version": "ranking-v1.0",
+        "id": 1,
+        "push_status": "SENT",
+        "ranking_run_id": "R2",
+        "read": false,
+        "read_at": null,
+        "route": "/stock/S03.NS",
+        "symbol": "S03.NS",
+        "title": "Watchlist: Stock 03",
+        "type": "WATCHLIST_ALERT"
+      }
+    ],
+    "limit": 50,
+    "offset": 0,
+    "total": 2,
+    "unread": 2
+  },
+  "message": "2 notification(s)",
+  "success": true
+}

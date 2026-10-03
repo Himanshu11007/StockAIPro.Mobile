@@ -1,0 +1,134 @@
+@page "/report"
+@* Report a problem. Reports are stored by the backend and reviewed in the
+   admin console; the confirmation text comes from the backend and says
+   exactly that (no email or ticket system is claimed). *@
+@inject INotificationApiClient NotificationApi
+@inject IPushTokenProvider PushInfo
+@inject NavigationManager Navigation
+
+<div class="sai-card">
+    <div class="sai-card-title">Report a problem</div>
+    <div class="sai-action-desc">Tell us about incorrect or stale data, wrong company information, a ranking/analysis issue, or an app problem.</div>
+</div>
+
+@if (_receipt is { } r)
+{
+    <div class="sai-banner sai-banner-info" role="status">@r.Message</div>
+    <button class="btn btn-secondary w-100" @onclick="Reset">Report something else</button>
+}
+else
+{
+    <div class="sai-card">
+        <label class="w-100 mb-2">What kind of problem?
+            <select class="form-select" @bind="_category">
+                @foreach (var (key, label) in FeedbackCategories.All)
+                {
+                    <option value="@key">@label</option>
+                }
+            </select>
+        </label>
+        <label class="w-100 mb-2">Stock symbol (optional)
+            <input class="form-control" maxlength="30" @bind="_symbol" placeholder="e.g. TCS.NS" />
+        </label>
+        <label class="w-100 mb-2">Details
+            <textarea class="form-control" rows="5" maxlength="2000" @bind="_message" placeholder="What did you see, and what did you expect?"></textarea>
+        </label>
+        @if (_error is not null)
+        {
+            <p class="text-danger" role="alert">@_error</p>
+        }
+        <button class="btn btn-primary w-100" disabled="@_busy" @onclick="SubmitAsync">@(_busy ? "Sending..." : "Send report")</button>
+    </div>
+}
+
+<div class="sai-section-title">My reports</div>
+@if (_reports is null)
+{
+    <button class="btn btn-link" @onclick="LoadReportsAsync">Show my previous reports</button>
+}
+else if (_reports.Count == 0)
+{
+    <div class="sai-action-desc">You haven't sent any reports.</div>
+}
+else
+{
+    @foreach (var f in _reports)
+    {
+        <div class="sai-card">
+            <div class="sai-notification-meta"><span>#@f.Id - @f.Category.Replace('_', ' ').ToLowerInvariant()@(f.Symbol is null ? "" : $" - {f.Symbol}")</span><span>@f.Status</span></div>
+            <div class="sai-action-desc">@f.Message</div>
+            @if (!string.IsNullOrEmpty(f.AdminNote))
+            {
+                <div class="sai-action-desc mt-1"><strong>Response:</strong> @f.AdminNote</div>
+            }
+            <div class="sai-action-desc text-muted">@ProductFormat.DateTimeIst(f.CreatedAt)</div>
+        </div>
+    }
+}
+
+@code {
+    [SupplyParameterFromQuery(Name = "symbol")] public string? Symbol { get; set; }
+
+    private string _category = FeedbackCategories.IncorrectStockData;
+    private string? _symbol;
+    private string _message = "";
+    private bool _busy;
+    private string? _error;
+    private FeedbackReceipt? _receipt;
+    private List<FeedbackItem>? _reports;
+
+    protected override void OnParametersSet() => _symbol ??= Symbol;
+
+    private async Task SubmitAsync()
+    {
+        _error = null;
+        if (_message.Trim().Length < 5)
+        {
+            _error = "Please describe the problem (at least 5 characters).";
+            return;
+        }
+        _busy = true;
+        try
+        {
+            _receipt = await NotificationApi.SubmitFeedbackAsync(new FeedbackRequest
+            {
+                Category = _category,
+                Message = _message.Trim(),
+                Symbol = string.IsNullOrWhiteSpace(_symbol) ? null : _symbol.Trim(),
+                AppVersion = AppInfo.Current.VersionString,
+                Platform = PushInfo.Platform ?? Microsoft.Maui.Devices.DeviceInfo.Current.Platform.ToString(),
+            });
+            _reports = null;
+        }
+        catch (ApiException ex) when (ex.Kind == ApiErrorKind.Unauthorized)
+        {
+            Navigation.NavigateTo("/login");
+        }
+        catch (ApiException ex)
+        {
+            _error = ex.Message;
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+
+    private void Reset()
+    {
+        _receipt = null;
+        _message = "";
+    }
+
+    private async Task LoadReportsAsync()
+    {
+        try
+        {
+            _reports = await NotificationApi.GetMyReportsAsync();
+        }
+        catch (ApiException ex)
+        {
+            _error = ex.Message;
+        }
+    }
+}

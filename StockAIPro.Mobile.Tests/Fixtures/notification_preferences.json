@@ -1,0 +1,20 @@
+{
+  "data": {
+    "daily_summary": false,
+    "daily_summary_time": "08:30",
+    "fqvf_changes": false,
+    "market_regime": false,
+    "new_top_candidate": true,
+    "push_enabled": true,
+    "quiet_hours_enabled": true,
+    "quiet_hours_end": "07:00",
+    "quiet_hours_start": "22:00",
+    "score_changes": true,
+    "timezone": "Asia/Kolkata",
+    "top_candidate_removed": false,
+    "updated_at": "2026-10-03T14:21:03.644598+00:00",
+    "watchlist_alerts": true
+  },
+  "message": "Notification preferences",
+  "success": true
+}

@@ -1,8 +1,10 @@
-﻿using System.Reflection;
+using System.Reflection;
 using Microsoft.Extensions.Logging;
 using StockAIPro.Mobile.Services.Api;
 using StockAIPro.Mobile.Services.Authentication;
 using StockAIPro.Mobile.Services.Configuration;
+using StockAIPro.Mobile.Services.Navigation;
+using StockAIPro.Mobile.Services.Notifications;
 
 namespace StockAIPro.Mobile
 {
@@ -75,6 +77,21 @@ namespace StockAIPro.Mobile
             services.AddSingleton<IIntelligenceApiClient, IntelligenceApiClient>();
             services.AddSingleton<IProductApiClient, ProductApiClient>();
             services.AddSingleton<AppConfigService>();
+
+            // Notifications: Notification Center client, unread badge, push
+            // registration (FCM on Android, APNs on iOS), deep links.
+            services.AddSingleton<INotificationApiClient, NotificationApiClient>();
+            services.AddSingleton<NotificationStateService>();
+            services.AddSingleton<PendingNavigationService>();
+            services.AddSingleton<SignInFlow>();
+#if ANDROID
+            services.AddSingleton<IPushTokenProvider, StockAIPro.Mobile.Platforms.Android.Push.AndroidPushTokenProvider>();
+#elif IOS
+            services.AddSingleton<IPushTokenProvider, StockAIPro.Mobile.Platforms.iOS.Push.IosPushTokenProvider>();
+#else
+            services.AddSingleton<IPushTokenProvider, UnsupportedPushTokenProvider>();
+#endif
+            services.AddSingleton<PushRegistrationService>();
 
             // Transient: IHttpClientFactory constructs a fresh handler
             // instance per HttpClient it builds, per its own lifecycle

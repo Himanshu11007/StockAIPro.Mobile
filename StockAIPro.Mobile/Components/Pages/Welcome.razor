@@ -1,0 +1,80 @@
+@page "/welcome"
+@* First-use introduction. Pages come from the backend (app_config
+   "app.onboarding"); the built-in text below is used only if the server
+   cannot be reached on first launch. *@
+@inject AppConfigService AppConfig
+@inject IAuthService AuthService
+@inject IPinService PinService
+@inject SignInFlow SignInFlow
+@inject NavigationManager Navigation
+@implements IDisposable
+
+<div class="sai-onboarding">
+    <div class="sai-card">
+        <div class="sai-card-title">@Current.Title</div>
+        <p class="mb-0">@Current.Body</p>
+    </div>
+
+    <div class="sai-dots" aria-hidden="true">
+        @for (var i = 0; i < Pages.Count; i++)
+        {
+            <span class="@(i == _index ? "active" : "")"></span>
+        }
+    </div>
+
+    <div class="d-flex gap-2">
+        @if (_index > 0)
+        {
+            <button class="btn btn-secondary flex-fill" @onclick="() => _index--">Back</button>
+        }
+        @if (_index < Pages.Count - 1)
+        {
+            <button class="btn btn-primary flex-fill" @onclick="() => _index++">Next</button>
+        }
+        else
+        {
+            <button class="btn btn-primary flex-fill" @onclick="Finish">Get started</button>
+        }
+    </div>
+    @if (_index < Pages.Count - 1)
+    {
+        <button class="btn btn-link mt-2" @onclick="Finish">Skip introduction</button>
+    }
+
+    <Disclaimer Text="@AppConfig.Disclaimer" />
+</div>
+
+@code {
+    private static readonly List<OnboardingPage> Fallback =
+    [
+        new() { Title = "Welcome to StockAI Pro", Body = "Transparent, rules-based analysis of NSE stocks: see exactly why each stock is rated the way it is." },
+        new() { Title = "StockAI Score and FQVF", Body = "The StockAI Score (0-100) ranks stocks against each other on quality, valuation, financial health, trend, momentum, risk and market regime. FQVF runs 18 fixed fundamental checks; 'Not available' means data is missing, never a failure." },
+        new() { Title = "Data and limitations", Body = "Market data can be delayed and every screen shows when it was last updated. StockAI Pro provides analysis, not investment advice; no analysis guarantees returns." },
+    ];
+
+    private int _index;
+
+    private List<OnboardingPage> Pages =>
+        AppConfig.Current?.Onboarding is { Count: > 0 } pages ? pages : Fallback;
+
+    private OnboardingPage Current => Pages[Math.Clamp(_index, 0, Pages.Count - 1)];
+
+    protected override void OnInitialized() => AppConfig.Changed += OnChanged;
+
+    private void OnChanged() => InvokeAsync(StateHasChanged);
+
+    private async Task Finish()
+    {
+        OnboardingState.MarkCompleted();
+        // Existing installations that already use a PIN keep the PIN gate.
+        if (!AuthService.IsAuthenticated && await PinService.IsPinSetAsync())
+        {
+            Navigation.NavigateTo("/pin-unlock");
+            return;
+        }
+        var restored = AuthService.IsAuthenticated || await AuthService.TryRestoreSessionAsync();
+        Navigation.NavigateTo(restored ? SignInFlow.NextRoute(offerPinSetup: false) : "/login");
+    }
+
+    public void Dispose() => AppConfig.Changed -= OnChanged;
+}

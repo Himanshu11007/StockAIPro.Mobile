@@ -10,7 +10,13 @@
          Developer portal (see docs/AUTHENTICATION.md "Apple setup") -
          adding it here alone is not sufficient; Xcode/the Apple Developer
          portal must agree. -->
+    <!-- aps-environment: Push Notifications capability (APNs). "development"
+         for debug/TestFlight-sandbox builds; Apple's signing replaces it with
+         "production" for App Store distribution profiles. The App ID must
+         have Push Notifications enabled (docs/NOTIFICATIONS.md). -->
     <dict>
+        <key>aps-environment</key>
+        <string>development</string>
         <key>com.apple.developer.applesignin</key>
         <array>
             <string>Default</string>

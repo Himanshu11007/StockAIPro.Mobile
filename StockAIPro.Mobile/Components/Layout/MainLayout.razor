@@ -3,12 +3,28 @@
 @inject IPinService PinService
 @inject AppConfigService AppConfig
 @inject NavigationManager Navigation
+@inject PendingNavigationService PendingNavigation
+@inject SignInFlow SignInFlow
+@inject NotificationStateService NotificationState
+@inject PushRegistrationService PushRegistration
 @implements IDisposable
 
 <div class="app-shell">
     <header class="app-topbar">
-        <span class="app-topbar-brand">StockAI Pro</span>
-        <span class="app-topbar-subtitle">AI-Powered Stock Intelligence</span>
+        <div>
+            <span class="app-topbar-brand">StockAI Pro</span>
+            <span class="app-topbar-subtitle">Transparent stock analysis</span>
+        </div>
+        @if (AuthService.IsAuthenticated && AppConfig.IsEnabled("notifications"))
+        {
+            <a class="sai-bell" href="notifications" aria-label="@($"Notifications, {NotificationState.UnreadCount} unread")">
+                <span aria-hidden="true">&#128276;</span>
+                @if (NotificationState.UnreadCount > 0)
+                {
+                    <span class="sai-bell-badge">@(NotificationState.UnreadCount > 99 ? "99+" : NotificationState.UnreadCount.ToString())</span>
+                }
+            </a>
+        }
     </header>
 
     <main class="app-content">
@@ -23,39 +39,62 @@
 
 @code {
     // Runs once when the app's single long-lived Blazor Hybrid session
-    // starts (this layout is not recreated on client-side navigation) -
-    // the "on application startup" hook: try to restore a session from
-    // secure storage without blocking the UI if the backend is unreachable.
+    // starts (this layout is not recreated on client-side navigation).
     protected override async Task OnInitializedAsync()
     {
         AuthService.AuthStateChanged += OnAuthStateChanged;
+        NotificationState.Changed += OnBadgeChanged;
+        PendingNavigation.DestinationRequested += OnDestinationRequested;
 
-        // Backend-controlled feature flags/disclaimer (public endpoint).
-        // Not awaited: it never throws and must not delay session restore.
+        // Backend-controlled feature flags/disclaimer/onboarding (public endpoint).
         _ = AppConfig.LoadAsync();
+
+        if (!OnboardingState.Completed)
+        {
+            Navigation.NavigateTo("/welcome");
+            return;
+        }
 
         if (await PinService.IsPinSetAsync())
         {
-            // A PIN gate exists for this device - require it before
-            // touching the stored session at all. PinUnlock.razor itself
-            // calls TryRestoreSessionAsync() after a correct PIN (the exact
-            // same call this branch would otherwise make directly), so the
-            // existing refresh/session-restore pipeline is never bypassed,
-            // only deferred behind the PIN check.
+            // A PIN gate exists for this device - require it before touching
+            // the stored session. PinUnlock restores the session itself.
             Navigation.NavigateTo("/pin-unlock");
             return;
         }
 
-        await AuthService.TryRestoreSessionAsync();
+        if (await AuthService.TryRestoreSessionAsync())
+            OpenPendingDestination();
     }
 
-    // The bottom nav's visibility depends on IsAuthenticated, which can
-    // flip asynchronously after this component's first render (session
-    // restore above, or a login/logout elsewhere) - without this
-    // subscription the nav would not appear/disappear until some unrelated
-    // re-render happened. See NavMenu/Home/Login/Register/Account for the
-    // same pattern; every component that reads AuthService state needs it.
+    /// <summary>A notification tap or stockaipro:// link while the app runs.</summary>
+    private void OnDestinationRequested() => InvokeAsync(() =>
+    {
+        if (AuthService.IsAuthenticated)
+        {
+            OpenPendingDestination();
+        }
+        else if (OnboardingState.Completed && !Navigation.Uri.Contains("/login") && !Navigation.Uri.Contains("/pin-unlock"))
+        {
+            // Kept by PendingNavigationService and opened after sign-in.
+            Navigation.NavigateTo("/login");
+        }
+    });
+
+    private void OpenPendingDestination()
+    {
+        if (SignInFlow.TakePending(AuthService.IsAuthenticated) is { } route)
+            Navigation.NavigateTo(route);
+    }
+
     private void OnAuthStateChanged() => InvokeAsync(StateHasChanged);
 
-    public void Dispose() => AuthService.AuthStateChanged -= OnAuthStateChanged;
+    private void OnBadgeChanged() => InvokeAsync(StateHasChanged);
+
+    public void Dispose()
+    {
+        AuthService.AuthStateChanged -= OnAuthStateChanged;
+        NotificationState.Changed -= OnBadgeChanged;
+        PendingNavigation.DestinationRequested -= OnDestinationRequested;
+    }
 }

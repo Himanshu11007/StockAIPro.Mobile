@@ -47,6 +47,26 @@ internal static class BusinessApiSend
         return envelope.Data;
     }
 
+    /// <summary>Like ReadDataOrThrowAsync but also returns the envelope's
+    /// user-facing message (e.g. a report receipt).</summary>
+    public static async Task<(T Data, string Message)> ReadEnvelopeOrThrowAsync<T>(HttpResponseMessage response, CancellationToken ct)
+    {
+        if (!response.IsSuccessStatusCode)
+            throw await BackendErrorParser.FromResponseAsync(response, ct);
+
+        var envelope = await response.Content.ReadFromJsonAsync<ApiEnvelope<T>>(cancellationToken: ct);
+        if (envelope is null)
+            throw new ApiException(ApiErrorKind.Unknown, "The server returned an empty response.");
+        return (envelope.Data, envelope.Message);
+    }
+
+    /// <summary>Non-success -> ApiException; success body ignored (204 etc.).</summary>
+    public static async Task EnsureSuccessAsync(HttpResponseMessage response, CancellationToken ct)
+    {
+        if (!response.IsSuccessStatusCode)
+            throw await BackendErrorParser.FromResponseAsync(response, ct);
+    }
+
     /// <summary>For the handful of routes that use `response_model=...`
     /// directly instead of success_envelope(...) - namely /stocks and
     /// /watchlist (see api/routes/stocks.py and api/routes/watchlist.py,

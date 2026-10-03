@@ -13,11 +13,15 @@ public sealed class WatchlistAddRequest
     [JsonPropertyName("symbol")]
     public required string Symbol { get; init; }
 
+    /// <summary>Optional personal note: a watchlist entry follows a stock's
+    /// analysis; a purchase price/date is not required.</summary>
     [JsonPropertyName("buy_price")]
-    public required double BuyPrice { get; init; }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public double? BuyPrice { get; init; }
 
     [JsonPropertyName("buy_date")]
-    public required string BuyDate { get; init; }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? BuyDate { get; init; }
 
     [JsonPropertyName("quantity")]
     public double Quantity { get; init; } = 1;

@@ -19,6 +19,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- Real backend responses captured by the backend's
+         scripts/export_mobile_contract_fixtures.py (contract tests). -->
+    <None Include="Fixtures\*.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
     <!-- Tests the platform-independent Core library directly - a
          net10.0-android test assembly (the MAUI app's TFM) cannot execute
          on desktop at all (no Android runtime host), so this project

@@ -1,7 +1,7 @@
 @page "/top-picks"
 @* Top Investment Candidates: the backend's ranked list (FQVF + StockAI
-   Score) from its latest completed engine run. This page only displays
-   what the backend returns - no ranking or filtering happens here. *@
+   Score) from its latest completed full analysis run. Sorting and filtering
+   only reorder/hide the delivered list; nothing is re-scored here. *@
 @inject IProductApiClient ProductApi
 @inject AppConfigService AppConfig
 @inject NavigationManager Navigation
@@ -9,7 +9,7 @@
 
 <div class="sai-card">
     <div class="sai-card-title">Top Investment Candidates</div>
-    <div class="sai-action-desc">Highest-ranked stocks by StockAI Score from the latest analysis run.</div>
+    <div class="sai-action-desc">The highest-ranked stocks by StockAI Score that pass the data-quality, liquidity and freshness rules. An analytical ranking to support your own research.</div>
 </div>
 
 @if (_loading)
@@ -29,35 +29,49 @@ else if (_error is not null)
 }
 else if (_data is { } data)
 {
-    @if (data.MarketRegime is { } regime)
-    {
-        <div class="sai-card">
-            <div class="sai-section-title">Market regime (@(regime.Index ?? "index"))</div>
-            <div><strong>@(regime.Regime ?? ProductFormat.Missing)</strong> <span class="text-muted">as of @ProductFormat.Date(regime.AsOfDate)</span></div>
-            @if (!string.IsNullOrEmpty(regime.Reason))
-            {
-                <div class="sai-action-desc">@regime.Reason</div>
-            }
-        </div>
-    }
-
     @if (data.Items.Count == 0)
     {
-        <EmptyState Title="No candidates yet"
-                    Message="@(data.Run is null ? "The analysis engine has not completed a run yet." : "No stock met the data-quality and liquidity rules in the latest run.")"
+        <EmptyState Title="No qualifying candidates are available right now."
+                    Message="@(data.Run is null ? "The first analysis run has not completed yet." : "No stock met the data-quality and liquidity rules in the latest analysis run.")"
                     ActionLabel="Refresh" OnAction="LoadAsync" />
     }
     else
     {
-        <div class="sai-action-desc mb-2">
-            Showing @data.Items.Count of @data.TotalEligible eligible stocks
+        <div class="sai-card">
             @if (data.Run is { } run)
             {
-                <span> - run @ProductFormat.Date(run.FinishedAt), @run.StocksAnalysed analysed, engine @run.EngineVersion</span>
+                <div class="sai-action-desc">Analysis generated @ProductFormat.DateTimeIst(run.FinishedAt) (@ProductFormat.Relative(run.FinishedAt, DateTimeOffset.UtcNow)) - @run.StocksAnalysed stocks analysed, @data.TotalEligible eligible - engine @run.EngineVersion</div>
             }
+            @if (data.MarketRegime is { } regime)
+            {
+                <div class="sai-action-desc">Market regime (NIFTY 50): <strong>@(regime.Regime ?? "-")</strong> as of @ProductFormat.DateTimeIst(regime.AsOfDate)</div>
+            }
+            <div class="sai-filters mt-2">
+                <select class="form-select" aria-label="Sort by" @bind="_sort">
+                    <option value="rank">Sort: Rank</option>
+                    <option value="score">Sort: StockAI Score</option>
+                    <option value="fqvf">Sort: FQVF score</option>
+                    <option value="risk">Sort: Lowest risk</option>
+                </select>
+                <select class="form-select" aria-label="Sector" @bind="_sector">
+                    <option value="">All sectors</option>
+                    @foreach (var s in data.Items.Select(i => i.Sector).Where(s => !string.IsNullOrEmpty(s)).Distinct().Order())
+                    {
+                        <option value="@s">@s</option>
+                    }
+                </select>
+            </div>
+            <label class="sai-toggle"><span>Hide High Risk</span><input type="checkbox" @bind="_hideHighRisk" /></label>
+            <label class="sai-toggle"><span>Hide Needs Review</span><input type="checkbox" @bind="_hideReview" /></label>
         </div>
 
-        @foreach (var item in data.Items)
+        var shown = Visible(data.Items).ToList();
+        <div class="sai-action-desc mb-2">Showing @shown.Count of @data.Items.Count candidates</div>
+        @if (shown.Count == 0)
+        {
+            <EmptyState Title="No candidates match these filters." ActionLabel="Clear filters" OnAction="ClearFilters" />
+        }
+        @foreach (var item in shown)
         {
             <div class="sai-card sai-clickable" role="button" tabindex="0" @onclick="() => Open(item.Symbol)">
                 <div class="d-flex justify-content-between align-items-start">
@@ -70,29 +84,37 @@ else if (_data is { } data)
                         <div class="sai-score-label">StockAI Score</div>
                     </div>
                 </div>
-                <div class="sai-metric-grid mt-2">
-                    <MetricCard Label="FQVF score" Value="@ProductFormat.Score(item.FqvfScore)" />
-                    <MetricCard Label="Data coverage" Value="@ProductFormat.Percent(item.ScoreCoverage, 0)" />
+                <AnalysisLabels Labels="item.Labels" />
+                <div class="sai-metric-grid mt-1">
+                    <MetricCard Label="FQVF" Value="@FqvfText(item)" />
+                    <MetricCard Label="Risk score" Value="@ProductFormat.Score(item.RiskScore)" />
                 </div>
-                @if (!string.IsNullOrEmpty(item.FqvfSummary))
-                {
-                    <div class="sai-action-desc mt-1">FQVF: @item.FqvfSummary</div>
-                }
+                <div class="sai-component-bars">
+                    @foreach (var comp in item.Components)
+                    {
+                        <div class="sai-component-bar">
+                            <span>@comp.Label</span>
+                            <div class="sai-bar-track"><div class="sai-bar-fill" style="width:@(Math.Clamp(comp.Score ?? 0, 0, 100).ToString("0", System.Globalization.CultureInfo.InvariantCulture))%"></div></div>
+                            <span class="text-end">@(comp.Score is null ? "n/a" : ProductFormat.Score(comp.Score))</span>
+                        </div>
+                    }
+                </div>
                 @if (item.Positives.Count > 0)
                 {
-                    <div class="sai-section-title mt-2">Positive factors</div>
+                    <div class="sai-section-title mt-2">Key reasons</div>
                     <ul class="sai-list sai-list-positive">
                         @foreach (var p in item.Positives.Take(3)) { <li>@p</li> }
                     </ul>
                 }
                 @if (item.Risks.Count > 0)
                 {
-                    <div class="sai-section-title">Risks</div>
+                    <div class="sai-section-title">Key risks</div>
                     <ul class="sai-list sai-list-negative">
                         @foreach (var r in item.Risks.Take(3)) { <li>@r</li> }
                     </ul>
                 }
-                <div class="sai-action-desc">Market data as of @ProductFormat.Date(item.Freshness.GetValueOrDefault("market_data_as_of"))</div>
+                <FreshnessNotice Status="item.FreshnessStatus" Compact="true" />
+                <div class="sai-action-desc">Analysis date @ProductFormat.DateTimeIst(item.ComputedAt) - market data @ProductFormat.DateTimeIst(item.Freshness.GetValueOrDefault("market_data_as_of"))</div>
             </div>
         }
     }
@@ -105,9 +127,37 @@ else if (_data is { } data)
     private bool _loading = true;
     private string? _error;
     private ApiErrorKind? _errorKind;
+    private string _sort = "rank";
+    private string _sector = "";
+    private bool _hideHighRisk;
+    private bool _hideReview;
     private readonly CancellationTokenSource _cts = new();
 
     protected override Task OnInitializedAsync() => LoadAsync();
+
+    private static string FqvfText(CandidateItem item) =>
+        item.FqvfCounts is { } c && c.TryGetValue("PASS", out var pass) ? $"{pass}/18 passed" : ProductFormat.Score(item.FqvfScore);
+
+    private IEnumerable<CandidateItem> Visible(IEnumerable<CandidateItem> items)
+    {
+        var q = items.Where(i => _sector == "" || i.Sector == _sector)
+                     .Where(i => !_hideHighRisk || !i.IsHighRisk)
+                     .Where(i => !_hideReview || i.Labels.All(l => l.Key != "needs_review"));
+        // Missing values sort last, never as zero.
+        return _sort switch
+        {
+            "score" => q.OrderByDescending(i => i.StockAiScore ?? double.MinValue),
+            "fqvf" => q.OrderByDescending(i => i.FqvfScore ?? double.MinValue),
+            "risk" => q.OrderByDescending(i => i.RiskScore ?? double.MinValue),
+            _ => q.OrderBy(i => i.Rank ?? int.MaxValue),
+        };
+    }
+
+    private void ClearFilters()
+    {
+        _sector = "";
+        _hideHighRisk = _hideReview = false;
+    }
 
     private async Task LoadAsync()
     {

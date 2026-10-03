@@ -452,3 +452,174 @@ label {
 .sai-row:last-child { border-bottom: none; }
 .sai-row-value { font-weight: 600; text-align: right; white-space: nowrap; }
 .sai-link { font-size: 0.8rem; color: var(--sai-primary); text-decoration: none; }
+
+/* ── Top bar with notification bell ──────────────────────────────────── */
+
+.app-topbar {
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.app-topbar > div {
+    display: flex;
+    flex-direction: column;
+}
+
+.sai-bell {
+    position: relative;
+    font-size: 1.3rem;
+    line-height: 1;
+    padding: 0.25rem 0.4rem;
+    color: var(--sai-text);
+}
+
+.sai-bell-badge {
+    position: absolute;
+    top: -0.2rem;
+    right: -0.35rem;
+    min-width: 1.15rem;
+    padding: 0 0.3rem;
+    border-radius: 999px;
+    background: var(--sai-negative);
+    color: #fff;
+    font-size: 0.65rem;
+    font-weight: 700;
+    line-height: 1.15rem;
+    text-align: center;
+}
+
+/* ── Labels, banners, toggles, filters ───────────────────────────────── */
+
+.sai-labels {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+    margin: 0.4rem 0;
+}
+
+.sai-banner {
+    border-radius: var(--sai-radius);
+    padding: 0.6rem 0.8rem;
+    margin-bottom: 0.85rem;
+    font-size: 0.85rem;
+}
+
+.sai-banner-warning {
+    background: var(--sai-warning-bg);
+    border: 1px solid var(--sai-warning);
+}
+
+.sai-banner-negative {
+    background: var(--sai-negative-bg);
+    border: 1px solid var(--sai-negative);
+}
+
+.sai-banner-info {
+    background: var(--sai-surface-alt);
+    border: 1px solid var(--sai-border);
+}
+
+.sai-status-dot {
+    display: inline-block;
+    width: 0.6rem;
+    height: 0.6rem;
+    border-radius: 50%;
+    margin-right: 0.4rem;
+    background: var(--sai-text-muted);
+}
+
+.sai-status-dot.open { background: var(--sai-positive); }
+.sai-status-dot.pre { background: var(--sai-warning); }
+
+.sai-toggle {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.55rem 0;
+    border-bottom: 1px solid var(--sai-border);
+}
+
+.sai-toggle:last-child { border-bottom: none; }
+
+.sai-toggle input[type=checkbox] {
+    width: 1.25rem;
+    height: 1.25rem;
+    flex-shrink: 0;
+}
+
+.sai-filters {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.sai-filters select { flex: 1 1 0; min-width: 0; }
+
+.sai-component-bars { margin-top: 0.5rem; }
+
+.sai-component-bar {
+    display: grid;
+    grid-template-columns: 7.5rem 1fr 2.5rem;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.78rem;
+    margin: 0.15rem 0;
+}
+
+.sai-bar-track {
+    height: 0.4rem;
+    border-radius: 999px;
+    background: var(--sai-surface-alt);
+    overflow: hidden;
+}
+
+.sai-bar-fill {
+    height: 100%;
+    background: var(--sai-primary);
+}
+
+.sai-notification {
+    display: block;
+    color: var(--sai-text);
+}
+
+.sai-notification.unread {
+    border-left: 3px solid var(--sai-primary);
+}
+
+.sai-notification-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.72rem;
+    color: var(--sai-text-muted);
+    margin-bottom: 0.25rem;
+}
+
+.sai-onboarding {
+    min-height: 60vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.sai-dots {
+    display: flex;
+    justify-content: center;
+    gap: 0.4rem;
+    margin: 1rem 0;
+}
+
+.sai-dots span {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: var(--sai-border);
+}
+
+.sai-dots span.active { background: var(--sai-primary); }
+
+details.sai-card > summary {
+    cursor: pointer;
+    font-weight: 600;
+}

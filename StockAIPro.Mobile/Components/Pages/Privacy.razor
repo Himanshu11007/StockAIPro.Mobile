@@ -1,0 +1,29 @@
+@page "/privacy"
+@* Privacy summary, terms/privacy links and support contact, all
+   backend-controlled (app_config "app.legal"). No certification or
+   compliance claim is made. *@
+@inject AppConfigService AppConfig
+
+<div class="sai-card">
+    <div class="sai-card-title">Privacy and terms</div>
+    <p>@(AppConfig.Current?.Legal?.PrivacySummary ?? "The privacy summary could not be loaded. Please check your connection and try again.")</p>
+    <div class="sai-section-title">Push notifications</div>
+    <p class="sai-action-desc">Push notifications are optional and only sent for the updates you enable in Notification settings. Your device's push token is used only to deliver them and is removed from our server when you sign out of the device. You can also turn notifications off in your device settings at any time.</p>
+    @if (AppConfig.Current?.Legal is { } legal)
+    {
+        @if (!string.IsNullOrEmpty(legal.PrivacyUrl))
+        {
+            <p><a href="@legal.PrivacyUrl" target="_blank" rel="noopener">Full privacy policy</a></p>
+        }
+        @if (!string.IsNullOrEmpty(legal.TermsUrl))
+        {
+            <p><a href="@legal.TermsUrl" target="_blank" rel="noopener">Terms of use</a></p>
+        }
+        @if (!string.IsNullOrEmpty(legal.SupportEmail))
+        {
+            <p>Support: <a href="@($"mailto:{legal.SupportEmail}")">@legal.SupportEmail</a></p>
+        }
+    }
+</div>
+
+<Disclaimer Text="@AppConfig.Disclaimer" />

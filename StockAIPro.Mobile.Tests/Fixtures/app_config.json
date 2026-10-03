@@ -1,0 +1,66 @@
+{
+  "data": {
+    "announcement": null,
+    "disclaimer": "StockAI Pro provides research and analysis, not investment advice. Scores rank stocks on available data; they are not predictions or guarantees of returns. Past performance does not indicate future results.",
+    "features": {
+      "feedback": true,
+      "intelligence": true,
+      "ml_signal_display": true,
+      "notifications": true,
+      "performance": true,
+      "stock_analysis": true,
+      "top_picks": true,
+      "watchlist": true
+    },
+    "legal": {
+      "privacy_summary": "StockAI Pro stores your account details (email or phone, sign-in methods), your watchlist, notification preferences, registered devices with their push tokens, your in-app notifications and any reports you submit. Push tokens are used only to deliver notifications you enabled and are removed when you sign out of a device. Push messages are delivered through Google Firebase Cloud Messaging (Android) or Apple Push Notification service (iOS). No analytics or advertising SDK is included in the app.",
+      "privacy_url": null,
+      "support_email": null,
+      "terms_url": null
+    },
+    "onboarding": [
+      {
+        "body": "StockAI Pro analyses NSE stocks with a transparent, rules-based method so you can see exactly why each stock is rated the way it is.",
+        "title": "Welcome to StockAI Pro"
+      },
+      {
+        "body": "A 0-100 score that ranks stocks against each other on quality, valuation, financial health, trend, momentum, risk and market regime. It is a relative ranking, not a price target or a return forecast.",
+        "title": "StockAI Score"
+      },
+      {
+        "body": "The Fundamental Quality & Value Framework runs 18 fixed checks on earnings, returns, valuation and balance sheet. 'Not available' means data is missing, never a failure.",
+        "title": "FQVF"
+      },
+      {
+        "body": "The highest-ranked stocks that pass data-quality, liquidity and freshness rules in the latest analysis run. Each one shows its key reasons, key risks and analysis date.",
+        "title": "Top Investment Candidates"
+      },
+      {
+        "body": "Optional alerts when candidates change, when your watchlist stocks change materially, or a daily summary. You choose which ones, and quiet hours are respected.",
+        "title": "Notifications"
+      },
+      {
+        "body": "Market data can be delayed and fundamentals are updated periodically; every screen shows when its data was last updated. StockAI Pro provides analysis, not investment advice, and no analysis guarantees returns.",
+        "title": "Data and limitations"
+      }
+    ],
+    "top_picks_limit": 20,
+    "versions": {
+      "api": "1.0.0",
+      "fqvf": "fqvf-v1.0",
+      "ml_model": {
+        "status": "informational (no demonstrated predictive discrimination)",
+        "type": "LR/RF/XGBoost blend",
+        "weights": {
+          "Logistic Regression": 0.2,
+          "Random Forest": 0.3,
+          "XGBoost": 0.5
+        }
+      },
+      "ranking_engine": "ranking-v1.0",
+      "recommendation_engine": "v1.1"
+    }
+  },
+  "message": "Configuration retrieved",
+  "success": true
+}

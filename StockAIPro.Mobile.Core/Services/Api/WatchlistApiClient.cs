@@ -46,4 +46,20 @@ public sealed class WatchlistApiClient : IWatchlistApiClient
 
         return true; // 204 No Content on success
     }
+
+    public async Task<WatchlistOverview> GetOverviewAsync(CancellationToken ct = default)
+    {
+        var client = _httpClientFactory.CreateClient(ApiConfiguration.AuthenticatedClientName);
+        using var response = await BusinessApiSend.SendAsync(
+            () => client.GetAsync($"{ApiConfiguration.ApiPrefix}/watchlist/overview", ct), ct);
+        return await BusinessApiSend.ReadDataOrThrowAsync<WatchlistOverview>(response, ct);
+    }
+
+    public async Task<WatchlistAlerts> UpdateAlertsAsync(int itemId, WatchlistAlerts alerts, CancellationToken ct = default)
+    {
+        var client = _httpClientFactory.CreateClient(ApiConfiguration.AuthenticatedClientName);
+        using var response = await BusinessApiSend.SendAsync(
+            () => client.PutAsJsonAsync($"{ApiConfiguration.ApiPrefix}/watchlist/{itemId}/alerts", alerts, ct), ct);
+        return await BusinessApiSend.ReadDataOrThrowAsync<WatchlistAlerts>(response, ct);
+    }
 }
