@@ -9,6 +9,7 @@ namespace StockAIPro.Mobile.Tests;
 /// GoogleAuthConfiguration's own doc comment and
 /// Platforms/Android/GoogleSignInService.cs:SignInAsync's IsConfigured
 /// check.</summary>
+[Collection("GoogleAuthConfiguration")]
 public class ProviderConfigurationTests
 {
     [Fact]
@@ -53,5 +54,28 @@ public class ProviderConfigurationTests
 
         Assert.Equal("Apple sign-in is currently unavailable. Please try again.", ex.Message);
         Assert.Same(inner, ex.InnerException);
+    }
+}
+
+[Collection("GoogleAuthConfiguration")]
+public class GoogleClientIdConfigurationTests
+{
+    [Fact]
+    public void Initialize_accepts_only_google_oauth_client_ids()
+    {
+        try
+        {
+            GoogleAuthConfiguration.Initialize("1234-abc.apps.googleusercontent.com");
+            Assert.True(GoogleAuthConfiguration.IsConfigured);
+            Assert.Equal("1234-abc.apps.googleusercontent.com", GoogleAuthConfiguration.ServerClientId);
+            GoogleAuthConfiguration.Initialize("not-a-client-id");
+            Assert.False(GoogleAuthConfiguration.IsConfigured);
+            GoogleAuthConfiguration.Initialize(null);
+            Assert.False(GoogleAuthConfiguration.IsConfigured);
+        }
+        finally
+        {
+            GoogleAuthConfiguration.Initialize(null);
+        }
     }
 }

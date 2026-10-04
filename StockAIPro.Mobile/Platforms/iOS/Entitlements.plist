@@ -3,23 +3,15 @@
 <plist version="1.0">
     <!-- See https://aka.ms/maui-publish-app-store#add-entitlements for more information about adding entitlements.
 
-         com.apple.developer.applesignin is REQUIRED for Sign in with Apple
-         (Microsoft.Maui.Authentication.AppleSignInAuthenticator) to work at
-         all - without it, the native authorization request fails. This
-         capability must ALSO be enabled for this app's App ID in the Apple
-         Developer portal (see docs/AUTHENTICATION.md "Apple setup") -
-         adding it here alone is not sufficient; Xcode/the Apple Developer
-         portal must agree. -->
-    <!-- aps-environment: Push Notifications capability (APNs). "development"
+         aps-environment: Push Notifications capability (APNs). "development"
          for debug/TestFlight-sandbox builds; Apple's signing replaces it with
          "production" for App Store distribution profiles. The App ID must
-         have Push Notifications enabled (docs/NOTIFICATIONS.md). -->
+         have Push Notifications enabled (docs/NOTIFICATIONS.md).
+
+         Sign in with Apple is not offered by the app, so the
+         com.apple.developer.applesignin entitlement is intentionally absent. -->
     <dict>
         <key>aps-environment</key>
         <string>development</string>
-        <key>com.apple.developer.applesignin</key>
-        <array>
-            <string>Default</string>
-        </array>
     </dict>
 </plist>

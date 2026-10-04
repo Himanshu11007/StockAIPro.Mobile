@@ -150,6 +150,18 @@
         </AssemblyAttribute>
     </ItemGroup>
 
+    <!-- Google Sign-In: the OAuth Web-application client id from Google Cloud
+         Console (public client configuration, not a secret), e.g.
+           -p:GoogleServerClientId=1234-abc.apps.googleusercontent.com
+         Without it the "Continue with Google" button reports that Google
+         sign-in is not configured. See the backend's docs/AUTHENTICATION.md. -->
+    <ItemGroup Condition="'$(GoogleServerClientId)' != ''">
+        <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+            <_Parameter1>GoogleServerClientId</_Parameter1>
+            <_Parameter2>$(GoogleServerClientId)</_Parameter2>
+        </AssemblyAttribute>
+    </ItemGroup>
+
     <Target Name="ValidateApiBaseUrl" BeforeTargets="BeforeBuild" Condition="'$(Configuration)' == 'Release'">
         <Error Condition="'$(StockAIProApiBaseUrl)' == ''"
                Text="Release builds require -p:StockAIProApiBaseUrl=https://your-api-host (see docs/MOBILE_SETUP.md)." />

@@ -4,7 +4,6 @@
 @inject IAuthService AuthService
 @inject IPinService PinService
 @inject IGoogleSignInService GoogleSignIn
-@inject IAppleSignInService AppleSignIn
 @inject NavigationManager Navigation
 @inject SignInFlow SignInFlow
 @implements IDisposable
@@ -19,11 +18,8 @@
     }
     else
     {
-        <button class="btn btn-outline-secondary w-100 mb-2" @onclick="SignInWithGoogleAsync" disabled="@_isSubmitting">
+        <button class="btn btn-outline-secondary w-100 mb-3" @onclick="SignInWithGoogleAsync" disabled="@_isSubmitting">
             Continue with Google
-        </button>
-        <button class="btn btn-outline-secondary w-100 mb-3" @onclick="SignInWithAppleAsync" disabled="@_isSubmitting">
-            Continue with Apple
         </button>
 
         <p class="text-center mb-3">OR</p>
@@ -118,41 +114,6 @@
             _errorMessage = "Google sign-in is not configured on this device.";
         }
         catch (GoogleSignInFailedException ex)
-        {
-            _errorMessage = ex.Message;
-        }
-        catch (ApiException ex) when (ex.Kind == ApiErrorKind.NetworkUnavailable)
-        {
-            _errorMessage = "Could not reach the StockLens server. Check your connection and try again.";
-        }
-        catch (ApiException ex)
-        {
-            _errorMessage = ex.Message;
-        }
-        finally
-        {
-            _isSubmitting = false;
-        }
-    }
-
-    private async Task SignInWithAppleAsync()
-    {
-        _errorMessage = null;
-        _isSubmitting = true;
-        try
-        {
-            var identityToken = await AppleSignIn.SignInAsync();
-            if (identityToken is null)
-                { _errorMessage = "Sign-in was cancelled."; return; }
-
-            await AuthService.LoginWithAppleAsync(identityToken);
-            await NavigateAfterLoginAsync();
-        }
-        catch (AppleSignInNotConfiguredException)
-        {
-            _errorMessage = "Apple sign-in is currently unavailable.";
-        }
-        catch (AppleSignInFailedException ex)
         {
             _errorMessage = ex.Message;
         }

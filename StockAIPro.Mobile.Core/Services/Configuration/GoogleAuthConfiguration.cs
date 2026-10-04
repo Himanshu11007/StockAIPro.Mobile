@@ -28,11 +28,21 @@ namespace StockAIPro.Mobile.Services.Configuration;
 public static class GoogleAuthConfiguration
 {
     /// <summary>Empty until a real Google Cloud OAuth Web-application
-    /// client id is supplied. IGoogleSignInService implementations must
-    /// treat an empty value as "not configured" and fail closed
-    /// (GoogleSignInNotConfiguredException) rather than calling Google
-    /// with an empty/placeholder audience.</summary>
-    public const string ServerClientId = "";
+    /// client id is supplied at build time (MSBuild property
+    /// GoogleServerClientId, applied by MauiProgram via Initialize).
+    /// IGoogleSignInService implementations must treat an empty value as
+    /// "not configured" and fail closed (GoogleSignInNotConfiguredException)
+    /// rather than calling Google with an empty/placeholder audience.</summary>
+    public static string ServerClientId { get; private set; } = "";
+
+    /// <summary>Called once at startup with the build's configured client
+    /// id (null/blank keeps Google sign-in disabled). Only a Google OAuth
+    /// client id shape ("....apps.googleusercontent.com") is accepted.</summary>
+    public static void Initialize(string? serverClientId)
+    {
+        var value = serverClientId?.Trim() ?? "";
+        ServerClientId = value.EndsWith(".apps.googleusercontent.com", StringComparison.Ordinal) ? value : "";
+    }
 
     public static bool IsConfigured => !string.IsNullOrWhiteSpace(ServerClientId);
 }

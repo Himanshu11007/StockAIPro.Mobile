@@ -47,6 +47,12 @@ namespace StockAIPro.Mobile
             const bool isRelease = true;
 #endif
             ApiConfiguration.Initialize(configured, isRelease);
+
+            // Google Sign-In web client id (public configuration, not a
+            // secret): -p:GoogleServerClientId=....apps.googleusercontent.com
+            GoogleAuthConfiguration.Initialize(typeof(MauiProgram).Assembly
+                .GetCustomAttributes<AssemblyMetadataAttribute>()
+                .FirstOrDefault(a => a.Key == "GoogleServerClientId")?.Value);
         }
 
         private static void RegisterApiAndAuthServices(IServiceCollection services)

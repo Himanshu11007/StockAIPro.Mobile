@@ -5,7 +5,6 @@
 @inject IAuthService AuthService
 @inject IPinService PinService
 @inject IGoogleSignInService GoogleSignIn
-@inject IAppleSignInService AppleSignIn
 @inject NavigationManager Navigation
 @inject INotificationApiClient NotificationApi
 @inject AppConfigService AppConfig
@@ -84,14 +83,11 @@
         }
         else
         {
-            <p>No Google or Apple account linked.</p>
+            <p>No Google account linked.</p>
         }
 
-        <button class="btn btn-outline-secondary w-100 mb-2" @onclick="LinkGoogleAsync" disabled="@_isBusy">
+        <button class="btn btn-outline-secondary w-100 mb-4" @onclick="LinkGoogleAsync" disabled="@_isBusy">
             Link Google account
-        </button>
-        <button class="btn btn-outline-secondary w-100 mb-4" @onclick="LinkAppleAsync" disabled="@_isBusy">
-            Link Apple account
         </button>
 
         <div class="sai-card-title">Notifications</div>
@@ -356,38 +352,6 @@
             _errorMessage = "Google sign-in is not configured on this device.";
         }
         catch (GoogleSignInFailedException ex)
-        {
-            _errorMessage = ex.Message;
-        }
-        catch (ApiException ex)
-        {
-            _errorMessage = ex.Message;
-        }
-        finally
-        {
-            _isBusy = false;
-        }
-    }
-
-    private async Task LinkAppleAsync()
-    {
-        _errorMessage = null;
-        _isBusy = true;
-        try
-        {
-            var identityToken = await AppleSignIn.SignInAsync();
-            if (identityToken is not null)
-            {
-                await AuthService.LinkAppleAsync(identityToken);
-                _identities = await AuthService.GetLinkedIdentitiesAsync();
-                _statusMessage = "Apple account linked.";
-            }
-        }
-        catch (AppleSignInNotConfiguredException)
-        {
-            _errorMessage = "Apple sign-in is currently unavailable.";
-        }
-        catch (AppleSignInFailedException ex)
         {
             _errorMessage = ex.Message;
         }
