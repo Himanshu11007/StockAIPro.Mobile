@@ -1,11 +1,11 @@
 # Builds an installable Android APK and attaches it to the run as a
 # downloadable artifact (Actions -> this run -> Artifacts).
 #
-# - Push to master or a ci/* branch, pull request: unit tests + Debug APK (local dev backend,
-#   http://10.0.2.2:8000 on the emulator).
-# - Manual run (Run workflow): choose Debug or Release. Release needs an HTTPS
-#   API URL, taken from the "api_base_url" input or the repository variable
-#   STOCKAIPRO_API_BASE_URL.
+# - Push to master or a ci/* branch, pull request: unit tests + Release APK.
+# - Manual run (Run workflow): choose Debug or Release.
+# The backend URL is, in order: the "api_base_url" input, the repository
+# variable STOCKAIPRO_API_BASE_URL, or the production API below. It is public
+# client configuration, not a secret.
 #
 # Optional repository configuration (Settings -> Secrets and variables -> Actions):
 #   Variables: STOCKAIPRO_API_BASE_URL, GOOGLE_SERVER_CLIENT_ID
@@ -27,9 +27,9 @@ on:
         description: Build configuration
         type: choice
         options: [Debug, Release]
-        default: Debug
+        default: Release
       api_base_url:
-        description: Backend URL (required for Release unless STOCKAIPRO_API_BASE_URL is set)
+        description: Backend URL (defaults to the production API)
         type: string
         required: false
 
@@ -45,6 +45,7 @@ env:
   DOTNET_CLI_TELEMETRY_OPTOUT: true
   PROJECT: StockAIPro.Mobile/StockAIPro.Mobile.csproj
   TFM: net10.0-android
+  DEFAULT_API_BASE_URL: https://stocklens-api-otrc.onrender.com
 
 jobs:
   build:
@@ -90,8 +91,8 @@ jobs:
 
       - name: Build APK
         env:
-          CONFIGURATION: ${{ inputs.configuration || 'Debug' }}
-          API_BASE_URL: ${{ inputs.api_base_url || vars.STOCKAIPRO_API_BASE_URL }}
+          CONFIGURATION: ${{ inputs.configuration || 'Release' }}
+          API_BASE_URL: ${{ inputs.api_base_url || vars.STOCKAIPRO_API_BASE_URL || env.DEFAULT_API_BASE_URL }}
           GOOGLE_SERVER_CLIENT_ID: ${{ vars.GOOGLE_SERVER_CLIENT_ID }}
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
