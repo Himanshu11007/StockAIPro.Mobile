@@ -49,10 +49,12 @@ else if (_a is { } a)
         <div class="sai-metric-grid mt-2">
             <MetricCard Label="@(a.Ranking.UniverseRank is not null ? "Rank (last full run)" : "Rank")" Value="@RankText(a)" />
             <MetricCard Label="FQVF" Value="@FqvfText(a)" />
-            <MetricCard Label="Reference price" Value="@ProductFormat.Price(a.ReferencePrice?.Close ?? a.Market?.Close)" />
+            <MetricCard Label="Current price" Value="@ProductFormat.Rupees(a.CurrentPrice?.Price)" />
+            <MetricCard Label="Reference price" Value="@ProductFormat.Rupees(a.ReferencePrice?.Close ?? a.Market?.Close)" />
             <MetricCard Label="Data coverage" Value="@ProductFormat.Percent(a.Ranking.ScoreCoverage, 0)" />
         </div>
-        <div class="sai-action-desc mt-1">Reference price = last daily close as of @ProductFormat.DateTimeIst(a.ReferencePrice?.AsOfDate ?? a.Market?.AsOfDate) (not a live quote).</div>
+        <div class="sai-action-desc mt-1">Current price: @ProductFormat.PriceStatusLabel(a.CurrentPrice?.Status)@(a.CurrentPrice?.Price is null ? "" : $", as of {ProductFormat.DateTimeIst(a.CurrentPrice.AsOf)}") (delayed market data, not a live quote).</div>
+        <div class="sai-action-desc">Reference price = the daily close the analysis used, as of @ProductFormat.DateTimeIst(a.ReferencePrice?.AsOfDate ?? a.Market?.AsOfDate)@(a.RankingDate is null ? "" : $" - ranking date {ProductFormat.DateTimeIst(a.RankingDate)}").</div>
         @if (!a.Ranking.EligibleForTopPicks && a.Ranking.IneligibleReasons.Count > 0)
         {
             <div class="sai-note mt-2">Not in Top Investment Candidates: @string.Join("; ", a.Ranking.IneligibleReasons)</div>

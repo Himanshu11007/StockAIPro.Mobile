@@ -2,12 +2,12 @@
   "data": {
     "admin_note": null,
     "category": "STALE_DATA",
-    "created_at": "2026-10-03T15:48:42.903038+00:00",
+    "created_at": "2026-10-04T10:19:48.197985+00:00",
     "id": 1,
     "message": "Price looks old",
     "status": "NEW",
     "symbol": "S03.NS",
-    "updated_at": "2026-10-03T15:48:42.903038+00:00"
+    "updated_at": "2026-10-04T10:19:48.197985+00:00"
   },
   "message": "Report #1 recorded. The StockLens team reviews reports in the admin console; you can see its status under Account > My reports.",
   "success": true

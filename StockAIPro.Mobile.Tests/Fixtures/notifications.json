@@ -3,7 +3,7 @@
     "items": [
       {
         "body": "Stock 10's StockLens Score changed from 80.0 to 99.0 (+19.0). Tap to review.",
-        "created_at": "2026-10-03T15:48:42.505793+00:00",
+        "created_at": "2026-10-04T10:19:47.713552+00:00",
         "data": {
           "delta": 19.0,
           "new": 99.0,
@@ -22,7 +22,7 @@
       },
       {
         "body": "StockLens Score 87.0 -> 75.0 (-12.0). Tap to view analysis.",
-        "created_at": "2026-10-03T15:48:42.505793+00:00",
+        "created_at": "2026-10-04T10:19:47.713552+00:00",
         "data": {
           "changes": [
             "StockLens Score 87.0 -> 75.0 (-12.0)"

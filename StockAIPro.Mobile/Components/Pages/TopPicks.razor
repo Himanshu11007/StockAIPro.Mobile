@@ -1,7 +1,10 @@
 @page "/top-picks"
 @* Top Investment Candidates: the backend's ranked list (FQVF + StockLens
    Score) from its latest completed full analysis run. Sorting and filtering
-   only reorder/hide the delivered list; nothing is re-scored here. *@
+   only reorder/hide the delivered list; nothing is re-scored here.
+   Loaded from the API every time the page opens (no local cache). Each
+   candidate shows the current price (latest available, delayed, with its
+   own as-of time) separately from the reference price the ranking used. *@
 @inject IProductApiClient ProductApi
 @inject AppConfigService AppConfig
 @inject NavigationManager Navigation
@@ -38,6 +41,7 @@ else if (_data is { } data)
     else
     {
         <div class="sai-card">
+            <div class="sai-action-title">Ranking date @ProductFormat.DateTimeIst(data.RankingDate ?? data.Run?.RankingDate)</div>
             @if (data.Run is { } run)
             {
                 <div class="sai-action-desc">Analysis generated @ProductFormat.DateTimeIst(run.FinishedAt) (@ProductFormat.Relative(run.FinishedAt, DateTimeOffset.UtcNow)) - @run.StocksAnalysed stocks analysed, @data.TotalEligible eligible - engine @run.EngineVersion</div>
@@ -45,6 +49,10 @@ else if (_data is { } data)
             @if (data.MarketRegime is { } regime)
             {
                 <div class="sai-action-desc">Market regime (NIFTY 50): <strong>@(regime.Regime ?? "-")</strong> as of @ProductFormat.DateTimeIst(regime.AsOfDate)</div>
+            }
+            @if (data.MarketStatus is { } market)
+            {
+                <div class="sai-action-desc">NSE: @market.Label</div>
             }
             <div class="sai-filters mt-2">
                 <select class="form-select" aria-label="Sort by" @bind="_sort">
@@ -88,6 +96,15 @@ else if (_data is { } data)
                 <div class="sai-metric-grid mt-1">
                     <MetricCard Label="FQVF" Value="@FqvfText(item)" />
                     <MetricCard Label="Risk score" Value="@ProductFormat.Score(item.RiskScore)" />
+                </div>
+                <div class="sai-price-block mt-1">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span>Current Price <strong>@ProductFormat.Rupees(item.CurrentPrice)</strong></span>
+                        <span class="sai-badge @ProductFormat.PriceStatusCss(item.CurrentPriceStatus)">@ProductFormat.PriceStatusLabel(item.CurrentPriceStatus)</span>
+                    </div>
+                    <div class="sai-action-desc">Price as of @(item.CurrentPrice is null ? ProductFormat.NotAvailable : ProductFormat.DateTimeIst(item.CurrentPriceAsOf))</div>
+                    <div class="sai-action-desc">Reference Price @ProductFormat.Rupees(item.ReferencePrice) @(item.ReferencePriceAsOf is null ? "" : $"(close of {ProductFormat.DateTimeIst(item.ReferencePriceAsOf)})")</div>
+                    <div class="sai-action-desc">Ranking Date @(item.RankingDate is null ? ProductFormat.NotAvailable : ProductFormat.DateTimeIst(item.RankingDate))</div>
                 </div>
                 <div class="sai-component-bars">
                     @foreach (var comp in item.Components)

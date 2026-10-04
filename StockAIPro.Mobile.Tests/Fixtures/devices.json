@@ -3,10 +3,10 @@
     {
       "active": true,
       "app_version": "1.0",
-      "created_at": "2026-10-03T15:48:42.712809+00:00",
+      "created_at": "2026-10-04T10:19:47.970566+00:00",
       "device_id": "fixture-device",
       "invalid_reason": null,
-      "last_active_at": "2026-10-03T15:48:42.711809+00:00",
+      "last_active_at": "2026-10-04T10:19:47.968565+00:00",
       "permission": "granted",
       "platform": "android",
       "provider": "fcm",

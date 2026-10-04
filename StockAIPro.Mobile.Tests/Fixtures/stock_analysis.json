@@ -1,5 +1,12 @@
 {
   "data": {
+    "current_price": {
+      "current_price": 1250.0,
+      "current_price_as_of": "2026-10-04T10:19:47.713552+00:00",
+      "current_price_date": "2026-10-04",
+      "current_price_source": "yfinance",
+      "current_price_status": "DELAYED_INTRADAY"
+    },
     "data_status": null,
     "data_status_reason": null,
     "engine": {
@@ -38,16 +45,16 @@
       "summary": "12 passed"
     },
     "freshness": {
-      "market_data_as_of": "2026-10-03"
+      "market_data_as_of": "2026-10-04"
     },
     "freshness_status": {
       "analysis_age_days": 0,
-      "analysis_computed_at": "2026-10-03T13:48:42.505793+00:00",
+      "analysis_computed_at": "2026-10-04T08:19:47.713552+00:00",
       "fiscal_period_end": null,
       "fundamentals_fetched_at": null,
       "issues": [],
       "market_data_age_days": 0,
-      "market_data_as_of": "2026-10-03",
+      "market_data_as_of": "2026-10-04",
       "status": "OK"
     },
     "industry": "Oil & Gas",
@@ -84,9 +91,9 @@
       }
     ],
     "market": {
-      "as_of_date": "2026-10-03",
+      "as_of_date": "2026-10-04",
       "close": 1234.5,
-      "fetched_at": "2026-10-03T12:48:42.505793+00:00",
+      "fetched_at": "2026-10-04T07:19:47.713552+00:00",
       "issues": [],
       "status": "OK",
       "technical": {
@@ -114,8 +121,8 @@
       "volume": null
     },
     "market_regime": {
-      "as_of_date": "2026-10-03",
-      "computed_at": "2026-10-03T13:48:42.505793+00:00",
+      "as_of_date": "2026-10-04",
+      "computed_at": "2026-10-04T08:19:47.713552+00:00",
       "index": "^NSEI",
       "reason": null,
       "regime": "Sideways",
@@ -190,7 +197,7 @@
           "weight": 0
         }
       ],
-      "computed_at": "2026-10-03T13:48:42.505793+00:00",
+      "computed_at": "2026-10-04T08:19:47.713552+00:00",
       "eligible_for_top_picks": true,
       "engine_version": "ranking-v1.0",
       "ineligible_reasons": [],
@@ -201,8 +208,9 @@
       "score_coverage": 0.95,
       "stockai_score": 75.0
     },
+    "ranking_date": "2026-10-04",
     "reference_price": {
-      "as_of_date": "2026-10-03",
+      "as_of_date": "2026-10-04",
       "close": 1234.5,
       "note": "Last daily close used by the analysis (not a live quote)"
     },

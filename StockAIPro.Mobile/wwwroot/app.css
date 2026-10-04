@@ -437,6 +437,7 @@ label {
 .sai-score { text-align: right; min-width: 72px; }
 .sai-score-value { font-size: 1.6rem; font-weight: 700; color: var(--sai-primary); line-height: 1; }
 .sai-score-label { font-size: 0.7rem; color: var(--sai-text-muted); }
+.sai-price-block { background: var(--sai-surface-alt); border: 1px solid var(--sai-border); border-radius: 8px; padding: 0.4rem 0.6rem; font-size: 0.85rem; }
 .sai-list { padding-left: 1.1rem; margin-bottom: 0.5rem; font-size: 0.85rem; }
 .sai-list-positive li::marker { color: var(--sai-positive); }
 .sai-list-negative li::marker { color: var(--sai-negative); }

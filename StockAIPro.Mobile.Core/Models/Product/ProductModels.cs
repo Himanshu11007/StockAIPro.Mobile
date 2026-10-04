@@ -41,6 +41,7 @@ public sealed class EngineRunInfo
     [JsonPropertyName("stocks_analysed")] public int StocksAnalysed { get; init; }
     [JsonPropertyName("engine_version")] public string? EngineVersion { get; init; }
     [JsonPropertyName("fqvf_version")] public string? FqvfVersion { get; init; }
+    [JsonPropertyName("ranking_date")] public string? RankingDate { get; init; }
 }
 
 public sealed class CandidateItem
@@ -63,6 +64,20 @@ public sealed class CandidateItem
     [JsonPropertyName("fqvf_counts")] public Dictionary<string, int>? FqvfCounts { get; init; }
     [JsonPropertyName("engine_version")] public string? EngineVersion { get; init; }
     [JsonPropertyName("computed_at")] public string? ComputedAt { get; init; }
+    [JsonPropertyName("stocklens_score")] public double? StockLensScore { get; init; }
+
+    // The ranking is from the run of RankingDate; ReferencePrice is the close
+    // that run used (frozen). CurrentPrice is the latest available market
+    // price, refreshed separately and never "live" (Yahoo NSE data is delayed).
+    [JsonPropertyName("ranking_date")] public string? RankingDate { get; init; }
+    [JsonPropertyName("reference_price")] public double? ReferencePrice { get; init; }
+    [JsonPropertyName("reference_price_as_of")] public string? ReferencePriceAsOf { get; init; }
+    [JsonPropertyName("current_price")] public double? CurrentPrice { get; init; }
+    [JsonPropertyName("current_price_as_of")] public string? CurrentPriceAsOf { get; init; }
+    [JsonPropertyName("current_price_status")] public string? CurrentPriceStatus { get; init; }
+    [JsonPropertyName("current_price_source")] public string? CurrentPriceSource { get; init; }
+    [JsonPropertyName("current_price_date")] public string? CurrentPriceDate { get; init; }
+    [JsonPropertyName("market_status")] public string? MarketStatus { get; init; }
 
     /// <summary>Risk component score (higher = lower volatility/drawdown).</summary>
     [JsonIgnore] public double? RiskScore => Components.FirstOrDefault(c => c.Key == "risk")?.Score;
@@ -77,6 +92,20 @@ public sealed class TopCandidatesResponse
     [JsonPropertyName("run")] public EngineRunInfo? Run { get; init; }
     [JsonPropertyName("market_regime")] public MarketRegimeInfo? MarketRegime { get; init; }
     [JsonPropertyName("disclaimer")] public string? Disclaimer { get; init; }
+    [JsonPropertyName("ranking_date")] public string? RankingDate { get; init; }
+    [JsonPropertyName("market_status")] public MarketStatusInfo? MarketStatus { get; init; }
+}
+
+/// <summary>Latest available market price of a stock (GET
+/// /stocks/{symbol}/analysis "current_price"), separate from the analysis'
+/// reference price. Null price = not available, never substituted.</summary>
+public sealed class CurrentPriceInfo
+{
+    [JsonPropertyName("current_price")] public double? Price { get; init; }
+    [JsonPropertyName("current_price_as_of")] public string? AsOf { get; init; }
+    [JsonPropertyName("current_price_status")] public string? Status { get; init; }
+    [JsonPropertyName("current_price_source")] public string? Source { get; init; }
+    [JsonPropertyName("current_price_date")] public string? Date { get; init; }
 }
 
 public sealed class ScoreComponent
@@ -226,4 +255,6 @@ public sealed class StockAnalysis
     [JsonPropertyName("market_regime")] public MarketRegimeInfo? MarketRegime { get; init; }
     [JsonPropertyName("reference_price")] public ReferencePrice? ReferencePrice { get; init; }
     [JsonPropertyName("engine")] public EngineInfo? Engine { get; init; }
+    [JsonPropertyName("current_price")] public CurrentPriceInfo? CurrentPrice { get; init; }
+    [JsonPropertyName("ranking_date")] public string? RankingDate { get; init; }
 }

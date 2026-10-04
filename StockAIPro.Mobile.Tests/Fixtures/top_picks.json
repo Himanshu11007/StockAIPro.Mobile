@@ -35,7 +35,12 @@
             "score": 99.0
           }
         ],
-        "computed_at": "2026-10-03T13:48:42.505793+00:00",
+        "computed_at": "2026-10-04T08:19:47.713552+00:00",
+        "current_price": 987.6,
+        "current_price_as_of": "2026-10-04T10:19:47.713552+00:00",
+        "current_price_date": "2026-10-04",
+        "current_price_source": "yfinance",
+        "current_price_status": "DELAYED_INTRADAY",
         "engine_version": "ranking-v1.0",
         "fqvf_counts": {
           "FAIL": 6,
@@ -44,16 +49,16 @@
         "fqvf_score": 66.66666666666666,
         "fqvf_summary": "12 passed",
         "freshness": {
-          "market_data_as_of": "2026-10-03"
+          "market_data_as_of": "2026-10-04"
         },
         "freshness_status": {
           "analysis_age_days": 0,
-          "analysis_computed_at": "2026-10-03T13:48:42.505793+00:00",
+          "analysis_computed_at": "2026-10-04T08:19:47.713552+00:00",
           "fiscal_period_end": null,
           "fundamentals_fetched_at": null,
           "issues": [],
           "market_data_age_days": 0,
-          "market_data_as_of": "2026-10-03",
+          "market_data_as_of": "2026-10-04",
           "status": "OK"
         },
         "industry": "Software",
@@ -84,13 +89,18 @@
             "tone": "positive"
           }
         ],
+        "market_status": "WEEKEND",
         "name": "Stock 10",
         "positives": [],
         "rank": 1,
+        "ranking_date": "2026-10-04",
+        "reference_price": 1010.0,
+        "reference_price_as_of": "2026-10-04",
         "risks": [],
         "score_coverage": 0.95,
         "sector": "IT",
         "stockai_score": 99.0,
+        "stocklens_score": 99.0,
         "symbol": "S10.NS"
       },
       {
@@ -126,7 +136,12 @@
             "score": 90.0
           }
         ],
-        "computed_at": "2026-10-03T13:48:42.505793+00:00",
+        "computed_at": "2026-10-04T08:19:47.713552+00:00",
+        "current_price": 1012.25,
+        "current_price_as_of": "2026-10-04T10:19:47.713552+00:00",
+        "current_price_date": "2026-10-04",
+        "current_price_source": "yfinance",
+        "current_price_status": "DELAYED_INTRADAY",
         "engine_version": "ranking-v1.0",
         "fqvf_counts": {
           "FAIL": 6,
@@ -135,16 +150,16 @@
         "fqvf_score": 66.66666666666666,
         "fqvf_summary": "12 passed",
         "freshness": {
-          "market_data_as_of": "2026-10-03"
+          "market_data_as_of": "2026-10-04"
         },
         "freshness_status": {
           "analysis_age_days": 0,
-          "analysis_computed_at": "2026-10-03T13:48:42.505793+00:00",
+          "analysis_computed_at": "2026-10-04T08:19:47.713552+00:00",
           "fiscal_period_end": null,
           "fundamentals_fetched_at": null,
           "issues": [],
           "market_data_age_days": 0,
-          "market_data_as_of": "2026-10-03",
+          "market_data_as_of": "2026-10-04",
           "status": "OK"
         },
         "industry": "Software",
@@ -175,13 +190,18 @@
             "tone": "positive"
           }
         ],
+        "market_status": "WEEKEND",
         "name": "Stock 00",
         "positives": [],
         "rank": 2,
+        "ranking_date": "2026-10-04",
+        "reference_price": 1000.0,
+        "reference_price_as_of": "2026-10-04",
         "risks": [],
         "score_coverage": 0.95,
         "sector": "IT",
         "stockai_score": 90.0,
+        "stocklens_score": 90.0,
         "symbol": "S00.NS"
       },
       {
@@ -217,7 +237,12 @@
             "score": 89.0
           }
         ],
-        "computed_at": "2026-10-03T13:48:42.505793+00:00",
+        "computed_at": "2026-10-04T08:19:47.713552+00:00",
+        "current_price": null,
+        "current_price_as_of": null,
+        "current_price_date": null,
+        "current_price_source": null,
+        "current_price_status": "NOT_AVAILABLE",
         "engine_version": "ranking-v1.0",
         "fqvf_counts": {
           "FAIL": 6,
@@ -226,16 +251,16 @@
         "fqvf_score": 66.66666666666666,
         "fqvf_summary": "12 passed",
         "freshness": {
-          "market_data_as_of": "2026-10-03"
+          "market_data_as_of": "2026-10-04"
         },
         "freshness_status": {
           "analysis_age_days": 0,
-          "analysis_computed_at": "2026-10-03T13:48:42.505793+00:00",
+          "analysis_computed_at": "2026-10-04T08:19:47.713552+00:00",
           "fiscal_period_end": null,
           "fundamentals_fetched_at": null,
           "issues": [],
           "market_data_age_days": 0,
-          "market_data_as_of": "2026-10-03",
+          "market_data_as_of": "2026-10-04",
           "status": "OK"
         },
         "industry": "Oil & Gas",
@@ -266,13 +291,18 @@
             "tone": "positive"
           }
         ],
+        "market_status": "WEEKEND",
         "name": "Stock 01",
         "positives": [],
         "rank": 3,
+        "ranking_date": "2026-10-04",
+        "reference_price": 1001.0,
+        "reference_price_as_of": "2026-10-04",
         "risks": [],
         "score_coverage": 0.95,
         "sector": "Energy",
         "stockai_score": 89.0,
+        "stocklens_score": 89.0,
         "symbol": "S01.NS"
       },
       {
@@ -308,7 +338,12 @@
             "score": 88.0
           }
         ],
-        "computed_at": "2026-10-03T13:48:42.505793+00:00",
+        "computed_at": "2026-10-04T08:19:47.713552+00:00",
+        "current_price": null,
+        "current_price_as_of": null,
+        "current_price_date": null,
+        "current_price_source": null,
+        "current_price_status": "NOT_AVAILABLE",
         "engine_version": "ranking-v1.0",
         "fqvf_counts": {
           "FAIL": 6,
@@ -317,16 +352,16 @@
         "fqvf_score": 66.66666666666666,
         "fqvf_summary": "12 passed",
         "freshness": {
-          "market_data_as_of": "2026-10-03"
+          "market_data_as_of": "2026-10-04"
         },
         "freshness_status": {
           "analysis_age_days": 0,
-          "analysis_computed_at": "2026-10-03T13:48:42.505793+00:00",
+          "analysis_computed_at": "2026-10-04T08:19:47.713552+00:00",
           "fiscal_period_end": null,
           "fundamentals_fetched_at": null,
           "issues": [],
           "market_data_age_days": 0,
-          "market_data_as_of": "2026-10-03",
+          "market_data_as_of": "2026-10-04",
           "status": "OK"
         },
         "industry": "Software",
@@ -357,13 +392,18 @@
             "tone": "positive"
           }
         ],
+        "market_status": "WEEKEND",
         "name": "Stock 02",
         "positives": [],
         "rank": 4,
+        "ranking_date": "2026-10-04",
+        "reference_price": 1002.0,
+        "reference_price_as_of": "2026-10-04",
         "risks": [],
         "score_coverage": 0.95,
         "sector": "IT",
         "stockai_score": 88.0,
+        "stocklens_score": 88.0,
         "symbol": "S02.NS"
       },
       {
@@ -399,7 +439,12 @@
             "score": 86.0
           }
         ],
-        "computed_at": "2026-10-03T13:48:42.505793+00:00",
+        "computed_at": "2026-10-04T08:19:47.713552+00:00",
+        "current_price": null,
+        "current_price_as_of": null,
+        "current_price_date": null,
+        "current_price_source": null,
+        "current_price_status": "NOT_AVAILABLE",
         "engine_version": "ranking-v1.0",
         "fqvf_counts": {
           "FAIL": 6,
@@ -408,16 +453,16 @@
         "fqvf_score": 66.66666666666666,
         "fqvf_summary": "12 passed",
         "freshness": {
-          "market_data_as_of": "2026-10-03"
+          "market_data_as_of": "2026-10-04"
         },
         "freshness_status": {
           "analysis_age_days": 0,
-          "analysis_computed_at": "2026-10-03T13:48:42.505793+00:00",
+          "analysis_computed_at": "2026-10-04T08:19:47.713552+00:00",
           "fiscal_period_end": null,
           "fundamentals_fetched_at": null,
           "issues": [],
           "market_data_age_days": 0,
-          "market_data_as_of": "2026-10-03",
+          "market_data_as_of": "2026-10-04",
           "status": "OK"
         },
         "industry": "Software",
@@ -448,13 +493,18 @@
             "tone": "positive"
           }
         ],
+        "market_status": "WEEKEND",
         "name": "Stock 04",
         "positives": [],
         "rank": 5,
+        "ranking_date": "2026-10-04",
+        "reference_price": 1004.0,
+        "reference_price_as_of": "2026-10-04",
         "risks": [],
         "score_coverage": 0.95,
         "sector": "IT",
         "stockai_score": 86.0,
+        "stocklens_score": 86.0,
         "symbol": "S04.NS"
       },
       {
@@ -490,7 +540,12 @@
             "score": 85.0
           }
         ],
-        "computed_at": "2026-10-03T13:48:42.505793+00:00",
+        "computed_at": "2026-10-04T08:19:47.713552+00:00",
+        "current_price": null,
+        "current_price_as_of": null,
+        "current_price_date": null,
+        "current_price_source": null,
+        "current_price_status": "NOT_AVAILABLE",
         "engine_version": "ranking-v1.0",
         "fqvf_counts": {
           "FAIL": 6,
@@ -499,16 +554,16 @@
         "fqvf_score": 66.66666666666666,
         "fqvf_summary": "12 passed",
         "freshness": {
-          "market_data_as_of": "2026-10-03"
+          "market_data_as_of": "2026-10-04"
         },
         "freshness_status": {
           "analysis_age_days": 0,
-          "analysis_computed_at": "2026-10-03T13:48:42.505793+00:00",
+          "analysis_computed_at": "2026-10-04T08:19:47.713552+00:00",
           "fiscal_period_end": null,
           "fundamentals_fetched_at": null,
           "issues": [],
           "market_data_age_days": 0,
-          "market_data_as_of": "2026-10-03",
+          "market_data_as_of": "2026-10-04",
           "status": "OK"
         },
         "industry": "Oil & Gas",
@@ -539,13 +594,18 @@
             "tone": "positive"
           }
         ],
+        "market_status": "WEEKEND",
         "name": "Stock 05",
         "positives": [],
         "rank": 6,
+        "ranking_date": "2026-10-04",
+        "reference_price": 1005.0,
+        "reference_price_as_of": "2026-10-04",
         "risks": [],
         "score_coverage": 0.95,
         "sector": "Energy",
         "stockai_score": 85.0,
+        "stocklens_score": 85.0,
         "symbol": "S05.NS"
       },
       {
@@ -581,7 +641,12 @@
             "score": 84.0
           }
         ],
-        "computed_at": "2026-10-03T13:48:42.505793+00:00",
+        "computed_at": "2026-10-04T08:19:47.713552+00:00",
+        "current_price": null,
+        "current_price_as_of": null,
+        "current_price_date": null,
+        "current_price_source": null,
+        "current_price_status": "NOT_AVAILABLE",
         "engine_version": "ranking-v1.0",
         "fqvf_counts": {
           "FAIL": 6,
@@ -590,16 +655,16 @@
         "fqvf_score": 66.66666666666666,
         "fqvf_summary": "12 passed",
         "freshness": {
-          "market_data_as_of": "2026-10-03"
+          "market_data_as_of": "2026-10-04"
         },
         "freshness_status": {
           "analysis_age_days": 0,
-          "analysis_computed_at": "2026-10-03T13:48:42.505793+00:00",
+          "analysis_computed_at": "2026-10-04T08:19:47.713552+00:00",
           "fiscal_period_end": null,
           "fundamentals_fetched_at": null,
           "issues": [],
           "market_data_age_days": 0,
-          "market_data_as_of": "2026-10-03",
+          "market_data_as_of": "2026-10-04",
           "status": "OK"
         },
         "industry": "Software",
@@ -630,13 +695,18 @@
             "tone": "positive"
           }
         ],
+        "market_status": "WEEKEND",
         "name": "Stock 06",
         "positives": [],
         "rank": 7,
+        "ranking_date": "2026-10-04",
+        "reference_price": 1006.0,
+        "reference_price_as_of": "2026-10-04",
         "risks": [],
         "score_coverage": 0.95,
         "sector": "IT",
         "stockai_score": 84.0,
+        "stocklens_score": 84.0,
         "symbol": "S06.NS"
       },
       {
@@ -672,7 +742,12 @@
             "score": 83.0
           }
         ],
-        "computed_at": "2026-10-03T13:48:42.505793+00:00",
+        "computed_at": "2026-10-04T08:19:47.713552+00:00",
+        "current_price": null,
+        "current_price_as_of": null,
+        "current_price_date": null,
+        "current_price_source": null,
+        "current_price_status": "NOT_AVAILABLE",
         "engine_version": "ranking-v1.0",
         "fqvf_counts": {
           "FAIL": 6,
@@ -681,16 +756,16 @@
         "fqvf_score": 66.66666666666666,
         "fqvf_summary": "12 passed",
         "freshness": {
-          "market_data_as_of": "2026-10-03"
+          "market_data_as_of": "2026-10-04"
         },
         "freshness_status": {
           "analysis_age_days": 0,
-          "analysis_computed_at": "2026-10-03T13:48:42.505793+00:00",
+          "analysis_computed_at": "2026-10-04T08:19:47.713552+00:00",
           "fiscal_period_end": null,
           "fundamentals_fetched_at": null,
           "issues": [],
           "market_data_age_days": 0,
-          "market_data_as_of": "2026-10-03",
+          "market_data_as_of": "2026-10-04",
           "status": "OK"
         },
         "industry": "Oil & Gas",
@@ -721,13 +796,18 @@
             "tone": "positive"
           }
         ],
+        "market_status": "WEEKEND",
         "name": "Stock 07",
         "positives": [],
         "rank": 8,
+        "ranking_date": "2026-10-04",
+        "reference_price": 1007.0,
+        "reference_price_as_of": "2026-10-04",
         "risks": [],
         "score_coverage": 0.95,
         "sector": "Energy",
         "stockai_score": 83.0,
+        "stocklens_score": 83.0,
         "symbol": "S07.NS"
       },
       {
@@ -763,7 +843,12 @@
             "score": 82.0
           }
         ],
-        "computed_at": "2026-10-03T13:48:42.505793+00:00",
+        "computed_at": "2026-10-04T08:19:47.713552+00:00",
+        "current_price": null,
+        "current_price_as_of": null,
+        "current_price_date": null,
+        "current_price_source": null,
+        "current_price_status": "NOT_AVAILABLE",
         "engine_version": "ranking-v1.0",
         "fqvf_counts": {
           "FAIL": 6,
@@ -772,16 +857,16 @@
         "fqvf_score": 66.66666666666666,
         "fqvf_summary": "12 passed",
         "freshness": {
-          "market_data_as_of": "2026-10-03"
+          "market_data_as_of": "2026-10-04"
         },
         "freshness_status": {
           "analysis_age_days": 0,
-          "analysis_computed_at": "2026-10-03T13:48:42.505793+00:00",
+          "analysis_computed_at": "2026-10-04T08:19:47.713552+00:00",
           "fiscal_period_end": null,
           "fundamentals_fetched_at": null,
           "issues": [],
           "market_data_age_days": 0,
-          "market_data_as_of": "2026-10-03",
+          "market_data_as_of": "2026-10-04",
           "status": "OK"
         },
         "industry": "Software",
@@ -812,13 +897,18 @@
             "tone": "positive"
           }
         ],
+        "market_status": "WEEKEND",
         "name": "Stock 08",
         "positives": [],
         "rank": 9,
+        "ranking_date": "2026-10-04",
+        "reference_price": 1008.0,
+        "reference_price_as_of": "2026-10-04",
         "risks": [],
         "score_coverage": 0.95,
         "sector": "IT",
         "stockai_score": 82.0,
+        "stocklens_score": 82.0,
         "symbol": "S08.NS"
       },
       {
@@ -854,7 +944,12 @@
             "score": 81.0
           }
         ],
-        "computed_at": "2026-10-03T13:48:42.505793+00:00",
+        "computed_at": "2026-10-04T08:19:47.713552+00:00",
+        "current_price": null,
+        "current_price_as_of": null,
+        "current_price_date": null,
+        "current_price_source": null,
+        "current_price_status": "NOT_AVAILABLE",
         "engine_version": "ranking-v1.0",
         "fqvf_counts": {
           "FAIL": 6,
@@ -863,16 +958,16 @@
         "fqvf_score": 66.66666666666666,
         "fqvf_summary": "12 passed",
         "freshness": {
-          "market_data_as_of": "2026-10-03"
+          "market_data_as_of": "2026-10-04"
         },
         "freshness_status": {
           "analysis_age_days": 0,
-          "analysis_computed_at": "2026-10-03T13:48:42.505793+00:00",
+          "analysis_computed_at": "2026-10-04T08:19:47.713552+00:00",
           "fiscal_period_end": null,
           "fundamentals_fetched_at": null,
           "issues": [],
           "market_data_age_days": 0,
-          "market_data_as_of": "2026-10-03",
+          "market_data_as_of": "2026-10-04",
           "status": "OK"
         },
         "industry": "Oil & Gas",
@@ -903,13 +998,18 @@
             "tone": "positive"
           }
         ],
+        "market_status": "WEEKEND",
         "name": "Stock 09",
         "positives": [],
         "rank": 10,
+        "ranking_date": "2026-10-04",
+        "reference_price": 1009.0,
+        "reference_price_as_of": "2026-10-04",
         "risks": [],
         "score_coverage": 0.95,
         "sector": "Energy",
         "stockai_score": 81.0,
+        "stocklens_score": 81.0,
         "symbol": "S09.NS"
       },
       {
@@ -945,7 +1045,12 @@
             "score": 79.0
           }
         ],
-        "computed_at": "2026-10-03T13:48:42.505793+00:00",
+        "computed_at": "2026-10-04T08:19:47.713552+00:00",
+        "current_price": null,
+        "current_price_as_of": null,
+        "current_price_date": null,
+        "current_price_source": null,
+        "current_price_status": "NOT_AVAILABLE",
         "engine_version": "ranking-v1.0",
         "fqvf_counts": {
           "FAIL": 6,
@@ -954,16 +1059,16 @@
         "fqvf_score": 66.66666666666666,
         "fqvf_summary": "12 passed",
         "freshness": {
-          "market_data_as_of": "2026-10-03"
+          "market_data_as_of": "2026-10-04"
         },
         "freshness_status": {
           "analysis_age_days": 0,
-          "analysis_computed_at": "2026-10-03T13:48:42.505793+00:00",
+          "analysis_computed_at": "2026-10-04T08:19:47.713552+00:00",
           "fiscal_period_end": null,
           "fundamentals_fetched_at": null,
           "issues": [],
           "market_data_age_days": 0,
-          "market_data_as_of": "2026-10-03",
+          "market_data_as_of": "2026-10-04",
           "status": "OK"
         },
         "industry": "Oil & Gas",
@@ -994,13 +1099,18 @@
             "tone": "positive"
           }
         ],
+        "market_status": "WEEKEND",
         "name": "Stock 11",
         "positives": [],
         "rank": 11,
+        "ranking_date": "2026-10-04",
+        "reference_price": 1011.0,
+        "reference_price_as_of": "2026-10-04",
         "risks": [],
         "score_coverage": 0.95,
         "sector": "Energy",
         "stockai_score": 79.0,
+        "stocklens_score": 79.0,
         "symbol": "S11.NS"
       },
       {
@@ -1036,7 +1146,12 @@
             "score": 78.0
           }
         ],
-        "computed_at": "2026-10-03T13:48:42.505793+00:00",
+        "computed_at": "2026-10-04T08:19:47.713552+00:00",
+        "current_price": null,
+        "current_price_as_of": null,
+        "current_price_date": null,
+        "current_price_source": null,
+        "current_price_status": "NOT_AVAILABLE",
         "engine_version": "ranking-v1.0",
         "fqvf_counts": {
           "FAIL": 6,
@@ -1045,16 +1160,16 @@
         "fqvf_score": 66.66666666666666,
         "fqvf_summary": "12 passed",
         "freshness": {
-          "market_data_as_of": "2026-10-03"
+          "market_data_as_of": "2026-10-04"
         },
         "freshness_status": {
           "analysis_age_days": 0,
-          "analysis_computed_at": "2026-10-03T13:48:42.505793+00:00",
+          "analysis_computed_at": "2026-10-04T08:19:47.713552+00:00",
           "fiscal_period_end": null,
           "fundamentals_fetched_at": null,
           "issues": [],
           "market_data_age_days": 0,
-          "market_data_as_of": "2026-10-03",
+          "market_data_as_of": "2026-10-04",
           "status": "OK"
         },
         "industry": "Software",
@@ -1085,13 +1200,18 @@
             "tone": "positive"
           }
         ],
+        "market_status": "WEEKEND",
         "name": "Stock 12",
         "positives": [],
         "rank": 12,
+        "ranking_date": "2026-10-04",
+        "reference_price": 1012.0,
+        "reference_price_as_of": "2026-10-04",
         "risks": [],
         "score_coverage": 0.95,
         "sector": "IT",
         "stockai_score": 78.0,
+        "stocklens_score": 78.0,
         "symbol": "S12.NS"
       },
       {
@@ -1127,7 +1247,12 @@
             "score": 77.0
           }
         ],
-        "computed_at": "2026-10-03T13:48:42.505793+00:00",
+        "computed_at": "2026-10-04T08:19:47.713552+00:00",
+        "current_price": null,
+        "current_price_as_of": null,
+        "current_price_date": null,
+        "current_price_source": null,
+        "current_price_status": "NOT_AVAILABLE",
         "engine_version": "ranking-v1.0",
         "fqvf_counts": {
           "FAIL": 6,
@@ -1136,16 +1261,16 @@
         "fqvf_score": 66.66666666666666,
         "fqvf_summary": "12 passed",
         "freshness": {
-          "market_data_as_of": "2026-10-03"
+          "market_data_as_of": "2026-10-04"
         },
         "freshness_status": {
           "analysis_age_days": 0,
-          "analysis_computed_at": "2026-10-03T13:48:42.505793+00:00",
+          "analysis_computed_at": "2026-10-04T08:19:47.713552+00:00",
           "fiscal_period_end": null,
           "fundamentals_fetched_at": null,
           "issues": [],
           "market_data_age_days": 0,
-          "market_data_as_of": "2026-10-03",
+          "market_data_as_of": "2026-10-04",
           "status": "OK"
         },
         "industry": "Oil & Gas",
@@ -1176,13 +1301,18 @@
             "tone": "positive"
           }
         ],
+        "market_status": "WEEKEND",
         "name": "Stock 13",
         "positives": [],
         "rank": 13,
+        "ranking_date": "2026-10-04",
+        "reference_price": 1013.0,
+        "reference_price_as_of": "2026-10-04",
         "risks": [],
         "score_coverage": 0.95,
         "sector": "Energy",
         "stockai_score": 77.0,
+        "stocklens_score": 77.0,
         "symbol": "S13.NS"
       },
       {
@@ -1218,7 +1348,12 @@
             "score": 76.0
           }
         ],
-        "computed_at": "2026-10-03T13:48:42.505793+00:00",
+        "computed_at": "2026-10-04T08:19:47.713552+00:00",
+        "current_price": null,
+        "current_price_as_of": null,
+        "current_price_date": null,
+        "current_price_source": null,
+        "current_price_status": "NOT_AVAILABLE",
         "engine_version": "ranking-v1.0",
         "fqvf_counts": {
           "FAIL": 6,
@@ -1227,16 +1362,16 @@
         "fqvf_score": 66.66666666666666,
         "fqvf_summary": "12 passed",
         "freshness": {
-          "market_data_as_of": "2026-10-03"
+          "market_data_as_of": "2026-10-04"
         },
         "freshness_status": {
           "analysis_age_days": 0,
-          "analysis_computed_at": "2026-10-03T13:48:42.505793+00:00",
+          "analysis_computed_at": "2026-10-04T08:19:47.713552+00:00",
           "fiscal_period_end": null,
           "fundamentals_fetched_at": null,
           "issues": [],
           "market_data_age_days": 0,
-          "market_data_as_of": "2026-10-03",
+          "market_data_as_of": "2026-10-04",
           "status": "OK"
         },
         "industry": "Software",
@@ -1267,13 +1402,18 @@
             "tone": "positive"
           }
         ],
+        "market_status": "WEEKEND",
         "name": "Stock 14",
         "positives": [],
         "rank": 14,
+        "ranking_date": "2026-10-04",
+        "reference_price": 1014.0,
+        "reference_price_as_of": "2026-10-04",
         "risks": [],
         "score_coverage": 0.95,
         "sector": "IT",
         "stockai_score": 76.0,
+        "stocklens_score": 76.0,
         "symbol": "S14.NS"
       },
       {
@@ -1309,7 +1449,12 @@
             "score": 75.0
           }
         ],
-        "computed_at": "2026-10-03T13:48:42.505793+00:00",
+        "computed_at": "2026-10-04T08:19:47.713552+00:00",
+        "current_price": 1250.0,
+        "current_price_as_of": "2026-10-04T10:19:47.713552+00:00",
+        "current_price_date": "2026-10-04",
+        "current_price_source": "yfinance",
+        "current_price_status": "DELAYED_INTRADAY",
         "engine_version": "ranking-v1.0",
         "fqvf_counts": {
           "FAIL": 6,
@@ -1318,16 +1463,16 @@
         "fqvf_score": 66.66666666666666,
         "fqvf_summary": "12 passed",
         "freshness": {
-          "market_data_as_of": "2026-10-03"
+          "market_data_as_of": "2026-10-04"
         },
         "freshness_status": {
           "analysis_age_days": 0,
-          "analysis_computed_at": "2026-10-03T13:48:42.505793+00:00",
+          "analysis_computed_at": "2026-10-04T08:19:47.713552+00:00",
           "fiscal_period_end": null,
           "fundamentals_fetched_at": null,
           "issues": [],
           "market_data_age_days": 0,
-          "market_data_as_of": "2026-10-03",
+          "market_data_as_of": "2026-10-04",
           "status": "OK"
         },
         "industry": "Oil & Gas",
@@ -1363,13 +1508,18 @@
             "tone": "negative"
           }
         ],
+        "market_status": "WEEKEND",
         "name": "Stock 03",
         "positives": [],
         "rank": 15,
+        "ranking_date": "2026-10-04",
+        "reference_price": 1003.0,
+        "reference_price_as_of": "2026-10-04",
         "risks": [],
         "score_coverage": 0.95,
         "sector": "Energy",
         "stockai_score": 75.0,
+        "stocklens_score": 75.0,
         "symbol": "S03.NS"
       },
       {
@@ -1405,7 +1555,12 @@
             "score": 75.0
           }
         ],
-        "computed_at": "2026-10-03T13:48:42.505793+00:00",
+        "computed_at": "2026-10-04T08:19:47.713552+00:00",
+        "current_price": null,
+        "current_price_as_of": null,
+        "current_price_date": null,
+        "current_price_source": null,
+        "current_price_status": "NOT_AVAILABLE",
         "engine_version": "ranking-v1.0",
         "fqvf_counts": {
           "FAIL": 6,
@@ -1414,16 +1569,16 @@
         "fqvf_score": 66.66666666666666,
         "fqvf_summary": "12 passed",
         "freshness": {
-          "market_data_as_of": "2026-10-03"
+          "market_data_as_of": "2026-10-04"
         },
         "freshness_status": {
           "analysis_age_days": 0,
-          "analysis_computed_at": "2026-10-03T13:48:42.505793+00:00",
+          "analysis_computed_at": "2026-10-04T08:19:47.713552+00:00",
           "fiscal_period_end": null,
           "fundamentals_fetched_at": null,
           "issues": [],
           "market_data_age_days": 0,
-          "market_data_as_of": "2026-10-03",
+          "market_data_as_of": "2026-10-04",
           "status": "OK"
         },
         "industry": "Oil & Gas",
@@ -1454,13 +1609,18 @@
             "tone": "positive"
           }
         ],
+        "market_status": "WEEKEND",
         "name": "Stock 15",
         "positives": [],
         "rank": 16,
+        "ranking_date": "2026-10-04",
+        "reference_price": 1015.0,
+        "reference_price_as_of": "2026-10-04",
         "risks": [],
         "score_coverage": 0.95,
         "sector": "Energy",
         "stockai_score": 75.0,
+        "stocklens_score": 75.0,
         "symbol": "S15.NS"
       },
       {
@@ -1496,7 +1656,12 @@
             "score": 74.0
           }
         ],
-        "computed_at": "2026-10-03T13:48:42.505793+00:00",
+        "computed_at": "2026-10-04T08:19:47.713552+00:00",
+        "current_price": null,
+        "current_price_as_of": null,
+        "current_price_date": null,
+        "current_price_source": null,
+        "current_price_status": "NOT_AVAILABLE",
         "engine_version": "ranking-v1.0",
         "fqvf_counts": {
           "FAIL": 6,
@@ -1505,16 +1670,16 @@
         "fqvf_score": 66.66666666666666,
         "fqvf_summary": "12 passed",
         "freshness": {
-          "market_data_as_of": "2026-10-03"
+          "market_data_as_of": "2026-10-04"
         },
         "freshness_status": {
           "analysis_age_days": 0,
-          "analysis_computed_at": "2026-10-03T13:48:42.505793+00:00",
+          "analysis_computed_at": "2026-10-04T08:19:47.713552+00:00",
           "fiscal_period_end": null,
           "fundamentals_fetched_at": null,
           "issues": [],
           "market_data_age_days": 0,
-          "market_data_as_of": "2026-10-03",
+          "market_data_as_of": "2026-10-04",
           "status": "OK"
         },
         "industry": "Software",
@@ -1545,13 +1710,18 @@
             "tone": "positive"
           }
         ],
+        "market_status": "WEEKEND",
         "name": "Stock 16",
         "positives": [],
         "rank": 17,
+        "ranking_date": "2026-10-04",
+        "reference_price": 1016.0,
+        "reference_price_as_of": "2026-10-04",
         "risks": [],
         "score_coverage": 0.95,
         "sector": "IT",
         "stockai_score": 74.0,
+        "stocklens_score": 74.0,
         "symbol": "S16.NS"
       },
       {
@@ -1587,7 +1757,12 @@
             "score": 73.0
           }
         ],
-        "computed_at": "2026-10-03T13:48:42.505793+00:00",
+        "computed_at": "2026-10-04T08:19:47.713552+00:00",
+        "current_price": null,
+        "current_price_as_of": null,
+        "current_price_date": null,
+        "current_price_source": null,
+        "current_price_status": "NOT_AVAILABLE",
         "engine_version": "ranking-v1.0",
         "fqvf_counts": {
           "FAIL": 6,
@@ -1596,16 +1771,16 @@
         "fqvf_score": 66.66666666666666,
         "fqvf_summary": "12 passed",
         "freshness": {
-          "market_data_as_of": "2026-10-03"
+          "market_data_as_of": "2026-10-04"
         },
         "freshness_status": {
           "analysis_age_days": 0,
-          "analysis_computed_at": "2026-10-03T13:48:42.505793+00:00",
+          "analysis_computed_at": "2026-10-04T08:19:47.713552+00:00",
           "fiscal_period_end": null,
           "fundamentals_fetched_at": null,
           "issues": [],
           "market_data_age_days": 0,
-          "market_data_as_of": "2026-10-03",
+          "market_data_as_of": "2026-10-04",
           "status": "OK"
         },
         "industry": "Oil & Gas",
@@ -1636,13 +1811,18 @@
             "tone": "positive"
           }
         ],
+        "market_status": "WEEKEND",
         "name": "Stock 17",
         "positives": [],
         "rank": 18,
+        "ranking_date": "2026-10-04",
+        "reference_price": 1017.0,
+        "reference_price_as_of": "2026-10-04",
         "risks": [],
         "score_coverage": 0.95,
         "sector": "Energy",
         "stockai_score": 73.0,
+        "stocklens_score": 73.0,
         "symbol": "S17.NS"
       },
       {
@@ -1678,7 +1858,12 @@
             "score": 72.0
           }
         ],
-        "computed_at": "2026-10-03T13:48:42.505793+00:00",
+        "computed_at": "2026-10-04T08:19:47.713552+00:00",
+        "current_price": null,
+        "current_price_as_of": null,
+        "current_price_date": null,
+        "current_price_source": null,
+        "current_price_status": "NOT_AVAILABLE",
         "engine_version": "ranking-v1.0",
         "fqvf_counts": {
           "FAIL": 6,
@@ -1687,16 +1872,16 @@
         "fqvf_score": 66.66666666666666,
         "fqvf_summary": "12 passed",
         "freshness": {
-          "market_data_as_of": "2026-10-03"
+          "market_data_as_of": "2026-10-04"
         },
         "freshness_status": {
           "analysis_age_days": 0,
-          "analysis_computed_at": "2026-10-03T13:48:42.505793+00:00",
+          "analysis_computed_at": "2026-10-04T08:19:47.713552+00:00",
           "fiscal_period_end": null,
           "fundamentals_fetched_at": null,
           "issues": [],
           "market_data_age_days": 0,
-          "market_data_as_of": "2026-10-03",
+          "market_data_as_of": "2026-10-04",
           "status": "OK"
         },
         "industry": "Software",
@@ -1727,13 +1912,18 @@
             "tone": "positive"
           }
         ],
+        "market_status": "WEEKEND",
         "name": "Stock 18",
         "positives": [],
         "rank": 19,
+        "ranking_date": "2026-10-04",
+        "reference_price": 1018.0,
+        "reference_price_as_of": "2026-10-04",
         "risks": [],
         "score_coverage": 0.95,
         "sector": "IT",
         "stockai_score": 72.0,
+        "stocklens_score": 72.0,
         "symbol": "S18.NS"
       },
       {
@@ -1769,7 +1959,12 @@
             "score": 71.0
           }
         ],
-        "computed_at": "2026-10-03T13:48:42.505793+00:00",
+        "computed_at": "2026-10-04T08:19:47.713552+00:00",
+        "current_price": null,
+        "current_price_as_of": null,
+        "current_price_date": null,
+        "current_price_source": null,
+        "current_price_status": "NOT_AVAILABLE",
         "engine_version": "ranking-v1.0",
         "fqvf_counts": {
           "FAIL": 6,
@@ -1778,16 +1973,16 @@
         "fqvf_score": 66.66666666666666,
         "fqvf_summary": "12 passed",
         "freshness": {
-          "market_data_as_of": "2026-10-03"
+          "market_data_as_of": "2026-10-04"
         },
         "freshness_status": {
           "analysis_age_days": 0,
-          "analysis_computed_at": "2026-10-03T13:48:42.505793+00:00",
+          "analysis_computed_at": "2026-10-04T08:19:47.713552+00:00",
           "fiscal_period_end": null,
           "fundamentals_fetched_at": null,
           "issues": [],
           "market_data_age_days": 0,
-          "market_data_as_of": "2026-10-03",
+          "market_data_as_of": "2026-10-04",
           "status": "OK"
         },
         "industry": "Oil & Gas",
@@ -1818,30 +2013,50 @@
             "tone": "positive"
           }
         ],
+        "market_status": "WEEKEND",
         "name": "Stock 19",
         "positives": [],
         "rank": 20,
+        "ranking_date": "2026-10-04",
+        "reference_price": 1019.0,
+        "reference_price_as_of": "2026-10-04",
         "risks": [],
         "score_coverage": 0.95,
         "sector": "Energy",
         "stockai_score": 71.0,
+        "stocklens_score": 71.0,
         "symbol": "S19.NS"
       }
     ],
     "limit": 20,
     "market_regime": {
-      "as_of_date": "2026-10-03",
-      "computed_at": "2026-10-03T13:48:42.505793+00:00",
+      "as_of_date": "2026-10-04",
+      "computed_at": "2026-10-04T08:19:47.713552+00:00",
       "index": "^NSEI",
       "reason": null,
       "regime": "Sideways",
       "regime_score": 0.1,
       "status": "OK"
     },
+    "market_status": {
+      "date": "2026-10-04",
+      "exchange": "NSE",
+      "holiday_calendar_configured": false,
+      "is_open": false,
+      "label": "Closed - weekend",
+      "next_trading_day": "2026-10-05",
+      "note": "Exchange holiday calendar not configured; weekends are recognised, trading holidays are not.",
+      "now_ist": "2026-10-04T15:49+05:30",
+      "session_hours": "Pre-open 09:00-09:15, normal 09:15-15:30, post-close 15:40-16:00 IST",
+      "status": "WEEKEND",
+      "timezone": "Asia/Kolkata (IST, UTC+05:30)"
+    },
+    "ranking_date": "2026-10-04",
     "run": {
       "engine_version": "ranking-v1.0",
-      "finished_at": "2026-10-03T13:48:42.505793+00:00",
+      "finished_at": "2026-10-04T08:19:47.713552+00:00",
       "fqvf_version": "fqvf-v1.0",
+      "ranking_date": "2026-10-04",
       "run_id": "R2",
       "status": "COMPLETED",
       "stocks_analysed": 0

@@ -103,6 +103,29 @@ public static class ProductFormat
         return f.IsStale ? $"Data may be stale. {market}{analysis}" : market + analysis;
     }
 
+    public const string NotAvailable = "Not available";
+
+    /// <summary>Indian rupee amount, e.g. "₹1,234.50"; missing -> "Not available".</summary>
+    public static string Rupees(double? v) =>
+        v is { } x ? "₹" + x.ToString("#,##0.00", CultureInfo.InvariantCulture) : NotAvailable;
+
+    /// <summary>Current-price status label. Prices are delayed provider data,
+    /// so nothing is ever labelled "live".</summary>
+    public static string PriceStatusLabel(string? status) => (status ?? "").ToUpperInvariant() switch
+    {
+        "LAST_CLOSE" => "Last close",
+        "DELAYED_INTRADAY" => "Delayed",
+        "STALE" => "Stale",
+        _ => NotAvailable,
+    };
+
+    /// <summary>CSS modifier for a current-price status.</summary>
+    public static string PriceStatusCss(string? status) => (status ?? "").ToUpperInvariant() switch
+    {
+        "LAST_CLOSE" or "DELAYED_INTRADAY" => "sai-badge-neutral",
+        _ => "sai-badge-warning",
+    };
+
     /// <summary>Signed change, e.g. "+12.5" / "-3.0"; missing -> "-".</summary>
     public static string Change(double? v) => v is { } x ? x.ToString("+0.0;-0.0;0.0", CultureInfo.InvariantCulture) : Missing;
 
