@@ -1,7 +1,7 @@
 # Builds an installable Android APK and attaches it to the run as a
 # downloadable artifact (Actions -> this run -> Artifacts).
 #
-# - Push to master / pull request: unit tests + Debug APK (local dev backend,
+# - Push to master or a ci/* branch, pull request: unit tests + Debug APK (local dev backend,
 #   http://10.0.2.2:8000 on the emulator).
 # - Manual run (Run workflow): choose Debug or Release. Release needs an HTTPS
 #   API URL, taken from the "api_base_url" input or the repository variable
@@ -19,7 +19,7 @@ name: Android APK
 
 on:
   push:
-    branches: [master]
+    branches: [master, "ci/**"]
   pull_request:
   workflow_dispatch:
     inputs:
