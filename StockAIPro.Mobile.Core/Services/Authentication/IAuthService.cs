@@ -39,6 +39,17 @@ public interface IAuthService
     Task RequestOtpAsync(string destination, CancellationToken ct = default);
     Task VerifyOtpAsync(string destination, string code, CancellationToken ct = default);
 
+    // ── Forgot / reset password ─────────────────────────────────────────────
+    // Neither signs anyone in: after a reset the user signs in with the new
+    // password (every previous session, including one on this device, was
+    // revoked by the backend).
+
+    /// <summary>Returns the backend's generic confirmation message - identical
+    /// whether or not the email has an account.</summary>
+    Task<string> RequestPasswordResetAsync(string email, CancellationToken ct = default);
+
+    Task<string> ResetPasswordAsync(string token, string newPassword, CancellationToken ct = default);
+
     // ── Phase 8: account linking ─────────────────────────────────────────────
 
     Task<LinkedIdentityResponse> LinkGoogleAsync(string idToken, CancellationToken ct = default);

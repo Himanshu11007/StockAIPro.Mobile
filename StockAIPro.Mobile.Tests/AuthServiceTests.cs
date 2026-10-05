@@ -262,6 +262,12 @@ public class AuthServiceTests
         public Task RequestOtpAsync(string destination, CancellationToken ct = default) =>
             inner.RequestOtpAsync(destination, ct);
 
+        public Task<string> ForgotPasswordAsync(string email, CancellationToken ct = default) =>
+            inner.ForgotPasswordAsync(email, ct);
+
+        public Task<string> ResetPasswordAsync(string token, string newPassword, CancellationToken ct = default) =>
+            inner.ResetPasswordAsync(token, newPassword, ct);
+
         public Task<Models.Auth.TokenResponse> VerifyOtpAsync(string destination, string code, string? deviceId, string? deviceName, CancellationToken ct = default) =>
             inner.VerifyOtpAsync(destination, code, deviceId, deviceName, ct);
 
