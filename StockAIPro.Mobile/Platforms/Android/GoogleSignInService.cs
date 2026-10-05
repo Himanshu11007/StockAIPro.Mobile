@@ -31,47 +31,75 @@ public sealed class GoogleSignInService : IGoogleSignInService
             throw new GoogleSignInNotConfiguredException();
 
         var activity = Platform.CurrentActivity
-            ?? throw new InvalidOperationException("No current Android activity to host Google Sign-In.");
+            ?? throw new GoogleSignInFailedException("Google sign-in is currently unavailable. Please try again.");
 
-        var googleIdOption = new GetGoogleIdOption.Builder()
-            .SetFilterByAuthorizedAccounts(false)
-            .SetServerClientId(GoogleAuthConfiguration.ServerClientId)
-            .SetAutoSelectEnabled(false)
-            .Build();
-
-        var request = new GetCredentialRequest.Builder()
-            .AddCredentialOption(googleIdOption)
-            .Build();
-
-        var credentialManager = CredentialManager.Create(activity);
-        var cancellationSignal = new CancellationSignal();
-        await using var ctRegistration = ct.Register(() => cancellationSignal.Cancel());
-        var executor = ContextCompat.GetMainExecutor(activity);
-
-        var tcs = new TaskCompletionSource<GetCredentialResponse>();
-        credentialManager.GetCredentialAsync(
-            activity, request, cancellationSignal, executor, new CredentialCallback(tcs));
-
-        GetCredentialResponse response;
         try
         {
-            response = await tcs.Task;
+            var googleIdOption = new GetGoogleIdOption.Builder()
+                .SetFilterByAuthorizedAccounts(false)
+                .SetServerClientId(GoogleAuthConfiguration.ServerClientId)
+                .SetAutoSelectEnabled(false)
+                .Build();
+
+            var request = new GetCredentialRequest.Builder()
+                .AddCredentialOption(googleIdOption)
+                .Build();
+
+            var credentialManager = CredentialManager.Create(activity);
+            var cancellationSignal = new CancellationSignal();
+            await using var ctRegistration = ct.Register(() => cancellationSignal.Cancel());
+            var executor = ContextCompat.GetMainExecutor(activity);
+
+            var tcs = new TaskCompletionSource<GetCredentialResponse>();
+            credentialManager.GetCredentialAsync(
+                activity, request, cancellationSignal, executor, new CredentialCallback(tcs));
+
+            var response = await tcs.Task;
+
+            // Only a Google ID-token credential is acceptable; CreateFrom
+            // throws for anything else (e.g. a password credential).
+            var data = response.Credential?.Data
+                ?? throw new GoogleSignInFailedException("Google sign-in returned no account. Please try again.");
+            var idToken = GoogleIdTokenCredential.CreateFrom(data).IdToken;
+            if (string.IsNullOrWhiteSpace(idToken))
+                throw new GoogleSignInFailedException("Google sign-in returned no account. Please try again.");
+            return idToken;
         }
         catch (System.OperationCanceledException)
         {
             return null; // user cancelled the native sign-in flow
         }
-        catch (InvalidOperationException ex)
+        catch (GoogleSignInFailedException)
         {
+            throw;
+        }
+        catch (CredentialManagerErrorException ex) when (ex.JavaClassName.Contains("NoCredential", StringComparison.Ordinal))
+        {
+            // NoCredentialException: no Google account on the device, or -
+            // the usual cause during setup - this build's package name /
+            // signing-certificate SHA-1 is not registered as an Android OAuth
+            // client in the same Google Cloud project as ServerClientId (see
+            // the backend's docs/AUTHENTICATION.md "Android configuration").
+            System.Diagnostics.Debug.WriteLine($"Google sign-in: {ex.JavaClassName}");
+            throw new GoogleSignInFailedException(
+                "No Google account is available for sign-in. Add a Google account to this device and try again.", ex);
+        }
+        catch (Exception ex)
+        {
+            // Never let a raw Java/binding exception escape to the UI (the
+            // Razor page only handles the IGoogleSignInService exceptions).
+            System.Diagnostics.Debug.WriteLine($"Google sign-in failed: {ex.GetType().Name}");
             throw new GoogleSignInFailedException("Google sign-in is currently unavailable. Please try again.", ex);
         }
+    }
 
-        var credential = response.Credential;
-        if (credential?.Data is null)
-            throw new InvalidOperationException("Google Sign-In returned no credential data.");
-
-        var googleIdTokenCredential = GoogleIdTokenCredential.CreateFrom(credential.Data);
-        return googleIdTokenCredential.IdToken;
+    /// <summary>Carries the Credential Manager error's Java class name
+    /// (e.g. androidx.credentials.exceptions.NoCredentialException) - the
+    /// only reliable discriminator this binding exposes, see OnError.</summary>
+    private sealed class CredentialManagerErrorException(string javaClassName)
+        : Exception("Credential Manager error: " + javaClassName)
+    {
+        public string JavaClassName { get; } = javaClassName;
     }
 
     private sealed class CredentialCallback(TaskCompletionSource<GetCredentialResponse> tcs)
@@ -100,8 +128,7 @@ public sealed class GoogleSignInService : IGoogleSignInService
                 return;
             }
 
-            tcs.TrySetException(new InvalidOperationException(
-                "Google Sign-In failed: " + (error?.ToString() ?? "unknown error")));
+            tcs.TrySetException(new CredentialManagerErrorException(javaClassName));
         }
     }
 }

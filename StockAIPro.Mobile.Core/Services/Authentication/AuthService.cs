@@ -63,6 +63,22 @@ public sealed class AuthService : IAuthService
         await EstablishSessionAsync(tokens, ct);
     }
 
+    public Task<string> RequestPasswordResetAsync(string email, CancellationToken ct = default) =>
+        _authApiClient.ForgotPasswordAsync(email, ct);
+
+    public async Task<string> ResetPasswordAsync(string token, string newPassword, CancellationToken ct = default)
+    {
+        var message = await _authApiClient.ResetPasswordAsync(token, newPassword, ct);
+        // The backend revoked every session of the account. If this device
+        // was signed in to it, its stored tokens are now dead - drop them.
+        if (IsAuthenticated)
+        {
+            await _tokenStore.ClearAsync();
+            SetUnauthenticated();
+        }
+        return message;
+    }
+
     public Task<LinkedIdentityResponse> LinkGoogleAsync(string idToken, CancellationToken ct = default) =>
         _authApiClient.LinkGoogleAsync(idToken, ct);
 

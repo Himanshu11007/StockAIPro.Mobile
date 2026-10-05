@@ -92,6 +92,24 @@ public sealed class FakeAuthApiClient : IAuthApiClient
         return Task.FromResult(AppleResult());
     }
 
+    public string? LastForgotPasswordEmail { get; private set; }
+    public (string Token, string Password)? LastReset { get; private set; }
+    public Exception? ResetPasswordException { get; set; }
+
+    public Task<string> ForgotPasswordAsync(string email, CancellationToken ct = default)
+    {
+        LastForgotPasswordEmail = email;
+        return Task.FromResult("If an account exists for this email address, a password reset link has been sent.");
+    }
+
+    public Task<string> ResetPasswordAsync(string token, string newPassword, CancellationToken ct = default)
+    {
+        if (ResetPasswordException is not null)
+            return Task.FromException<string>(ResetPasswordException);
+        LastReset = (token, newPassword);
+        return Task.FromResult("Your password has been reset. Sign in with your new password.");
+    }
+
     public Task RequestOtpAsync(string destination, CancellationToken ct = default)
     {
         RequestOtpCallCount++;

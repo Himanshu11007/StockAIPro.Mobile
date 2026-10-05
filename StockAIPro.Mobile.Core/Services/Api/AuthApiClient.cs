@@ -128,6 +128,30 @@ public sealed class AuthApiClient : IAuthApiClient
         return await ReadOrThrowAsync<TokenResponse>(response, ct);
     }
 
+    // ── Forgot / reset password ────────────────────────────────────────────
+
+    public async Task<string> ForgotPasswordAsync(string email, CancellationToken ct = default)
+    {
+        var client = _httpClientFactory.CreateClient(ApiConfiguration.RawClientName);
+        using var response = await SendAsync(
+            client, () => client.PostAsJsonAsync(
+                $"{ApiConfiguration.ApiPrefix}/auth/forgot-password",
+                new ForgotPasswordRequest { Email = email.Trim() }, ct),
+            ct);
+        return (await ReadOrThrowAsync<MessageResponse>(response, ct)).Message;
+    }
+
+    public async Task<string> ResetPasswordAsync(string token, string newPassword, CancellationToken ct = default)
+    {
+        var client = _httpClientFactory.CreateClient(ApiConfiguration.RawClientName);
+        using var response = await SendAsync(
+            client, () => client.PostAsJsonAsync(
+                $"{ApiConfiguration.ApiPrefix}/auth/reset-password",
+                new ResetPasswordRequest { Token = token.Trim(), NewPassword = newPassword }, ct),
+            ct);
+        return (await ReadOrThrowAsync<MessageResponse>(response, ct)).Message;
+    }
+
     // ── Phase 8: account linking, device/session management ────────────────
 
     public async Task<LinkedIdentityResponse> LinkGoogleAsync(string idToken, CancellationToken ct = default)

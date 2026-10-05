@@ -25,6 +25,8 @@ public sealed class FakeAuthService : IAuthService
     public Task LoginWithGoogleAsync(string idToken, CancellationToken ct = default) => throw new NotSupportedException();
     public Task LoginWithAppleAsync(string identityToken, CancellationToken ct = default) => throw new NotSupportedException();
     public Task RequestOtpAsync(string destination, CancellationToken ct = default) => throw new NotSupportedException();
+    public Task<string> RequestPasswordResetAsync(string email, CancellationToken ct = default) => throw new NotSupportedException();
+    public Task<string> ResetPasswordAsync(string token, string newPassword, CancellationToken ct = default) => throw new NotSupportedException();
     public Task VerifyOtpAsync(string destination, string code, CancellationToken ct = default) => throw new NotSupportedException();
     public Task<LinkedIdentityResponse> LinkGoogleAsync(string idToken, CancellationToken ct = default) => throw new NotSupportedException();
     public Task<LinkedIdentityResponse> LinkAppleAsync(string identityToken, CancellationToken ct = default) => throw new NotSupportedException();

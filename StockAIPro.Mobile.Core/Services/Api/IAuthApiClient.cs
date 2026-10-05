@@ -52,6 +52,21 @@ public interface IAuthApiClient
 
     Task<TokenResponse> VerifyOtpAsync(string destination, string code, string? deviceId, string? deviceName, CancellationToken ct = default);
 
+    // ── Forgot / reset password ────────────────────────────────────────────
+    // Unauthenticated (RawClientName). Both return the backend's message.
+
+    /// <summary>POST /auth/forgot-password. The backend answers 202 with the
+    /// same generic message whether or not the email has an account, so the
+    /// result never tells the caller whether an account exists. Only an
+    /// invalid email (422) or too many requests (429) throw.</summary>
+    Task<string> ForgotPasswordAsync(string email, CancellationToken ct = default);
+
+    /// <summary>POST /auth/reset-password with the token from the emailed
+    /// link. 400 = invalid/expired/used link, 422 = password rejected by the
+    /// password policy (the link stays valid), 429 = too many attempts. On
+    /// success every existing session of the account has been revoked.</summary>
+    Task<string> ResetPasswordAsync(string token, string newPassword, CancellationToken ct = default);
+
     // ── Phase 8: account linking, device/session management ────────────────
     // Authenticated (AuthenticatedClientName) - all require an existing
     // session, routed through AuthenticatedHttpMessageHandler like GetCurrentUserAsync.
